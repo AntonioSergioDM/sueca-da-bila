@@ -1,0 +1,18 @@
+{
+    "name": "@antoniosergiodm/sueca-da-bila",
+    "private": true,
+    "version": "1.0.0",
+    "author": "António Sérgio, Nuno Almeida, Bruno Gomes, Dylan Brito",
+    "license": "CC0-1.0",
+    "workspaces": {
+      "packages": [
+        "workspaces/*"
+      ]
+    },
+    "scripts": {
+      "start:dev:client": "yarn workspace @sueca-da-bila/client start:dev",
+      "start:dev:server": "yarn workspace @sueca-da-bila/server start:dev",
+      "start:prod:client": "yarn workspace @sueca-da-bila/client start:prod",
+      "start:prod:server": "yarn workspace @sueca-da-bila/server start:prod"
+    }
+  }
