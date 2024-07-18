@@ -1,22 +1,40 @@
 {
-  "name": "@antoniosergiodm/sueca-da-bila",
+  "name": "sueca-da-bila",
+  "version": "0.0.1",
   "private": true,
-  "version": "1.0.0",
-  "author": "António Sérgio, Nuno Almeida, Bruno Gomes, Dylan Brito",
-  "license": "CC0-1.0",
-  "workspaces": {
-    "packages": [
-      "workspaces/*"
-    ]
-  },
   "scripts": {
-    "dev": "concurrently \"yarn run start:dev:client\" \"yarn run start:dev:server\"",
-    "start:dev:client": "yarn workspace @sueca-da-bila/client dev",
-    "start:dev:server": "yarn workspace @sueca-da-bila/server start:dev",
-    "start:prod:client": "yarn workspace @sueca-da-bila/client build",
-    "start:prod:server": "yarn workspace @sueca-da-bila/server start:prod"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "errors:types": "tsc --noEmit && echo \"Type errors done\"",
+    "errors:lint": "eslint src --ext .mts --ext .mjs --ext .ts --ext .js --ext .tsx --fix && echo \"Lint errors done\"",
+    "errors": "npm run errors:types && npm run errors:lint"
   },
   "dependencies": {
-    "concurrently": "^8.2.2"
+    "@emotion/cache": "^11.11.0",
+    "@emotion/react": "^11.11.4",
+    "@emotion/server": "^11.11.0",
+    "@emotion/styled": "^11.11.5",
+    "@mui/icons-material": "^5.16.4",
+    "@mui/material": "^5.16.4",
+    "@mui/material-nextjs": "^5.16.4",
+    "next": "^14.2.5",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "socket.io": "^4.7.5",
+    "socket.io-client": "^4.7.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.11",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.57.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-airbnb-typescript": "^18.0.0",
+    "eslint-config-next": "^14.2.5",
+    "eslint-import-resolver-typescript": "^3.6.1",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-react": "^7.34.4",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "typescript": "latest"
   }
 }
