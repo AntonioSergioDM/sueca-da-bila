@@ -11,7 +11,11 @@ type EmitOptions<T> = {
   data?: T;
 };
 
-const showNotification =({message}:{message:string}) => {alert(message);};
+const showNotification =({message}:{message:string}) => {
+  if (typeof alert !== 'undefined'){
+    alert(message);
+  }
+};
 
 export default class SocketManager
 {
@@ -23,7 +27,7 @@ export default class SocketManager
 
   constructor()
   {
-    this.socket = io(process.env.NEXT_PUBLIC_WS_API_URL as string, {
+    this.socket = io("http://localhost:3000", {
       autoConnect: false,
       path: '/wsapi',
       transports: ['websocket'],
@@ -33,6 +37,7 @@ export default class SocketManager
     this.onConnect();
     this.onDisconnect();
     this.onException();
+
   }
 
   emit<T>(options: EmitOptions<T>): this
@@ -78,14 +83,14 @@ export default class SocketManager
   private onConnect(): void
   {
     this.socket.on('connect', () => {
-      if (this.connectionLost) {
+      // if (this.connectionLost) {
         showNotification({
           message: 'Reconnected to server!',
           color: 'green',
           autoClose: 2000,
         });
         this.connectionLost = false;
-      }
+      // }
     });
   }
 
