@@ -27,7 +27,6 @@ const Home = () => {
     const socketInitializer = () => {
       if (socket) { return; }
 
-      console.log('🚀 ~ socketInitializer ~ socketInitializer:');
       socket = io({ path: '/api/socket', autoConnect: false });
 
       socket.on('connect', () => {
@@ -44,30 +43,39 @@ const Home = () => {
     socketInitializer();
   }, []);
 
-  const onPing = useCallback(() => {
-    console.log('Trying to ping...');
+  const onJoin = useCallback(() => {
+    console.log('Trying to join...');
 
-    console.log('🚀 ~ onPing ~ lobbyHash:', lobbyHash);
+    console.log('🚀 ~ lobbyHash:', lobbyHash);
     socket.emit('joinLobby', lobbyHash, playerNameRef.current?.value);
-
-    console.log('Did it ping?');
   }, [lobbyHash]);
 
   return (
-    <Stack maxWidth="lg" direction="column" gap={2} margin={2}>
+    <Stack
+      gap={2}
+      useFlexGap
+      maxWidth="sm"
+      margin="16px auto"
+      direction="column"
+      justifyContent="center"
+      alignItems={{ md: 'center', lg: 'center', xl: 'center' }}
+    >
       <Typography>Hello there!</Typography>
 
       <TextField
+        fullWidth
         label="Lobby hash"
         value={lobbyHash}
         onChange={(event) => { setLobbyHash(event.target.value); }}
       />
+
       <TextField
+        fullWidth
         label="Player Name"
         inputRef={playerNameRef}
       />
 
-      <Button onClick={onPing}>Ping</Button>
+      <Button variant="contained" onClick={onJoin}>Join</Button>
     </Stack>
   );
 };
