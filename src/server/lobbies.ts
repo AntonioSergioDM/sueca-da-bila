@@ -23,7 +23,7 @@ export const joinLobby = (socket: Socket): ClientToServerEvents['joinLobby'] => 
     callback(lobby.hash, player.id);
 };
 
-export const createLobby = (socket: Socket<any, any, any, { arroz:boolean }>): ClientToServerEvents['createLobby'] => (playerName, callback) => {
+export const createLobby = (socket: Socket): ClientToServerEvents['createLobby'] => (playerName, callback) => {
     const lobby = new Lobby();
     lobbies.set(lobby.hash, lobby);
 

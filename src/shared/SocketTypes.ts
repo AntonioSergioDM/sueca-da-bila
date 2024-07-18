@@ -17,4 +17,7 @@ export interface InterServerEvents { }
 /**
  * Data sent on connection
  */
-export interface SocketData { }
+export interface SocketData {
+  lobbyHash:string | null;
+  playerId:string | null;
+}
