@@ -14,9 +14,10 @@ import {
   Typography,
 } from '@mui/material';
 
-import type { ClientToServerEvents, ServerToClientEvents } from '../shared/server/SocketTypes';
+import type { ClientToServerEvents, ServerToClientEvents } from '../../shared/SocketTypes';
 
 let socket: Socket<ServerToClientEvents, ClientToServerEvents>;
+let userId: string = '';
 
 const Home = () => {
   // two ways of setting input values
@@ -47,7 +48,15 @@ const Home = () => {
     console.log('Trying to join...');
 
     console.log('🚀 ~ lobbyHash:', lobbyHash);
-    socket.emit('joinLobby', lobbyHash, playerNameRef.current?.value);
+    socket.emit('joinLobby', lobbyHash, playerNameRef.current?.value || '', (hash, playerId) => {
+      userId = playerId;
+
+      setLobbyHash(hash);
+
+      console.log('Hash: ' + hash);
+      console.log('Player Id: ' + playerId);
+
+    });
   }, [lobbyHash]);
 
   return (
