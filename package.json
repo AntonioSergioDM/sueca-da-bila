@@ -1,22 +1,33 @@
 {
-  "name": "@antoniosergiodm/sueca-da-bila",
+  "name": "material-ui-nextjs-pages-router-ts",
+  "version": "5.0.0",
   "private": true,
-  "version": "1.0.0",
-  "author": "António Sérgio, Nuno Almeida, Bruno Gomes, Dylan Brito",
-  "license": "CC0-1.0",
-  "workspaces": {
-    "packages": [
-      "workspaces/*"
-    ]
-  },
   "scripts": {
-    "dev": "concurrently \"yarn run start:dev:client\" \"yarn run start:dev:server\"",
-    "start:dev:client": "yarn workspace @sueca-da-bila/client dev",
-    "start:dev:server": "yarn workspace @sueca-da-bila/server start:dev",
-    "start:prod:client": "yarn workspace @sueca-da-bila/client build",
-    "start:prod:server": "yarn workspace @sueca-da-bila/server start:prod"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "post-update": "echo \"codesandbox preview only, need an update\" && pnpm update --latest"
   },
   "dependencies": {
-    "concurrently": "^8.2.2"
+    "@emotion/cache": "latest",
+    "@emotion/react": "latest",
+    "@emotion/server": "latest",
+    "@emotion/styled": "latest",
+    "@mui/icons-material": "latest",
+    "@mui/material": "latest",
+    "@mui/material-nextjs": "latest",
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "socket.io": "^4.7.5",
+    "socket.io-client": "^4.7.5"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "eslint": "latest",
+    "eslint-config-next": "latest",
+    "typescript": "latest"
   }
 }
