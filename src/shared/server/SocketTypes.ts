@@ -4,7 +4,7 @@ export interface ServerToClientEvents {
 }
 
 export interface ClientToServerEvents {
-  joinLobby: (lobbyHash: string) => void;
+  joinLobby: (lobbyHash: string, playerName?: string) => void;
 }
 
 /**

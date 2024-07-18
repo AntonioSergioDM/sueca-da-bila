@@ -1,33 +1,40 @@
 {
-  "name": "material-ui-nextjs-pages-router-ts",
-  "version": "5.0.0",
+  "name": "sueca-da-bila",
+  "version": "0.0.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "post-update": "echo \"codesandbox preview only, need an update\" && pnpm update --latest"
+    "errors:types": "tsc --noEmit && echo \"Type errors done\"",
+    "errors:lint": "eslint src --ext .mts --ext .mjs --ext .ts --ext .js --ext .tsx --fix && echo \"Lint errors done\"",
+    "errors": "npm run errors:types && npm run errors:lint"
   },
   "dependencies": {
-    "@emotion/cache": "latest",
-    "@emotion/react": "latest",
-    "@emotion/server": "latest",
-    "@emotion/styled": "latest",
-    "@mui/icons-material": "latest",
-    "@mui/material": "latest",
-    "@mui/material-nextjs": "latest",
-    "next": "latest",
-    "react": "latest",
-    "react-dom": "latest",
+    "@emotion/cache": "^11.11.0",
+    "@emotion/react": "^11.11.4",
+    "@emotion/server": "^11.11.0",
+    "@emotion/styled": "^11.11.5",
+    "@mui/icons-material": "^5.16.4",
+    "@mui/material": "^5.16.4",
+    "@mui/material-nextjs": "^5.16.4",
+    "next": "^14.2.5",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "socket.io": "^4.7.5",
     "socket.io-client": "^4.7.5"
   },
   "devDependencies": {
-    "@types/node": "latest",
-    "@types/react": "latest",
-    "eslint": "latest",
-    "eslint-config-next": "latest",
+    "@types/node": "^20.14.11",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.57.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-airbnb-typescript": "^18.0.0",
+    "eslint-config-next": "^14.2.5",
+    "eslint-import-resolver-typescript": "^3.6.1",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-react": "^7.34.4",
+    "eslint-plugin-react-hooks": "^4.6.2",
     "typescript": "latest"
   }
 }

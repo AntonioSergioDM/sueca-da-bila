@@ -1,4 +1,4 @@
-export enum ClientMessages{
+export enum ClientMessages {
     ping = 'Ping',
     joinLobby = 'Join Lobby',
 }

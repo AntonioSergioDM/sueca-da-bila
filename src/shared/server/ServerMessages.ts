@@ -1,3 +1,3 @@
-export enum ServerMessages{
-    lobbyJoined = 'Lobby Joined'
+export enum ServerMessages {
+    lobbyJoined = 'Lobby Joined',
 }

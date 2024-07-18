@@ -1,9 +1,10 @@
-import * as React from 'react';
 import Head from 'next/head';
-import { AppProps } from 'next/app';
-import { AppCacheProvider } from '@mui/material-nextjs/v14-pagesRouter';
-import { ThemeProvider } from '@mui/material/styles';
+import type { AppProps } from 'next/app';
+
 import CssBaseline from '@mui/material/CssBaseline';
+import { ThemeProvider } from '@mui/material/styles';
+import { AppCacheProvider } from '@mui/material-nextjs/v14-pagesRouter';
+
 import theme from '../theme';
 
 export default function MyApp(props: AppProps) {
