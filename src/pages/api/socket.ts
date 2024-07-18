@@ -1,3 +1,3 @@
-import SocketHandler from "../../server/socket";
+import SocketHandler from '../../server/socket';
 
 export default SocketHandler;

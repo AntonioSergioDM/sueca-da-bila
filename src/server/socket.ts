@@ -9,8 +9,7 @@ import type {
     ClientToServerEvents,
     ServerToClientEvents,
 } from '../shared/SocketTypes';
-import Lobby from './yes/Lobby';
-import Player from './yes/Player';
+import { createLobby, joinLobby } from './lobbies';
 
 type SocketIOResponse = NextApiResponse & {
     socket: NextApiResponse['socket'] & {
@@ -19,8 +18,6 @@ type SocketIOResponse = NextApiResponse & {
         };
     };
 };
-
-let lobbies: Map<string, Lobby> = new Map();
 
 const SocketHandler = (_: NextApiRequest, res: SocketIOResponse) => {
     console.log('🚀 ~ res.socket.server:', res.socket?.server);
@@ -49,25 +46,8 @@ const SocketHandler = (_: NextApiRequest, res: SocketIOResponse) => {
         const clientId = socket.id;
         console.log(`A client connected. ID: ${clientId}`);
 
-        socket.on('joinLobby', (lobbyHash, playerName, callback) => {
-            if (!lobbyHash) {
-                return callback('', '');
-            }
-
-            let lobby = lobbies.get(lobbyHash);
-            if (!lobby) {
-                lobby = new Lobby();
-                lobbies.set(lobby.hash, lobby);
-            }
-
-            let player = new Player(socket, playerName);
-
-            if (!lobby.addPlayer(player)) {
-                return callback('', '');
-            }
-
-            callback(lobby.hash, player.id);
-        });
+        socket.on('joinLobby', joinLobby(socket));
+        socket.on('createLobby', createLobby(socket));
     });
 
     res.socket!.server.io = io;

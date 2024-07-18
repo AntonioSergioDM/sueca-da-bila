@@ -1,11 +1,13 @@
 import { v4 as uuid } from 'uuid';
-import Player from './Player';
+import type Player from './Player';
 
 export default class Lobby {
     hash:string;
+
     players:Array<Player> = [];
+
     results: Array<number> = [];
-    //game:Game;
+    // game:Game;
 
     constructor() {
         this.hash = uuid();
@@ -18,16 +20,16 @@ export default class Lobby {
 
         this.players.push(player);
 
-        //debug
+        // debug
         console.log('Jogadores no Lobby:');
-        this.players.forEach((player)=>{
+        this.players.forEach((player) => {
             console.log(player.name);
-        })
+        });
 
         return true;
     }
 
     startGame() {
-        //this.game.start();
+        // this.game.start();
     }
 }

@@ -116,6 +116,7 @@ module.exports = {
           },
           multilineDetection: 'brackets',
         }],
+        "indent": ["error", 4],
         '@typescript-eslint/consistent-type-imports': 'error',
         '@typescript-eslint/return-await': 'error',
         '@typescript-eslint/require-await': 'error',
