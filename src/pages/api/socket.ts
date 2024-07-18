@@ -1,26 +1,41 @@
 import { Server } from 'Socket.IO'
-import { ClientMessages } from '../../shared/client/ClientMessages';
-import { ServerMessages } from '../../shared/server/ServerMessages';
+import { ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData } from '../../shared/server/SocketTypes';
 
+let lobbies: Array<Object>;
 
-let lobbies:Array<Object>;
-
-const SocketHandler = (req, res) => {
-  if (res.socket.server.io) {
+const SocketHandler = (_req, res) => {
+  if (res.socket!.server.io) {
     console.log('Socket is already running');
-  } else {
-    console.log('Socket is initializing');
-    const io = new Server(res.socket.server);
-    io.on('connection', (socket) => {
-        socket.on(ClientMessages.joinLobby, (args) => {
-            console.log('receive a Ping;');
-            console.log('Joined Lobby: ' + args);
-            
-            socket.emit(ServerMessages.lobbyJoined);
-        })
-    })
-    res.socket.server.io = io;
+    res.end();
+    return;
   }
+
+  console.log('Socket is initializing');
+  const io = new Server<
+    ClientToServerEvents,
+    ServerToClientEvents,
+    InterServerEvents,
+    SocketData
+  >(
+    res.socket!.server,
+    {
+      path: '/api/socket',
+      addTrailingSlash: false,
+    },
+  );
+
+  io.on('connection', (socket) => {
+    const clientId = socket.id;
+    console.log('A client connected');
+    console.log(`A client connected. ID: ${clientId}`);
+
+    socket.on('joinLobby', (lobbyHash) => {
+      console.log('Joined Lobby: ' + lobbyHash);
+
+      socket.emit('lobbyJoined');
+    });
+  })
+  res.socket.server.io = io;
   res.end();
 }
 
