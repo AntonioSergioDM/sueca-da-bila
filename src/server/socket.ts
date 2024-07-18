@@ -39,12 +39,23 @@ const SocketHandler = (_: NextApiRequest, res: SocketIOResponse) => {
         {
             path: '/api/socket',
             addTrailingSlash: false,
+            connectionStateRecovery: {
+                // the backup duration of the sessions and the packets
+                maxDisconnectionDuration: 2 * 60 * 1000,
+                // whether to skip middlewares upon successful recovery
+                skipMiddlewares: true,
+            }
         },
     );
 
     io.on('connection', (socket) => {
-        const clientId = socket.id;
-        console.log(`A client connected. ID: ${clientId}`);
+        if (socket.recovered) {
+            // recovery was successful: socket.id, socket.rooms and socket.data were restored
+            console.log(`A client reconnected. ID: ${socket.id}`);
+        } else {
+            // new or unrecoverable session
+            console.log(`A client connected. ID: ${socket.id}`);
+        }
 
         socket.on('joinLobby', joinLobby(socket));
         socket.on('createLobby', createLobby(socket));
