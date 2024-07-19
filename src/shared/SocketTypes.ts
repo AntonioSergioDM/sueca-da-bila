@@ -4,6 +4,7 @@ export interface ServerToClientEvents {
   lobbyJoined: () => void;
   error: () => void;
   withAck: (d: string, callback: (e: number) => void) => void;
+  playerJoined: (playerNames:Array<string>) => void;
 }
 
 export interface ClientToServerEvents {

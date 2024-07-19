@@ -16,21 +16,21 @@ import { createLobby, joinLobby, lobbyPlayers } from './lobbies';
 
 type SocketIOResponse = NextApiResponse & {
   socket: NextApiResponse['socket'] & {
-    server: Http2Server & {
-      io: Server;
-    };
+    server: Http2Server
   };
 };
 
+export let io:Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData> | null = null;
+
 const SocketHandler = (_: NextApiRequest, res: SocketIOResponse) => {
-  if (res.socket?.server.io) {
+  if (io) {
     console.log('Socket is already running');
     res.end();
     return;
   }
 
   console.log('Socket is initializing');
-  const io = new Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>(
+  io = new Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>(
     res.socket!.server,
     {
       path: '/api/socket',
@@ -69,7 +69,6 @@ const SocketHandler = (_: NextApiRequest, res: SocketIOResponse) => {
     });
   }
 
-  res.socket!.server.io = io;
   res.end();
 };
 
