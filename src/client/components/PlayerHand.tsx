@@ -1,18 +1,19 @@
 import { useCallback } from 'react';
 
-import { Stack } from '@mui/material';
+import { CircularProgress, Stack } from '@mui/material';
 
 import type { Card } from '@/shared/Card';
-import type { PlayerState } from '@/shared/GameTypes';
+import type { GameState, PlayerState } from '@/shared/GameTypes';
 
 import PlayerCard from './PlayerCard';
 import { useSocket } from '../tools/useSocket';
 
 type PlayerHandProps = {
+  gameState: GameState;
   playerState: PlayerState;
 };
 
-const PlayerHand = ({ playerState }: PlayerHandProps) => {
+const PlayerHand = ({ playerState, gameState }: PlayerHandProps) => {
   const socket = useSocket();
 
   const onPlayCard = useCallback((card: Card) => {
@@ -31,6 +32,10 @@ const PlayerHand = ({ playerState }: PlayerHandProps) => {
           onPlay={onPlayCard}
         />
       ))}
+
+      {gameState.currentPlayer === playerState.index && (
+        <CircularProgress />
+      )}
     </Stack>
   );
 };

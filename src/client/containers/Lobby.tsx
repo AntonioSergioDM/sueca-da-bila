@@ -107,7 +107,7 @@ const Lobby = () => {
         <>
           <Table playerState={playerState} gameState={gameState} players={players} />
 
-          <PlayerHand playerState={playerState} />
+          <PlayerHand playerState={playerState} gameState={gameState} />
         </>
       )}
 
