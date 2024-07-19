@@ -6,7 +6,7 @@ import {
 } from 'react';
 import { useRouter } from 'next/router';
 
-import { Typography, CircularProgress } from '@mui/material';
+import { Typography, CircularProgress, Button } from '@mui/material';
 
 import type { GameState } from '@/shared/SocketTypes';
 
@@ -18,10 +18,12 @@ const Lobby = () => {
   const socket = useSocket();
   const { query } = useRouter();
 
-  const [gameState, setGameState] = useState<GameState | null>(null);
-
-  const [loading, setLoading] = useState(true);
   const [players, setPlayers] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const [isReady, setIsReady] = useState(false);
+
+  const [gameState, setGameState] = useState<GameState | null>(null);
 
   // TODO: verify if this lobby is valid
   const urlLobby = useMemo(() => {
@@ -49,12 +51,6 @@ const Lobby = () => {
     }
   }, [socket, updatePlayers, urlLobby]);
 
-  useEffect(() => {
-    if (players.length) {
-      socket.emit('playerReady');
-    }
-  }, [players.length, socket]);
-
   const onGameStart = useCallback((newGameState: GameState) => {
     setGameState(newGameState);
   }, []);
@@ -71,6 +67,14 @@ const Lobby = () => {
     };
   }, [onGameStart, socket, updatePlayers]);
 
+  const onReady = useCallback(() => {
+    setIsReady(true);
+
+    if (players.length) {
+      socket.emit('playerReady');
+    }
+  }, [players.length, socket]);
+
   return (
     <>
       <Typography>This is the game!</Typography>
@@ -79,9 +83,11 @@ const Lobby = () => {
       {(!loading && !players.length) && <Typography>No players or error</Typography>}
       {(!loading && !!players.length) && <pre>{JSON.stringify(players, null, 2)}</pre>}
 
-      <ShareUrlButton url={urlLobby} />
+      <Button onClick={onReady} disabled={!players.length || isReady}>READY!</Button>
 
       {!!gameState && <CardHolding gameState={gameState} />}
+
+      <ShareUrlButton url={urlLobby} />
     </>
   );
 };
