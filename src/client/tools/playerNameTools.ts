@@ -6,16 +6,13 @@ import {
 
 const LOCALSTORAGE_NAME = 'sueca-username';
 
+const hasLocalStorage = typeof localStorage !== 'undefined';
+
 export const playerNameTools = {
   get: () => {
-    if (typeof localStorage === 'undefined') {
-      return '';
-    }
+    if (!hasLocalStorage) { return ''; }
 
-    let name = (
-      (typeof localStorage !== 'undefined' ? localStorage.getItem(LOCALSTORAGE_NAME) : '')
-      || ''
-    ).trim();
+    let name = (localStorage.getItem(LOCALSTORAGE_NAME) || '').trim();
 
     if (!name) {
       name = uniqueNamesGenerator({
@@ -30,10 +27,14 @@ export const playerNameTools = {
   },
 
   set: (name: string) => {
-    localStorage.setItem(LOCALSTORAGE_NAME, name);
+    if (hasLocalStorage) {
+      localStorage.setItem(LOCALSTORAGE_NAME, name);
+    }
   },
 
   reset: () => {
-    localStorage.removeItem(LOCALSTORAGE_NAME);
+    if (hasLocalStorage) {
+      localStorage.removeItem(LOCALSTORAGE_NAME);
+    }
   },
 };
