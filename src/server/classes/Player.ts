@@ -1,6 +1,7 @@
 import { v4 as uuid } from 'uuid';
-import type { Socket } from 'socket.io';
 import type { Room } from 'socket.io-adapter';
+
+import type { OurServerSocket } from '@/shared/SocketTypes';
 
 import { io } from '../socket';
 
@@ -9,9 +10,9 @@ export default class Player {
 
   name: string;
 
-  socket: Socket;
+  socket: OurServerSocket;
 
-  constructor(socket: Socket, name?: string) {
+  constructor(socket: OurServerSocket, name?: string) {
     this.socket = socket;
     this.name = name || '';
     this.id = uuid();

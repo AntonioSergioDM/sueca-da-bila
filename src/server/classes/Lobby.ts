@@ -39,10 +39,18 @@ export default class Lobby {
     console.log('Jogadores no Lobby:');
     this.players.forEach((p) => { console.log(p.name); });
 
+    if (this.players.length >= 1) {
+      this.startGame();
+    }
+
     return true;
   }
 
   startGame() {
     this.game.start();
+
+    this.players.forEach((player, idx) => {
+      player.socket.emit('gameStart', this.game.getState(idx));
+    });
   }
 }

@@ -6,24 +6,22 @@ import {
 } from 'react';
 import { useRouter } from 'next/router';
 
-import {
-  Box,
-  IconButton,
-  Typography,
-  CircularProgress,
-} from '@mui/material';
-import { CopyAll } from '@mui/icons-material';
+import { Typography, CircularProgress } from '@mui/material';
 
-import { SiteRoute } from '@/shared/Routes';
+import type { GameState } from '@/shared/SocketTypes';
 
 import { useSocket } from '../tools/useSocket';
+import CardHolding from '../components/CardHolding';
+import ShareUrlButton from '../components/ShareUrlButton';
 
 const Lobby = () => {
   const socket = useSocket();
   const { query } = useRouter();
 
+  const [gameState, setGameState] = useState<GameState | null>(null);
+
   const [loading, setLoading] = useState(true);
-  const [playerNames, setPlayerNames] = useState<string[]>([]);
+  const [players, setPlayers] = useState<string[]>([]);
 
   // TODO: verify if this lobby is valid
   const urlLobby = useMemo(() => {
@@ -34,68 +32,56 @@ const Lobby = () => {
     return '';
   }, [query.lobby]);
 
+  const updatePlayers = useCallback((newPlayers: Array<string>) => {
+    setPlayers(newPlayers);
+  }, []);
+
   useEffect(() => {
     if (urlLobby) {
-      socket.emit('lobbyPlayers', urlLobby, (validHash, players) => {
+      socket.emit('lobbyPlayers', urlLobby, (validHash, newPlayers) => {
         if (validHash) {
-          setPlayerNames(players);
+          updatePlayers(newPlayers);
           setLoading(false);
         } else {
           setLoading(false);
         }
       });
     }
-  }, [socket, urlLobby]);
+  }, [socket, updatePlayers, urlLobby]);
 
-  const updatePlayers = (players: Array<string>) => {
-    setPlayerNames(players);
-  };
+  useEffect(() => {
+    if (players.length) {
+      socket.emit('playerReady');
+    }
+  }, [players.length, socket]);
+
+  const onGameStart = useCallback((newGameState: GameState) => {
+    setGameState(newGameState);
+  }, []);
 
   useEffect(() => {
     socket.on('playerJoined', updatePlayers);
+    socket.on('gameStart', onGameStart);
 
     return () => {
       socket.off('playerJoined', updatePlayers);
+      socket.off('gameStart', onGameStart);
+
       // TODO leave lobby
     };
-  }, [socket]);
-
-  const shareURL = useMemo(() => (
-    `${process.env.NEXT_PUBLIC_URL}${SiteRoute.JoinLobby}/${urlLobby}`
-  ), [urlLobby]);
-
-  const onCopy = useCallback(async () => {
-    await navigator.clipboard.writeText(shareURL);
-  }, [shareURL]);
+  }, [onGameStart, socket, updatePlayers]);
 
   return (
     <>
       <Typography>This is the game!</Typography>
 
       {loading && <CircularProgress />}
-      {(!loading && !playerNames.length) && <Typography>No players or error</Typography>}
-      {(!loading && !!playerNames.length) && <pre>{JSON.stringify(playerNames, null, 2)}</pre>}
+      {(!loading && !players.length) && <Typography>No players or error</Typography>}
+      {(!loading && !!players.length) && <pre>{JSON.stringify(players, null, 2)}</pre>}
 
-      <Box
-        component="div"
-        sx={{
-          display: 'flex',
-          p: 1,
-          gap: 1,
-          alignItems: 'center',
-          bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#101010' : '#fff'),
-          color: (theme) => (theme.palette.mode === 'dark' ? 'grey.300' : 'grey.800'),
-          border: '1px solid',
-          borderColor: (theme) => (theme.palette.mode === 'dark' ? 'grey.800' : 'grey.300'),
-          borderRadius: 2,
-          fontSize: '0.875rem',
-          fontWeight: '700',
-        }}
-      >
-        Share link
+      <ShareUrlButton url={urlLobby} />
 
-        <IconButton onClick={onCopy}><CopyAll /></IconButton>
-      </Box>
+      {!!gameState && <CardHolding gameState={gameState} />}
     </>
   );
 };

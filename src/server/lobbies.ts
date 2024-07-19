@@ -1,10 +1,10 @@
 /* eslint-disable no-param-reassign */
-import type { ClientToServerEvents, Socket } from '@/shared/SocketTypes';
+import type { ClientToServerEvents, OurServerSocket } from '@/shared/SocketTypes';
 
 import Lobby from './classes/Lobby';
 import Player from './classes/Player';
 
-export const joinLobby = (socket: Socket): ClientToServerEvents['joinLobby'] => (
+export const joinLobby = (socket: OurServerSocket): ClientToServerEvents['joinLobby'] => (
   async (lobbyHash, playerName, callback) => {
     if (!lobbyHash) {
       return callback('');
@@ -29,7 +29,7 @@ export const joinLobby = (socket: Socket): ClientToServerEvents['joinLobby'] => 
   }
 );
 
-export const createLobby = (socket: Socket): ClientToServerEvents['createLobby'] => (
+export const createLobby = (socket: OurServerSocket): ClientToServerEvents['createLobby'] => (
   async (playerName, callback) => {
     const lobby = new Lobby();
     Lobby.lobbies.set(lobby.hash, lobby);
@@ -47,7 +47,7 @@ export const createLobby = (socket: Socket): ClientToServerEvents['createLobby']
   }
 );
 
-export const lobbyPlayers = (socket: Socket): ClientToServerEvents['lobbyPlayers'] => (
+export const lobbyPlayers = (socket: OurServerSocket): ClientToServerEvents['lobbyPlayers'] => (
   (lobbyHash, callback) => {
     if (!lobbyHash) {
       return callback('', []);

@@ -1,3 +1,5 @@
+import type { GameState, Table } from '@/shared/SocketTypes';
+
 import type { Card } from '../../shared/Card';
 import { pointsOf, Suit } from '../../shared/Card';
 
@@ -36,7 +38,7 @@ export default class Game {
   currPlayer: number = -1;
 
   /** each Card is related by id to the player */
-  onTable: [Card | null, Card | null, Card | null, Card | null] = [null, null, null, null];
+  onTable: Table = [null, null, null, null];
 
   tableSuit: Suit | `${Suit}` | null = null;
 
@@ -92,13 +94,22 @@ export default class Game {
     return true;
   }
 
-  // --------------- Private Methods --------------- //
-
-  shuffleAndDistribute() {
-    getFullDeck().forEach(this.addCardRandom);
+  getState(player: number): GameState {
+    return {
+      trumpCard: this.trumpCard,
+      table: this.onTable,
+      currentPlayer: this.currPlayer,
+      hand: this.decks[player],
+    };
   }
 
-  addCardRandom(card: Card): void {
+  // --------------- Private Methods --------------- //
+
+  private shuffleAndDistribute() {
+    getFullDeck().forEach(this.addCardRandom.bind(this));
+  }
+
+  private addCardRandom(card: Card): void {
     const playerNum = getRandom(4);
 
     if (this.decks[playerNum].length > 9) {
@@ -109,28 +120,28 @@ export default class Game {
     this.decks[playerNum].push(card);
   }
 
-  getNextPlayer(player = this.currPlayer) {
-    if (player === 4) {
+  private getNextPlayer(player = this.currPlayer) {
+    if (player === 3) {
       return 0;
     }
 
     return player + 1;
   }
 
-  getPreviousPlayer(player = this.currPlayer) {
+  private getPreviousPlayer(player = this.currPlayer) {
     if (player === 0) {
-      return 4;
+      return 3;
     }
 
     return player - 1;
   }
 
-  chooseTrump() {
+  private chooseTrump() {
     this.trumpCard = this.decks[this.getPreviousPlayer(this.shufflePlayer)][getRandom(10)];
     this.trump = this.trumpCard.suit;
   }
 
-  clearTable() {
+  private clearTable() {
     const { isBiggerThan } = this;
     let winnerId = 0;
     let points = 0;
@@ -163,7 +174,7 @@ export default class Game {
     }
   }
 
-  isBiggerThan(card1: Card, card2: Card): boolean {
+  private isBiggerThan(card1: Card, card2: Card): boolean {
     if (card1.suit === card2.suit) {
       return card1.value > card2.value;
     }
@@ -179,7 +190,7 @@ export default class Game {
     return false;
   }
 
-  end() {
+  private end() {
     // end game no one can play
     this.currPlayer = -1;
   }
