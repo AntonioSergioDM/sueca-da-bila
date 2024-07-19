@@ -4,7 +4,8 @@ import type { DecorateAcknowledgementsWithMultipleResponses } from 'socket.io/di
 
 import type { ServerToClientEvents, SocketData } from '@/shared/SocketTypes';
 
-import type { Card } from '@/shared/Card';
+import { cardName, Suit, type Card } from '@/shared/Card';
+import { IN_DEV } from 'src/globals';
 import Game from './Game';
 import type Player from './Player';
 
@@ -42,6 +43,10 @@ export default class Lobby {
       return;
     }
 
+    if (IN_DEV) {
+      console.info(`😎 PlayerID: ${playerId} left the lobby ${this.hash}`);
+    }
+
     this.room?.emit('playerJoined', this.players.map((p) => p.name));
     this.resetGame();
   }
@@ -55,9 +60,11 @@ export default class Lobby {
     this.room?.emit('playerJoined', this.players.map((p) => p.name));
     this.room = await player.joinRoom(this.hash);
 
-    // TODO debug
-    console.log('Jogadores no Lobby:');
-    this.players.forEach((p) => { console.log(p.name); });
+    if (IN_DEV) {
+      console.info(`😎 A player joined the Lobby ${this.hash}`);
+      console.info(`      Players on Lobby ${this.hash}`);
+      console.info(this.players.reduce((info, p, idx) => (`       ${idx}. ${info} ${p.name} (ID: ${p.id})`), ''));
+    }
 
     return true;
   }
@@ -67,6 +74,9 @@ export default class Lobby {
     this.players.forEach((p) => {
       if (p.id === playerId) {
         p.setReady();
+        if (IN_DEV) {
+          console.info(`🫡 Player ${p.name} (ID: ${p.id}) is ready`);
+        }
       }
 
       if (!p.ready) {
@@ -83,6 +93,10 @@ export default class Lobby {
     const foundIdx = this.players.findIndex((p) => p.id === playerId);
     if (foundIdx === -1) {
       return false;
+    }
+
+    if (IN_DEV) {
+      console.info(`😉 PlayerID: ${playerId} played ${cardName(card)} of ${Suit[card.suit]}`);
     }
 
     return this.game.play(foundIdx, card);

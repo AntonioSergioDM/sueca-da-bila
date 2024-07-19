@@ -31,12 +31,12 @@ export let io: Server<ClientToServerEvents, ServerToClientEvents, InterServerEve
 
 const SocketHandler = (_: NextApiRequest, res: SocketIOResponse) => {
   if (io) {
-    console.log('Socket is already running');
+    console.info('Socket is already running');
     res.end();
     return;
   }
 
-  console.log('Socket is initializing');
+  console.info('Socket is initializing');
   io = new Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>(
     res.socket!.server,
     {
@@ -58,17 +58,21 @@ const SocketHandler = (_: NextApiRequest, res: SocketIOResponse) => {
   io.on('connection', (socket) => {
     if (socket.recovered) {
       // recovery was successful: socket.id, socket.rooms and socket.data were restored
-      console.log(`A client reconnected. ID: ${socket.id}`);
+      if (IN_DEV) {
+        console.info(`🥰 A client reconnected. ID: ${socket.id}`);
+      }
     } else {
       // new or unrecoverable session
-      console.log(`A client connected. ID: ${socket.id}`);
-    }
+      if (IN_DEV) {
+        console.info(`😊 A client connected. ID: ${socket.id}`);
+      }
 
-    socket.on('joinLobby', joinLobby(socket));
-    socket.on('createLobby', createLobby(socket));
-    socket.on('playerReady', playerReady(socket));
-    socket.on('playCard', playCard(socket));
-    socket.on('lobbyPlayers', lobbyPlayers(socket));
+      socket.on('joinLobby', joinLobby(socket));
+      socket.on('createLobby', createLobby(socket));
+      socket.on('playerReady', playerReady(socket));
+      socket.on('playCard', playCard(socket));
+      socket.on('lobbyPlayers', lobbyPlayers(socket));
+    }
   });
 
   if (IN_DEV) {
