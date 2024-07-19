@@ -1,5 +1,3 @@
-/** @type {import('next').NextConfig} */
-
 function formatDate() {
   const date = new Date();
   const year = date.getFullYear();
@@ -12,6 +10,7 @@ function formatDate() {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
+/** @type {import('next').NextConfig} */
 module.exports = {
   reactStrictMode: true,
   env: {
