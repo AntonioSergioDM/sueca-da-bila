@@ -2,11 +2,17 @@ import { useCallback, useMemo } from 'react';
 import { useRouter } from 'next/router';
 
 import { Button, TextField } from '@mui/material';
+import { useForm, type SubmitHandler } from 'react-hook-form';
 
 import { SiteRoute } from '@/shared/Routes';
 
-import { useInput } from '../tools/useInput';
 import { useSocket } from '../tools/useSocket';
+import FormWrapper from '../components/FormWrapper';
+
+type FormValues = {
+  playerName: string;
+  lobbyHash: string;
+};
 
 const JoinLobby = () => {
   // detect if this player already has an assigned playername in this browser
@@ -22,28 +28,38 @@ const JoinLobby = () => {
     return '';
   }, [query.lobby]);
 
-  const [playerName, playerInput] = useInput();
-  const [lobbyHash, lobbyHashInput] = useInput(urlLobby);
+  const form = useForm<FormValues>({
+    defaultValues: {
+      playerName: '',
+      lobbyHash: urlLobby,
+    },
+  });
 
   const socket = useSocket();
 
-  const onJoin = useCallback(() => {
-    socket.emit('joinLobby', lobbyHash, playerName, (validHash) => {
+  const onJoin = useCallback<SubmitHandler<FormValues>>((values) => {
+    socket.emit('joinLobby', values.lobbyHash, values.playerName, (validHash) => {
       if (validHash) {
         void push(`${SiteRoute.Lobby}/${validHash}`);
       } else {
         alert('failed to join lobby');
       }
     });
-  }, [lobbyHash, playerName, push, socket]);
+  }, [push, socket]);
 
   return (
-    <>
-      <TextField {...playerInput} label="Player name" />
-      <TextField {...lobbyHashInput} label="Lobby hash" />
+    <FormWrapper {...form} onSuccess={onJoin}>
+      <TextField
+        {...form.register('playerName', { required: true })}
+        label="Player name"
+      />
+      <TextField
+        {...form.register('lobbyHash', { required: true })}
+        label="Lobby hash"
+      />
 
-      <Button onClick={onJoin}>Join</Button>
-    </>
+      <Button type="submit">Join</Button>
+    </FormWrapper>
   );
 };
 

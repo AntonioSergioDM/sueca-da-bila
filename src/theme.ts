@@ -17,14 +17,21 @@ const theme = createTheme({
         variant: 'contained',
       },
     },
+    MuiTextField: {
+      defaultProps: {
+        InputLabelProps: {
+          shrink: true,
+        },
+      },
+    },
   },
   palette: {
     mode: 'dark',
     primary: {
-      main: '#556cd6',
+      main: '#F21F23',
     },
     secondary: {
-      main: '#19857b',
+      main: '#7B1024',
     },
     error: {
       main: red.A400,
