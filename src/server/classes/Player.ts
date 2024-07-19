@@ -30,7 +30,7 @@ export default class Player {
     await this.socket.leave(room);
   }
 
-  setReady() {
-    this.ready = true;
+  setReady(state: boolean = true) {
+    this.ready = state;
   }
 }

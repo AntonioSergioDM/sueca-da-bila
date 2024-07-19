@@ -10,6 +10,7 @@ export interface ServerToClientEvents {
   playerJoined: (playerNames: Array<string>) => void;
   gameStart: (hand: Hand) => void;
   gameChange: (gameState: GameState) => void;
+  gameReset: () => void;
 }
 
 export interface ClientToServerEvents {

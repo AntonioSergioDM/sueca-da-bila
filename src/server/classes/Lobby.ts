@@ -110,6 +110,10 @@ export default class Lobby {
   private startGame() {
     this.game.start();
 
+    if (IN_DEV) {
+      console.info(`♠️ ♦️ ♣️ ♥️ Game started on Lobby ${this.hash}\n`);
+    }
+
     this.players.forEach((player, idx) => {
       player.socket.emit('gameStart', this.game.decks[idx]);
     });
@@ -120,5 +124,17 @@ export default class Lobby {
   private resetGame() {
     this.game = new Game();
     this.results = [];
+    this.players.forEach((p) => {
+      p.setReady(false);
+      if (IN_DEV) {
+        console.info(`🙃 Player ${p.name} (ID: ${p.id}) is no longer ready\n`);
+      }
+    });
+
+    if (IN_DEV) {
+      console.info(`🃏 Game restarted on Lobby ${this.hash}\n`);
+    }
+
+    this.room?.emit('gameReset');
   }
 }
