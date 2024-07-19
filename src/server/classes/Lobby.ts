@@ -2,10 +2,10 @@ import { v4 as uuid } from 'uuid';
 import type Player from './Player';
 
 export default class Lobby {
-  hash:string;
-
-  players:Array<Player> = [];
-
+  static lobbies: Map<string, Lobby> = new Map();
+  
+  hash: string;
+  players: Array<Player> = [];
   results: Array<number> = [];
   // game:Game;
 
@@ -13,7 +13,7 @@ export default class Lobby {
     this.hash = uuid();
   }
 
-  addPlayer(player:Player): boolean {
+  addPlayer(player: Player): boolean {
     if (this.players.length >= 4) {
       return false;
     }

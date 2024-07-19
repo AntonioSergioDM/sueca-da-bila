@@ -4,15 +4,13 @@ import type { ClientToServerEvents, Socket } from '@/shared/SocketTypes';
 import Lobby from './classes/Lobby';
 import Player from './classes/Player';
 
-export const lobbies: Map<string, Lobby> = new Map();
-
 export const joinLobby = (socket: Socket): ClientToServerEvents['joinLobby'] => (
   (lobbyHash, playerName, callback) => {
     if (!lobbyHash) {
       return callback('');
     }
 
-    const lobby = lobbies.get(lobbyHash);
+    const lobby = Lobby.lobbies.get(lobbyHash);
     if (!lobby) {
       return callback('');
     }
@@ -34,7 +32,7 @@ export const joinLobby = (socket: Socket): ClientToServerEvents['joinLobby'] => 
 export const createLobby = (socket: Socket): ClientToServerEvents['createLobby'] => (
   (playerName, callback) => {
     const lobby = new Lobby();
-    lobbies.set(lobby.hash, lobby);
+    Lobby.lobbies.set(lobby.hash, lobby);
 
     const player = new Player(socket, playerName);
 
@@ -56,7 +54,7 @@ export const lobbyPlayers = (_: Socket): ClientToServerEvents['lobbyPlayers'] =>
       return callback('', []);
     }
 
-    const lobby = lobbies.get(lobbyHash);
+    const lobby = Lobby.lobbies.get(lobbyHash);
     console.log('🚀 ~ lobby:', lobby);
     if (!lobby) {
       return callback('', []);
@@ -78,7 +76,7 @@ export const lobbyPlayers = (_: Socket): ClientToServerEvents['lobbyPlayers'] =>
 // export const leaveLobby = (socket: Socket): ClientToServerEvents['createLobby'] => (
 //   (playerName, callback) => {
 // const lobby = new Lobby();
-// lobbies.set(lobby.hash, lobby);
+// Lobby.lobbies.set(lobby.hash, lobby);
 
 // const player = new Player(socket, playerName);
 
