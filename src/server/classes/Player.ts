@@ -26,6 +26,10 @@ export default class Player {
     return io?.to(room) || null;
   }
 
+  async leaveRoom(room: Room) {
+    await this.socket.leave(room);
+  }
+
   setReady() {
     this.ready = true;
   }

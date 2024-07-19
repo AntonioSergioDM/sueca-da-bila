@@ -73,7 +73,7 @@ const Lobby = () => {
       socket.off('gameStart', onGameStart);
       socket.off('gameChange', onGameChange);
 
-      // TODO leave lobby
+      socket.emit('leaveLobby');
     };
   }, [onGameStart, socket, updatePlayers, onGameChange]);
 

@@ -27,6 +27,25 @@ export default class Lobby {
     this.hash = uuid();
   }
 
+  async removePlayer(playerId: string) {
+    const founIdx = this.players.findIndex((p) => p.id === playerId);
+    if (founIdx === -1) {
+      return;
+    }
+
+    const player = this.players.splice(founIdx, 1)[0];
+
+    await player.leaveRoom(this.hash);
+
+    if (!this.players.length) {
+      Lobby.lobbies.delete(this.hash);
+      return;
+    }
+
+    this.room?.emit('playerJoined', this.players.map((p) => p.name));
+    this.resetGame();
+  }
+
   async addPlayer(player: Player): Promise<boolean> {
     if (this.players.length >= 4) {
       return false;
@@ -77,5 +96,10 @@ export default class Lobby {
     });
 
     this.room?.emit('gameChange', this.game.getState());
+  }
+
+  private resetGame() {
+    this.game = new Game();
+    this.results = [];
   }
 }

@@ -102,17 +102,17 @@ export const playCard = (socket: OurServerSocket): ClientToServerEvents['playCar
   }
 );
 
-// export const leaveLobby = (socket: Socket): ClientToServerEvents['createLobby'] => (
-//   (playerName, callback) => {
-// const lobby = new Lobby();
-// Lobby.lobbies.set(lobby.hash, lobby);
+export const leaveLobby = (socket: OurServerSocket): ClientToServerEvents['leaveLobby'] => (
+  async () => {
+    if (!socket?.data?.lobbyHash || !socket.data.playerId) {
+      return;
+    }
 
-// const player = new Player(socket, playerName);
+    const lobby = Lobby.lobbies.get(socket.data.lobbyHash);
+    if (!lobby) {
+      return;
+    }
 
-// if (!lobby.addPlayer(player)) {
-//   return callback('', '');
-// }
-
-// return callback(lobby.hash, player.id);
-//   }
-// );
+    await lobby.removePlayer(socket.data.playerId);
+  }
+);
