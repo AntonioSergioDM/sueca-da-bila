@@ -27,14 +27,15 @@ export default class Game {
     trump: Suit | `${Suit}` | null = null;
     trumpCard: Card | null = null;
     shufflePlayer: number = 0;
-    currPlayer: number = 0;
+    currPlayer: number = -1;
     /** each Card is related by id to the player */
     onTable: [Card | null, Card | null, Card | null, Card | null] = [null, null, null, null];
     tableSuit: Suit | `${Suit}` | null = null;
 
-    constructor() {
+    start() {
         this.shuffleAndDistribute();
         this.chooseTrump();
+        this.currPlayer = this.shufflePlayer;
     }
 
     play(player: number, card: Card): boolean {
@@ -130,7 +131,6 @@ export default class Game {
     }
 
     clearTable() {
-
         let winnerId = 0;
         let points = 0;
         let winningCard = this.onTable[0];
@@ -148,21 +148,22 @@ export default class Game {
             }
         });
 
-        // The player that wins is the first to play
-        this.currPlayer = winnerId;
-        this.score[winnerId%2] += points;
+        this.score[winnerId % 2] += points;
 
         // Reset the table
         this.tableSuit = null;
         this.onTable = [null, null, null, null];
 
         if (!this.decks[0].length) {
-            // TODO trigger end game
+            this.end();
+        } else {
+            // The player that wins is the first to play
+            this.currPlayer = winnerId;
         }
     }
 
     isBiggerThan(card1: Card, card2: Card): boolean {
-        if (card1.suit === card2.suit ) {
+        if (card1.suit === card2.suit) {
             return card1.value > card2.value;
         }
 
@@ -175,5 +176,10 @@ export default class Game {
         }
 
         return false;
+    }
+
+    end() {
+        // end game no one can play
+        this.currPlayer = -1;
     }
 }
