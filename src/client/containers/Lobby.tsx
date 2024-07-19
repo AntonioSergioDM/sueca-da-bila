@@ -10,6 +10,7 @@ import { Typography, CircularProgress, Button } from '@mui/material';
 
 import type { GameState, PlayerState } from '@/shared/GameTypes';
 
+import type { Card } from '@/shared/Card';
 import type { ServerToClientEvents } from '@/shared/SocketTypes';
 import Table from '../components/Table';
 import { useSocket } from '../tools/useSocket';
@@ -62,6 +63,12 @@ const Lobby = () => {
     setGameState(newGameState);
   }, []);
 
+  const onPlayCard = useCallback((card: Card) => {
+    socket.emit('playCard', card, (newPlayerState) => {
+      if (newPlayerState) setPlayerState(newPlayerState);
+    });
+  }, [socket]);
+
   useEffect(() => {
     const cleanup = () => {
       socket.off('playerJoined', updatePlayers);
@@ -108,7 +115,7 @@ const Lobby = () => {
         <>
           <Table playerState={playerState} gameState={gameState} players={players} />
 
-          <PlayerHand playerState={playerState} gameState={gameState} />
+          <PlayerHand playerState={playerState} onPlayCard={onPlayCard} gameState={gameState} />
         </>
       )}
 

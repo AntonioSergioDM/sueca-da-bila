@@ -88,13 +88,13 @@ export const lobbyPlayers = (socket: OurServerSocket): ClientToServerEvents['lob
 export const playCard = (socket: OurServerSocket): ClientToServerEvents['playCard'] => (
   (card: Card, callback) => {
     if (!socket?.data?.lobbyHash || !socket.data.playerId) {
-      callback(false);
+      callback(null);
       return;
     }
 
     const lobby = Lobby.lobbies.get(socket.data.lobbyHash);
     if (!lobby) {
-      callback(false);
+      callback(null);
       return;
     }
 

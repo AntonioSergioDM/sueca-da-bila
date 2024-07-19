@@ -142,7 +142,7 @@ export default class Game {
   }
 
   private clearTable() {
-    const { isBiggerThan } = this;
+    const that = this;
     let winnerId = 0;
     let points = 0;
     let winningCard = this.onTable[0];
@@ -154,7 +154,7 @@ export default class Game {
 
       points += pointsOf(card);
 
-      if (isBiggerThan(card, winningCard)) {
+      if (that.isBiggerThan(card, winningCard)) {
         winningCard = card;
         winnerId = playerIdx;
       }

@@ -1,43 +1,31 @@
-import { useCallback } from 'react';
-
 import { CircularProgress, Stack } from '@mui/material';
 
-import type { Card } from '@/shared/Card';
 import type { GameState, PlayerState } from '@/shared/GameTypes';
 
+import type { Card } from '@/shared/Card';
 import PlayerCard from './PlayerCard';
-import { useSocket } from '../tools/useSocket';
 
 type PlayerHandProps = {
   gameState: GameState;
   playerState: PlayerState;
+  onPlayCard: (card: Card) => void;
 };
 
-const PlayerHand = ({ playerState, gameState }: PlayerHandProps) => {
-  const socket = useSocket();
+const PlayerHand = ({ playerState, onPlayCard, gameState }: PlayerHandProps) => (
 
-  const onPlayCard = useCallback((card: Card) => {
-    socket.emit('playCard', card, (success) => {
-      console.log('played card');
-      console.log({ success });
-    });
-  }, [socket]);
+  <Stack direction="row" justifyContent="center" gap={2} flexWrap="wrap" maxWidth="sm">
+    {playerState.hand.map((card) => (
+      <PlayerCard
+        key={`${card.suit}${card.value}`}
+        card={card}
+        onPlay={onPlayCard}
+      />
+    ))}
 
-  return (
-    <Stack direction="row" justifyContent="center" gap={2} flexWrap="wrap" maxWidth="sm">
-      {playerState.hand.map((card) => (
-        <PlayerCard
-          key={`${card.suit}${card.value}`}
-          card={card}
-          onPlay={onPlayCard}
-        />
-      ))}
-
-      {gameState.currentPlayer === playerState.index && (
-        <CircularProgress />
-      )}
-    </Stack>
-  );
-};
+    {gameState.currentPlayer === playerState.index && (
+      <CircularProgress />
+    )}
+  </Stack>
+);
 
 export default PlayerHand;

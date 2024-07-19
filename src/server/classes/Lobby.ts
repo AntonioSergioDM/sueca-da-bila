@@ -11,6 +11,7 @@ import { cardName, Suit, type Card } from '@/shared/Card';
 import { IN_DEV } from 'src/globals';
 import Game from './Game';
 import type Player from './Player';
+import { PlayerState } from '@/shared/GameTypes';
 
 export type LobbyRoom = BroadcastOperator<DecorateAcknowledgementsWithMultipleResponses<ServerToClientEvents>, SocketData>;
 
@@ -114,17 +115,30 @@ export default class Lobby {
     }
   }
 
-  playCard(playerId: string, card: Card): boolean {
+  playCard(playerId: string, card: Card): PlayerState | null {
     const foundIdx = this.players.findIndex((p) => p.id === playerId);
     if (foundIdx === -1) {
-      return false;
+      return null;
     }
 
     if (IN_DEV) {
       console.info(`😉 PlayerID: ${playerId} played ${cardName(card)} of ${Suit[card.suit]}\n`);
     }
 
-    return this.game.play(foundIdx, card);
+    if (!this.game.play(foundIdx, card)) {
+      return null;
+    }
+
+    if (IN_DEV) {
+      console.info('    Card Played');
+    }
+
+    this.room?.emit('gameChange', this.game.getState());
+
+    return {
+      index: foundIdx,
+      hand: this.game.decks[foundIdx],
+    };
   }
 
   private startGame() {
