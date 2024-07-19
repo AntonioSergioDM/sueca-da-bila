@@ -5,7 +5,7 @@ import { pointsOf, Suit } from '../../shared/Card';
 const getFullDeck = () => {
   const fulldeck: Array<Card> = [];
 
-  [Suit.diamond, Suit.spades, Suit.hearts, Suit.clubs].forEach((suit) => {
+  [Suit.Diamonds, Suit.Spades, Suit.Hearts, Suit.Clubs].forEach((suit) => {
     let i: number = 10;
     while (i) {
       fulldeck.push({

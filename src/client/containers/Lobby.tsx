@@ -8,10 +8,11 @@ import { useRouter } from 'next/router';
 
 import { Typography, CircularProgress, Button } from '@mui/material';
 
-import type { GameState, Hand } from '@/shared/GameTypes';
+import type { GameState, PlayerState } from '@/shared/GameTypes';
 
+import Table from '../components/Table';
 import { useSocket } from '../tools/useSocket';
-import CardHolding from '../components/CardHolding';
+import PlayerHand from '../components/PlayerHand';
 import ShareUrlButton from '../components/ShareUrlButton';
 
 const Lobby = () => {
@@ -23,7 +24,8 @@ const Lobby = () => {
 
   const [isReady, setIsReady] = useState(false);
 
-  const [myHand, setHand] = useState<Hand>([]);
+  const [gameState, setGameState] = useState<GameState | null>(null);
+  const [playerState, setPlayerState] = useState<PlayerState | null>(null);
 
   // TODO: verify if this lobby is valid
   const urlLobby = useMemo(() => {
@@ -51,21 +53,16 @@ const Lobby = () => {
     }
   }, [socket, updatePlayers, urlLobby]);
 
-  const onGameStart = useCallback((hand: Hand) => {
-    console.log(hand);
-
-    setHand(hand);
+  const onGameStart = useCallback((newPlayerState: PlayerState) => {
+    setPlayerState(newPlayerState);
   }, []);
 
   const onGameChange = useCallback((newGameState: GameState) => {
-    console.log(newGameState);
-
-    // TODO show it
+    setGameState(newGameState);
   }, []);
 
   useEffect(() => {
     const cleanup = () => {
-      console.log('🚀 ~ cleanup ~ cleanup:');
       socket.off('playerJoined', updatePlayers);
       socket.off('gameStart', onGameStart);
       socket.off('gameChange', onGameChange);
@@ -79,7 +76,6 @@ const Lobby = () => {
     window.addEventListener('beforeunload', cleanup);
 
     return () => {
-      console.log('unmounting | leaving');
       cleanup();
       window.removeEventListener('beforeunload', cleanup);
     };
@@ -95,15 +91,25 @@ const Lobby = () => {
 
   return (
     <>
-      <Typography>This is the game!</Typography>
-
       {loading && <CircularProgress />}
       {(!loading && !players.length) && <Typography>No players or error</Typography>}
-      {(!loading && !!players.length) && <pre>{JSON.stringify(players, null, 2)}</pre>}
+      {(!loading && !!players.length && !playerState) && (
+        <pre>{JSON.stringify(players, null, 2)}</pre>
+      )}
 
-      <Button onClick={onReady} disabled={!players.length || isReady}>READY!</Button>
+      {!playerState && (
+        <Button onClick={onReady} disabled={!players.length || isReady}>
+          READY!
+        </Button>
+      )}
 
-      {!!myHand.length && <CardHolding hand={myHand} />}
+      {(!!playerState && !!gameState) && (
+        <>
+          <Table playerState={playerState} gameState={gameState} players={players} />
+
+          <PlayerHand playerState={playerState} />
+        </>
+      )}
 
       <ShareUrlButton url={urlLobby} />
     </>

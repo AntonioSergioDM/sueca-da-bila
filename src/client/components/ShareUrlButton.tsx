@@ -22,6 +22,7 @@ const ShareUrlButton = ({ url }: ShareUrlButtonProps) => {
     <Box
       component="div"
       sx={{
+        alignSelf: 'flex-end',
         display: 'flex',
         p: 1,
         gap: 1,
