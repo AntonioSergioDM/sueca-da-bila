@@ -1,4 +1,4 @@
-import type { Socket as SocketIoSocket } from 'Socket.IO';
+import type { Socket as SocketIoSocket } from 'socket.io';
 
 export interface ServerToClientEvents {
   lobbyJoined: () => void;

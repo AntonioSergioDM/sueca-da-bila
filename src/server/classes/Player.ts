@@ -1,5 +1,5 @@
 import { v4 as uuid } from 'uuid';
-import type { Socket } from 'Socket.IO';
+import type { Socket } from 'socket.io';
 import type { Room } from 'socket.io-adapter';
 
 import { io } from '../socket';

@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-import { Server } from 'Socket.IO';
+import { Server } from 'socket.io';
 import type { Http2Server } from 'http2';
 import { instrument } from '@socket.io/admin-ui';
 

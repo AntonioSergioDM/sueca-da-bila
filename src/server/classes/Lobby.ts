@@ -1,6 +1,6 @@
 import { v4 as uuid } from 'uuid';
-import type { BroadcastOperator } from 'Socket.IO';
-import type { DecorateAcknowledgementsWithMultipleResponses } from 'Socket.IO/dist/typed-events';
+import type { BroadcastOperator } from 'socket.io';
+import type { DecorateAcknowledgementsWithMultipleResponses } from 'socket.io/dist/typed-events';
 
 import type { ServerToClientEvents, SocketData } from '@/shared/SocketTypes';
 
