@@ -4,11 +4,13 @@ import Image from 'next/image';
 
 import { ButtonBase } from '@mui/material';
 
-import { type Card, cardName, Suit } from '@/shared/Card';
+import { type Card } from '@/shared/Card';
 
-const CARD_WIDTH = 180;
-const CARD_HEIGHT = 250;
-const CARD_RATIO = CARD_HEIGHT / CARD_WIDTH;
+import getCardId from '../tools/getCardId';
+
+export const CARD_WIDTH = 180;
+export const CARD_HEIGHT = 250;
+export const CARD_RATIO = CARD_HEIGHT / CARD_WIDTH;
 
 type PlayerCardProps = {
   card: Card;
@@ -20,12 +22,9 @@ const PlayerCard = ({ card, onPlay }: PlayerCardProps) => {
     onPlay(card);
   }, [card, onPlay]);
 
-  const cardId = useMemo(() => {
-    const suitStr = Suit[card.suit];
-    const valueStr = cardName(card);
-
-    return `${suitStr}${valueStr}`;
-  }, [card]);
+  const cardId = useMemo(() => (
+    getCardId(card)
+  ), [card]);
 
   const cardImageSrc = useMemo(() => (
     `/images/cards/${cardId}.png`
