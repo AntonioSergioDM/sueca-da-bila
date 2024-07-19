@@ -15,6 +15,7 @@ import { IN_DEV } from '../globals';
 import {
   createLobby,
   joinLobby,
+  leaveLobby,
   lobbyPlayers,
   playCard,
   playerReady,
@@ -70,6 +71,7 @@ const SocketHandler = (_: NextApiRequest, res: SocketIOResponse) => {
       socket.on('joinLobby', joinLobby(socket));
       socket.on('createLobby', createLobby(socket));
       socket.on('playerReady', playerReady(socket));
+      socket.on('leaveLobby', leaveLobby(socket));
       socket.on('playCard', playCard(socket));
       socket.on('lobbyPlayers', lobbyPlayers(socket));
     }
@@ -80,6 +82,8 @@ const SocketHandler = (_: NextApiRequest, res: SocketIOResponse) => {
       auth: false,
       mode: 'development',
     });
+
+    console.info('\n\nAdmin website:    https://admin.socket.io \nURL:   http://localhost:3001\npath:   /api/socket\n\n');
   }
 
   res.end();
