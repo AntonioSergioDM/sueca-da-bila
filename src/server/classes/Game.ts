@@ -142,6 +142,7 @@ export default class Game {
   }
 
   private clearTable() {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const that = this;
     let winnerId = 0;
     let points = 0;
@@ -193,5 +194,7 @@ export default class Game {
   private end() {
     // end game no one can play
     this.currPlayer = -1;
+    //TODO fix it
+    console.log(`equipa par|   ${this.score[0]}\n_________________________\nequipa impar| ${this.score[0]}\n`);
   }
 }
