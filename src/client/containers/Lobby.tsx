@@ -36,7 +36,7 @@ const Lobby = () => {
 
   useEffect(() => {
     if (urlLobby) {
-      socket.emit('lobbyPlayers', urlLobby, 'Test', (validHash, players) => {
+      socket.emit('lobbyPlayers', urlLobby, (validHash, players) => {
         if (validHash) {
           setPlayerNames(players);
           setLoading(false);

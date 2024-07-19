@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/router';
 
 import { Button, TextField } from '@mui/material';
@@ -31,9 +31,15 @@ const JoinLobby = () => {
   const form = useForm<FormValues>({
     defaultValues: {
       playerName: '',
-      lobbyHash: urlLobby,
+      lobbyHash: '',
     },
   });
+
+  useEffect(() => {
+    if (urlLobby) {
+      form.reset({ lobbyHash: urlLobby });
+    }
+  }, [form, urlLobby]);
 
   const socket = useSocket();
 
