@@ -3,6 +3,7 @@ import type { ClientToServerEvents, OurServerSocket } from '@/shared/SocketTypes
 
 import Lobby from './classes/Lobby';
 import Player from './classes/Player';
+import { Card } from '@/shared/Card';
 
 export const joinLobby = (socket: OurServerSocket): ClientToServerEvents['joinLobby'] => (
   async (lobbyHash, playerName, callback) => {
@@ -81,6 +82,23 @@ export const lobbyPlayers = (socket: OurServerSocket): ClientToServerEvents['lob
 
     // returning lobby hash so the client knows it was successful at least
     return callback(lobby.hash, lobby.players.map((p) => p.name));
+  }
+);
+
+export const playCard = (socket: OurServerSocket): ClientToServerEvents['playCard'] => (
+  (card: Card, callback) => {
+    if (!socket?.data?.lobbyHash || !socket.data.playerId) {
+      callback(false);
+      return;
+    }
+
+    const lobby = Lobby.lobbies.get(socket.data.lobbyHash);
+    if (!lobby) {
+      callback(false);
+      return;
+    }
+
+    callback(lobby.playCard(socket.data.playerId, card));
   }
 );
 

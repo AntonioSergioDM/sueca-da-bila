@@ -4,6 +4,7 @@ import type { DecorateAcknowledgementsWithMultipleResponses } from 'socket.io/di
 
 import type { ServerToClientEvents, SocketData } from '@/shared/SocketTypes';
 
+import type { Card } from '@/shared/Card';
 import Game from './Game';
 import type Player from './Player';
 
@@ -59,7 +60,16 @@ export default class Lobby {
     }
   }
 
-  startGame() {
+  playCard(playerId: string, card: Card): boolean {
+    const foundIdx = this.players.findIndex((p) => p.id === playerId);
+    if (foundIdx === -1) {
+      return false;
+    }
+
+    return this.game.play(foundIdx, card);
+  }
+
+  private startGame() {
     this.game.start();
 
     this.players.forEach((player, idx) => {

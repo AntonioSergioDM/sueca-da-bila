@@ -17,7 +17,7 @@ export interface ClientToServerEvents {
   createLobby: (playerName: string, callback: (lobbyHash: string) => void) => void;
   lobbyPlayers: (lobbyHash: string, callback: (lobbyHash: string, players: string[]) => void) => void;
   playerReady: () => void;
-  playCard: (card: Card) => void;
+  playCard: (card: Card, callback: (sucess: boolean) => void) => void;
 }
 
 /**
