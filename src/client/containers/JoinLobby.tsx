@@ -8,7 +8,10 @@ import {
   Button,
   TextField,
   IconButton,
+  InputAdornment,
 } from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
+
 import { ArrowBack } from '@mui/icons-material';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 
@@ -16,6 +19,7 @@ import { SiteRoute } from '@/shared/Routes';
 
 import { useSocket } from '../tools/useSocket';
 import FormWrapper from '../components/FormWrapper';
+import { playerNameTools } from '../tools/playerNameTools';
 
 type FormValues = {
   playerName: string;
@@ -38,7 +42,7 @@ const JoinLobby = () => {
 
   const form = useForm<FormValues>({
     defaultValues: {
-      playerName: '',
+      playerName: playerNameTools.get(),
       lobbyHash: '',
     },
   });
@@ -52,6 +56,8 @@ const JoinLobby = () => {
   const socket = useSocket();
 
   const onJoin = useCallback<SubmitHandler<FormValues>>((values) => {
+    playerNameTools.set(values.playerName);
+
     socket.emit('joinLobby', values.lobbyHash, values.playerName, (validHash) => {
       if (validHash) {
         void push(`${SiteRoute.Lobby}/${validHash}`);
@@ -61,9 +67,14 @@ const JoinLobby = () => {
     });
   }, [push, socket]);
 
+  const handleClearUsername = useCallback(() => {
+    playerNameTools.reset();
+    form.setValue('playerName', playerNameTools.get());
+  }, [form]);
+
   return (
     <>
-      <Stack alignItems="flex-end">
+      <Stack alignItems="flex-start">
         <IconButton LinkComponent={Link} href={SiteRoute.Home}>
           <ArrowBack />
         </IconButton>
@@ -73,6 +84,18 @@ const JoinLobby = () => {
         <TextField
           autoFocus
           label="Player name"
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  onClick={handleClearUsername}
+                  edge="end"
+                >
+                  <RefreshIcon />
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
           {...form.register('playerName', { required: true })}
         />
         <TextField
