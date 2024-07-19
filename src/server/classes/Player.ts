@@ -3,17 +3,17 @@ import { v4 as uuid } from 'uuid';
 import type { Card } from '../../shared/Card';
 
 export default class Player {
-    id:string;
+  id:string;
 
-    name:string;
+  name:string;
 
-    cards:Array<Card> = [];
+  cards:Array<Card> = [];
 
-    socket: Socket;
+  socket: Socket;
 
-    constructor(socket:Socket, name?:string) {
-        this.socket = socket;
-        this.name = name || '';
-        this.id = uuid();
-    }
+  constructor(socket:Socket, name?:string) {
+    this.socket = socket;
+    this.name = name || '';
+    this.id = uuid();
+  }
 }

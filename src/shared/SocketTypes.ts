@@ -1,3 +1,5 @@
+import type { Socket as SocketIoSocket } from 'Socket.IO';
+
 export interface ServerToClientEvents {
   lobbyJoined: () => void;
   error: () => void;
@@ -5,8 +7,9 @@ export interface ServerToClientEvents {
 }
 
 export interface ClientToServerEvents {
-  joinLobby: (lobbyHash: string, playerName: string, callback: (hash: string, id: string) => void) => void;
-  createLobby: (playerName: string, callback: (hash: string, id: string) => void) => void;
+  joinLobby: (lobbyHash: string, playerName: string, callback: (lobbyHash: string) => void) => void;
+  createLobby: (playerName: string, callback: (lobbyHash: string) => void) => void;
+  lobbyPlayers: (lobbyHash: string, playerName: string, callback: (lobbyHash: string, players: string[]) => void) => void;
 }
 
 /**
@@ -16,8 +19,10 @@ export interface InterServerEvents { }
 
 /**
  * Data sent on connection
- */
+*/
 export interface SocketData {
-  lobbyHash:string | null;
-  playerId:string | null;
+  lobbyHash: string | null;
+  playerId: string | null;
 }
+
+export type Socket = SocketIoSocket<any, any, any, SocketData>;

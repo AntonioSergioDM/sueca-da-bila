@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -14,8 +18,39 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "jsxImportSource": "@emotion/react",
-    "incremental": true
+    "incremental": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/public/*": [
+        "public/*"
+      ],
+      "@/client/*": [
+        "src/client/*"
+      ],
+      "@/client/components/*": [
+        "src/client/components/*"
+      ],
+      "@/client/containers/*": [
+        "src/client/containers/*"
+      ],
+      "@/client/tools/*": [
+        "src/client/tools/*"
+      ],
+      "@/server/*": [
+        "src/server/*"
+      ],
+      "@/shared/*": [
+        "src/shared/*"
+      ]
+    }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "server/server.js"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next-env.d.ts",
+    "src",
+    "next.config.js",
+    "next-env.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+  ]
 }

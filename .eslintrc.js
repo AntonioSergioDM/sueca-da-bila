@@ -72,6 +72,9 @@ module.exports = {
         'no-void': ['error', {
           allowAsStatement: true,
         }],
+        "indent": 0,
+        "no-tabs": 0,
+        "max-len": ["error", 150],
         'func-names': 0,
         'import/no-cycle': 0,
         'react/prop-types': 0,
@@ -104,7 +107,6 @@ module.exports = {
         }],
         '@typescript-eslint/ban-ts-comment': 0,
         '@typescript-eslint/explicit-module-boundary-types': 0,
-        '@typescript-eslint/indent': 0,
         '@typescript-eslint/member-delimiter-style': ['error', {
           multiline: {
             delimiter: 'semi',
@@ -116,7 +118,6 @@ module.exports = {
           },
           multilineDetection: 'brackets',
         }],
-        "indent": ["error", 4],
         '@typescript-eslint/consistent-type-imports': 'error',
         '@typescript-eslint/return-await': 'error',
         '@typescript-eslint/require-await': 'error',
