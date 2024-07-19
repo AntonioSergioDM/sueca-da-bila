@@ -1,6 +1,6 @@
 import type { Socket as SocketIoSocket } from 'socket.io';
 
-import type { GameState, Hand } from '@/shared/GameTypes';
+import type { GameState, PlayerState } from '@/shared/GameTypes';
 import type { Card } from './Card';
 
 export interface ServerToClientEvents {
@@ -8,7 +8,7 @@ export interface ServerToClientEvents {
   error: () => void;
   withAck: (d: string, callback: (e: number) => void) => void;
   playerJoined: (playerNames: Array<string>) => void;
-  gameStart: (hand: Hand) => void;
+  gameStart: (playerState: PlayerState) => void;
   gameChange: (gameState: GameState) => void;
   gameReset: () => void;
 }

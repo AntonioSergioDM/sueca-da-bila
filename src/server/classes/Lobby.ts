@@ -135,7 +135,10 @@ export default class Lobby {
     }
 
     this.players.forEach((player, idx) => {
-      player.socket.emit('gameStart', this.game.decks[idx]);
+      player.socket.emit('gameStart', {
+        index: idx,
+        hand: this.game.decks[idx],
+      });
     });
 
     this.room?.emit('gameChange', this.game.getState());
