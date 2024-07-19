@@ -1,6 +1,10 @@
 import { v4 as uuid } from 'uuid';
 import type { BroadcastOperator } from 'socket.io';
 import type { DecorateAcknowledgementsWithMultipleResponses } from 'socket.io/dist/typed-events';
+import {
+  uniqueNamesGenerator,
+  adjectives, colors, names, animals, countries,
+} from 'unique-names-generator';
 
 import type { ServerToClientEvents, SocketData } from '@/shared/SocketTypes';
 
@@ -25,7 +29,24 @@ export default class Lobby {
   room: LobbyRoom | null = null;
 
   constructor() {
-    this.hash = uuid();
+    this.hash = Lobby.generateNewHash();
+  }
+
+  static generateNewHash(): string {
+    const newHash = uniqueNamesGenerator({
+      dictionaries: [adjectives, colors, names, animals, countries],
+      length: 3,
+      separator: '-',
+      style: 'lowerCase',
+    });
+
+    // In the very low case of generating a already existing
+    // one call again until we get a unique name
+    if (Lobby.lobbies.has(newHash)) {
+      return this.generateNewHash();
+    }
+
+    return newHash;
   }
 
   async removePlayer(playerId: string) {
