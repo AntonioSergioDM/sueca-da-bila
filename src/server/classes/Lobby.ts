@@ -1,4 +1,3 @@
-import { v4 as uuid } from 'uuid';
 import type { BroadcastOperator } from 'socket.io';
 import type { DecorateAcknowledgementsWithMultipleResponses } from 'socket.io/dist/typed-events';
 import {
