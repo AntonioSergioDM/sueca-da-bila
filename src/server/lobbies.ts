@@ -8,25 +8,25 @@ import Player from './classes/Player';
 export const joinLobby = (socket: OurServerSocket): ClientToServerEvents['joinLobby'] => (
   async (lobbyHash, playerName, callback) => {
     if (!lobbyHash) {
-      return callback('');
+      return callback({ error: 'Invalid lobby' });
     }
 
     const lobby = Lobby.lobbies.get(lobbyHash);
     if (!lobby) {
-      return callback('');
+      return callback({ error: 'Invalid lobby' });
     }
 
     const player = new Player(socket, playerName);
 
     if (!(await lobby.addPlayer(player))) {
-      return callback('');
+      return callback({ error: 'Failed to add player. Lobby full?' });
     }
 
     socket.data.lobbyHash = lobby.hash;
     socket.data.playerId = player.id;
 
     // returning lobby hash so the client knows it was successful at least
-    return callback(lobby.hash);
+    return callback({ data: { lobbyHash: lobby.hash } });
   }
 );
 
@@ -38,13 +38,13 @@ export const createLobby = (socket: OurServerSocket): ClientToServerEvents['crea
     const player = new Player(socket, playerName);
 
     if (!(await lobby.addPlayer(player))) {
-      return callback('');
+      return callback({ error: 'Failed to add player' });
     }
 
     socket.data.lobbyHash = lobby.hash;
     socket.data.playerId = player.id;
 
-    return callback(lobby.hash);
+    return callback({ data: { lobbyHash: lobby.hash } });
   }
 );
 

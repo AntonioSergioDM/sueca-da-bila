@@ -10,6 +10,7 @@ import { Typography, CircularProgress, Button } from '@mui/material';
 
 import type { GameState, PlayerState } from '@/shared/GameTypes';
 
+import type { ServerToClientEvents } from '@/shared/SocketTypes';
 import Table from '../components/Table';
 import { useSocket } from '../tools/useSocket';
 import PlayerHand from '../components/PlayerHand';
@@ -53,11 +54,11 @@ const Lobby = () => {
     }
   }, [socket, updatePlayers, urlLobby]);
 
-  const onGameStart = useCallback((newPlayerState: PlayerState) => {
+  const onGameStart = useCallback<ServerToClientEvents['gameStart']>((newPlayerState) => {
     setPlayerState(newPlayerState);
   }, []);
 
-  const onGameChange = useCallback((newGameState: GameState) => {
+  const onGameChange = useCallback<ServerToClientEvents['gameChange']>((newGameState) => {
     setGameState(newGameState);
   }, []);
 

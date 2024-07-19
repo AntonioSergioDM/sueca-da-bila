@@ -17,6 +17,7 @@ import { useForm, type SubmitHandler } from 'react-hook-form';
 
 import { SiteRoute } from '@/shared/Routes';
 
+import { useSnackbar } from 'notistack';
 import { useSocket } from '../tools/useSocket';
 import FormWrapper from '../components/FormWrapper';
 import { playerNameTools } from '../tools/playerNameTools';
@@ -29,6 +30,7 @@ type FormValues = {
 const JoinLobby = () => {
   // detect if this player already has an assigned playername in this browser
   // fill it by default in the playerName
+  const { enqueueSnackbar } = useSnackbar();
 
   const { query, push } = useRouter();
 
@@ -58,14 +60,17 @@ const JoinLobby = () => {
   const onJoin = useCallback<SubmitHandler<FormValues>>((values) => {
     playerNameTools.set(values.playerName);
 
-    socket.emit('joinLobby', values.lobbyHash, values.playerName, (validHash) => {
-      if (validHash) {
-        void push(`${SiteRoute.Lobby}/${validHash}`);
+    socket.emit('joinLobby', values.lobbyHash, values.playerName, (res) => {
+      if (typeof res.error === 'string') {
+        enqueueSnackbar({
+          variant: 'error',
+          message: res.error,
+        });
       } else {
-        alert('failed to join lobby');
+        void push(`${SiteRoute.Lobby}/${res.data.lobbyHash}`);
       }
     });
-  }, [push, socket]);
+  }, [enqueueSnackbar, push, socket]);
 
   const handleClearUsername = useCallback(() => {
     playerNameTools.reset();

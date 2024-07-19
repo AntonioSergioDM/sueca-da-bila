@@ -13,9 +13,17 @@ export interface ServerToClientEvents {
   gameReset: () => void;
 }
 
+type GenericCallbackResponse<T = any> = {
+  data: T;
+  error?: never;
+} | {
+  data?: T;
+  error: string;
+};
+
 export interface ClientToServerEvents {
-  joinLobby: (lobbyHash: string, playerName: string, callback: (lobbyHash: string) => void) => void;
-  createLobby: (playerName: string, callback: (lobbyHash: string) => void) => void;
+  joinLobby: (lobbyHash: string, playerName: string, callback: (res: GenericCallbackResponse<{ lobbyHash: string }>) => void) => void;
+  createLobby: (playerName: string, callback: (res: GenericCallbackResponse<{ lobbyHash: string }>) => void) => void;
   leaveLobby: () => void;
   lobbyPlayers: (lobbyHash: string, callback: (lobbyHash: string, players: string[]) => void) => void;
   playerReady: () => void;

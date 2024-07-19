@@ -10,6 +10,8 @@ import {
   IconButton,
   InputAdornment,
 } from '@mui/material';
+import { useSnackbar } from 'notistack';
+
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { ArrowBack } from '@mui/icons-material';
 import { useForm, type SubmitHandler } from 'react-hook-form';
@@ -25,6 +27,7 @@ type FormValues = {
 };
 
 const CreateLobby = () => {
+  const { enqueueSnackbar } = useSnackbar();
   const socket = useSocket();
   const { push } = useRouter();
 
@@ -35,14 +38,17 @@ const CreateLobby = () => {
   const onCreate = useCallback<SubmitHandler<FormValues>>((values) => {
     playerNameTools.set(values.playerName);
 
-    socket.emit('createLobby', values.playerName, (hash) => {
-      if (hash) {
-        void push(`${SiteRoute.Lobby}/${hash}`);
+    socket.emit('createLobby', values.playerName, (res) => {
+      if (typeof res.error === 'string') {
+        enqueueSnackbar({
+          variant: 'error',
+          message: res.error,
+        });
       } else {
-        alert('failed to create lobby or failed to get hash');
+        void push(`${SiteRoute.Lobby}/${res.data.lobbyHash}`);
       }
     });
-  }, [push, socket]);
+  }, [enqueueSnackbar, push, socket]);
 
   const handleClearUsername = useCallback(() => {
     playerNameTools.reset();

@@ -1,5 +1,6 @@
 import Head from 'next/head';
 import type { AppProps } from 'next/app';
+import { SnackbarProvider } from 'notistack';
 
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider } from '@mui/material/styles';
@@ -25,10 +26,11 @@ const MyApp = (props: AppProps) => {
 
       <ThemeProvider theme={theme}>
         <CssBaseline />
-
-        <Layout>
-          <Component {...pageProps} />
-        </Layout>
+        <SnackbarProvider>
+          <Layout>
+            <Component {...pageProps} />
+          </Layout>
+        </SnackbarProvider>
       </ThemeProvider>
     </AppCacheProvider>
   );
