@@ -38,13 +38,18 @@ export default class Lobby {
 
     await player.leaveRoom(this.hash);
 
-    if (!this.players.length) {
-      Lobby.lobbies.delete(this.hash);
-      return;
-    }
-
     if (IN_DEV) {
       console.info(`😘 PlayerID: ${playerId} left the lobby ${this.hash}\n`);
+    }
+
+    if (!this.players.length) {
+      Lobby.lobbies.delete(this.hash);
+
+      if (IN_DEV) {
+        console.info(`💀 Lobby ${this.hash} closed!\n`);
+      }
+
+      return;
     }
 
     this.room?.emit('playerJoined', this.players.map((p) => p.name));
