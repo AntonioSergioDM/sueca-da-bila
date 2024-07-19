@@ -44,7 +44,7 @@ export default class Lobby {
     }
 
     if (IN_DEV) {
-      console.info(`😎 PlayerID: ${playerId} left the lobby ${this.hash}`);
+      console.info(`😘 PlayerID: ${playerId} left the lobby ${this.hash}\n`);
     }
 
     this.room?.emit('playerJoined', this.players.map((p) => p.name));
@@ -63,7 +63,7 @@ export default class Lobby {
     if (IN_DEV) {
       console.info(`😎 A player joined the Lobby ${this.hash}`);
       console.info(`      Players on Lobby ${this.hash}`);
-      console.info(this.players.reduce((info, p, idx) => (`       ${idx}. ${info} ${p.name} (ID: ${p.id})`), ''));
+      console.info(this.players.reduce((info, p, idx) => (`${info}       ${idx}.  ${p.name} (ID: ${p.id})\n`), ''));
     }
 
     return true;
@@ -75,7 +75,7 @@ export default class Lobby {
       if (p.id === playerId) {
         p.setReady();
         if (IN_DEV) {
-          console.info(`🫡 Player ${p.name} (ID: ${p.id}) is ready`);
+          console.info(`🫡  Player ${p.name} (ID: ${p.id}) is ready\n`);
         }
       }
 
@@ -96,7 +96,7 @@ export default class Lobby {
     }
 
     if (IN_DEV) {
-      console.info(`😉 PlayerID: ${playerId} played ${cardName(card)} of ${Suit[card.suit]}`);
+      console.info(`😉 PlayerID: ${playerId} played ${cardName(card)} of ${Suit[card.suit]}\n`);
     }
 
     return this.game.play(foundIdx, card);

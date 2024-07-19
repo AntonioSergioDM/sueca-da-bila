@@ -59,12 +59,12 @@ const SocketHandler = (_: NextApiRequest, res: SocketIOResponse) => {
     if (socket.recovered) {
       // recovery was successful: socket.id, socket.rooms and socket.data were restored
       if (IN_DEV) {
-        console.info(`🥰 A client reconnected. ID: ${socket.id}`);
+        console.info(`🥰 A client reconnected. ID: ${socket.id}\n`);
       }
     } else {
       // new or unrecoverable session
       if (IN_DEV) {
-        console.info(`😊 A client connected. ID: ${socket.id}`);
+        console.info(`😊 A client connected. ID: ${socket.id}\n`);
       }
 
       socket.on('joinLobby', joinLobby(socket));
