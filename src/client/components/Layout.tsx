@@ -1,10 +1,11 @@
-import Image from 'next/image';
 import type { ReactNode } from 'react';
+
+import Link from 'next/link';
+import Image from 'next/image';
 
 import { Stack } from '@mui/material';
 
 import logo from '@/public/favicon.ico';
-import Link from 'next/link';
 import { SiteRoute } from '@/shared/Routes';
 
 type LayoutProps = {
@@ -15,7 +16,6 @@ const Layout = ({ children }: LayoutProps) => (
   <Stack
     gap={10}
     useFlexGap
-    maxWidth="sm"
     margin="16px auto"
     direction="column"
     alignItems="center"
@@ -28,7 +28,6 @@ const Layout = ({ children }: LayoutProps) => (
     <Stack
       gap={3}
       useFlexGap
-      maxWidth={350}
       direction="column"
     >
       {children}
