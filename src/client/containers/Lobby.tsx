@@ -70,17 +70,18 @@ const Lobby = () => {
       socket.on('playerJoined', updatePlayers);
       socket.on('gameStart', onGameStart);
       socket.on('gameChange', onGameChange);
-
-      mountedRef.current = true;
     }
 
     return () => {
       if (!mountedRef.current) {
+        console.log('unmounting | leaving');
         socket.off('playerJoined', updatePlayers);
         socket.off('gameStart', onGameStart);
         socket.off('gameChange', onGameChange);
 
         socket.emit('leaveLobby');
+
+        mountedRef.current = true;
       }
     };
   }, [onGameStart, socket, updatePlayers, onGameChange]);
