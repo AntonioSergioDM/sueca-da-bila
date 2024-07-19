@@ -29,6 +29,7 @@ const Layout = ({ children }: LayoutProps) => (
       gap={3}
       useFlexGap
       direction="column"
+      alignItems="center"
     >
       {children}
     </Stack>

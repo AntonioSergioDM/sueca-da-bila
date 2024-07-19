@@ -13,7 +13,7 @@ type PlayerHandProps = {
 
 const PlayerHand = ({ playerState, onPlayCard, gameState }: PlayerHandProps) => (
 
-  <Stack direction="row" justifyContent="center" gap={2} flexWrap="wrap" maxWidth="sm">
+  <Stack direction="row" alignItems="center" justifyContent="center" gap={2} flexWrap="wrap" maxWidth="sm">
     {playerState.hand.map((card) => (
       <PlayerCard
         key={`${card.suit}${card.value}`}

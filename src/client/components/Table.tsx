@@ -68,6 +68,18 @@ const Table = ({ players, playerState, gameState }: TableProps) => {
           trumpCard={(leftPlayerIdx === getPreviousPlayer(gameState.shufflePlayer) && gameState.trumpCard) || null}
         />
 
+        <Stack direction="row" gap={4} flexWrap="wrap">
+          {gameState.table.filter(Boolean).map((card) => (
+            <Image
+              key={getCardId(card!)}
+              src={`/images/cards/${getCardId(card!)}.png`}
+              alt="Card"
+              width={40}
+              height={50 * CARD_RATIO}
+            />
+          ))}
+        </Stack>
+
         {/* right player */}
         <OtherPlayer
           name={players[rightPlayerIdx].name}
