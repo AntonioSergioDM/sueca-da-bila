@@ -1,5 +1,4 @@
-import type { GameState, Table } from '@/shared/SocketTypes';
-
+import type { GameState, Table } from '@/shared/GameTypes';
 import type { Card } from '../../shared/Card';
 import { pointsOf, Suit } from '../../shared/Card';
 
@@ -94,12 +93,13 @@ export default class Game {
     return true;
   }
 
-  getState(player: number): GameState {
+  getState(): GameState {
     return {
       trumpCard: this.trumpCard,
       table: this.onTable,
       currentPlayer: this.currPlayer,
-      hand: this.decks[player],
+      shufflePlayer: this.shufflePlayer,
+      hands: this.decks.map((hand) => hand.length),
     };
   }
 

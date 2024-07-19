@@ -1,12 +1,11 @@
-import type { GameState } from '@/shared/SocketTypes';
+import type { Hand } from '@/shared/GameTypes';
 
 type CardHoldingProps = {
-  gameState: GameState;
+  hand: Hand;
 };
 
-const CardHolding = ({ gameState: { hand, trumpCard: trump } }: CardHoldingProps) => {
+const CardHolding = ({ hand }: CardHoldingProps) => {
   console.log({ hand });
-  console.log({ trump });
 
   return (
     <>

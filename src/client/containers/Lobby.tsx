@@ -8,7 +8,7 @@ import { useRouter } from 'next/router';
 
 import { Typography, CircularProgress, Button } from '@mui/material';
 
-import type { GameState } from '@/shared/SocketTypes';
+import type { GameState, Hand } from '@/shared/GameTypes';
 
 import { useSocket } from '../tools/useSocket';
 import CardHolding from '../components/CardHolding';
@@ -23,7 +23,7 @@ const Lobby = () => {
 
   const [isReady, setIsReady] = useState(false);
 
-  const [gameState, setGameState] = useState<GameState | null>(null);
+  const [myHand, setHand] = useState<Hand>([]);
 
   // TODO: verify if this lobby is valid
   const urlLobby = useMemo(() => {
@@ -51,21 +51,31 @@ const Lobby = () => {
     }
   }, [socket, updatePlayers, urlLobby]);
 
-  const onGameStart = useCallback((newGameState: GameState) => {
-    setGameState(newGameState);
+  const onGameStart = useCallback((hand: Hand) => {
+    console.log(hand);
+
+    setHand(hand);
+  }, []);
+
+  const onGameChange = useCallback((newGameState: GameState) => {
+    console.log(newGameState);
+
+  // TODO show it
   }, []);
 
   useEffect(() => {
     socket.on('playerJoined', updatePlayers);
     socket.on('gameStart', onGameStart);
+    socket.on('gameChange', onGameChange);
 
     return () => {
       socket.off('playerJoined', updatePlayers);
       socket.off('gameStart', onGameStart);
+      socket.off('gameChange', onGameChange);
 
       // TODO leave lobby
     };
-  }, [onGameStart, socket, updatePlayers]);
+  }, [onGameStart, socket, updatePlayers, onGameChange]);
 
   const onReady = useCallback(() => {
     setIsReady(true);
@@ -85,7 +95,7 @@ const Lobby = () => {
 
       <Button onClick={onReady} disabled={!players.length || isReady}>READY!</Button>
 
-      {!!gameState && <CardHolding gameState={gameState} />}
+      {!!myHand && <CardHolding hand={myHand} />}
 
       <ShareUrlButton url={urlLobby} />
     </>

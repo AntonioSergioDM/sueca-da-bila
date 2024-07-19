@@ -47,6 +47,21 @@ export const createLobby = (socket: OurServerSocket): ClientToServerEvents['crea
   }
 );
 
+export const playerReady = (socket: OurServerSocket): ClientToServerEvents['playerReady'] => (
+  () => {
+    if (!socket?.data?.lobbyHash || !socket.data.playerId) {
+      return;
+    }
+
+    const lobby = Lobby.lobbies.get(socket.data.lobbyHash);
+    if (!lobby) {
+      return;
+    }
+
+    lobby.setPlayerReady(socket.data.playerId);
+  }
+);
+
 export const lobbyPlayers = (socket: OurServerSocket): ClientToServerEvents['lobbyPlayers'] => (
   (lobbyHash, callback) => {
     if (!lobbyHash) {

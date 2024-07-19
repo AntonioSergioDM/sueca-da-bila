@@ -1,5 +1,6 @@
 import type { Socket as SocketIoSocket } from 'socket.io';
 
+import type { GameState, Hand } from '@/shared/GameTypes';
 import type { Card } from './Card';
 
 export interface ServerToClientEvents {
@@ -7,7 +8,8 @@ export interface ServerToClientEvents {
   error: () => void;
   withAck: (d: string, callback: (e: number) => void) => void;
   playerJoined: (playerNames: Array<string>) => void;
-  gameStart: (gameState: GameState) => void;
+  gameStart: (hand: Hand) => void;
+  gameChange: (gameState: GameState) => void;
 }
 
 export interface ClientToServerEvents {
@@ -15,16 +17,8 @@ export interface ClientToServerEvents {
   createLobby: (playerName: string, callback: (lobbyHash: string) => void) => void;
   lobbyPlayers: (lobbyHash: string, callback: (lobbyHash: string, players: string[]) => void) => void;
   playerReady: () => void;
+  playCard: (card: Card) => void;
 }
-
-export type Table = [Card | null, Card | null, Card | null, Card | null];
-
-export type GameState = {
-  hand: Array<Card>;
-  table: Table;
-  trumpCard: Card | null;
-  currentPlayer: number;
-};
 
 /**
  * IDK?

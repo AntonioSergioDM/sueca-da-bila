@@ -12,6 +12,8 @@ export default class Player {
 
   socket: OurServerSocket;
 
+  ready: boolean = false;
+
   constructor(socket: OurServerSocket, name?: string) {
     this.socket = socket;
     this.name = name || '';
@@ -22,5 +24,9 @@ export default class Player {
     await this.socket.join(room);
 
     return io?.to(room) || null;
+  }
+
+  setReady() {
+    this.ready = true;
   }
 }

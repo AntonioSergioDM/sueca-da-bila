@@ -35,22 +35,37 @@ export default class Lobby {
     this.room?.emit('playerJoined', this.players.map((p) => p.name));
     this.room = await player.joinRoom(this.hash);
 
-    // debug
+    // TODO debug
     console.log('Jogadores no Lobby:');
     this.players.forEach((p) => { console.log(p.name); });
 
-    if (this.players.length >= 1) {
+    return true;
+  }
+
+  setPlayerReady(playerId: string) {
+    let allReady = true;
+    this.players.forEach((p) => {
+      if (p.id === playerId) {
+        p.setReady();
+      }
+
+      if (!p.ready) {
+        allReady = false;
+      }
+    });
+
+    if (allReady && this.players.length >= 4) {
       this.startGame();
     }
-
-    return true;
   }
 
   startGame() {
     this.game.start();
 
     this.players.forEach((player, idx) => {
-      player.socket.emit('gameStart', this.game.getState(idx));
+      player.socket.emit('gameStart', this.game.decks[idx]);
     });
+
+    this.room?.emit('gameChange', this.game.getState());
   }
 }

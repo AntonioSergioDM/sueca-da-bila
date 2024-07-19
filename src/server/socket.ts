@@ -12,7 +12,12 @@ import type {
 } from '../shared/SocketTypes';
 import { IN_DEV } from '../globals';
 
-import { createLobby, joinLobby, lobbyPlayers } from './lobbies';
+import {
+  createLobby,
+  joinLobby,
+  lobbyPlayers,
+  playerReady,
+} from './lobbies';
 
 type SocketIOResponse = NextApiResponse & {
   socket: NextApiResponse['socket'] & {
@@ -60,6 +65,7 @@ const SocketHandler = (_: NextApiRequest, res: SocketIOResponse) => {
 
     socket.on('joinLobby', joinLobby(socket));
     socket.on('createLobby', createLobby(socket));
+    socket.on('playerReady', playerReady(socket));
     socket.on('lobbyPlayers', lobbyPlayers(socket));
   });
 
