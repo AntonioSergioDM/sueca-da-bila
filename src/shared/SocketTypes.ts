@@ -9,7 +9,7 @@ export interface ServerToClientEvents {
 export interface ClientToServerEvents {
   joinLobby: (lobbyHash: string, playerName: string, callback: (lobbyHash: string) => void) => void;
   createLobby: (playerName: string, callback: (lobbyHash: string) => void) => void;
-  lobbyPlayers: (lobbyHash: string, playerName: string, callback: (lobbyHash: string, players: string[]) => void) => void;
+  lobbyPlayers: (lobbyHash: string, callback: (lobbyHash: string, players: string[]) => void) => void;
 }
 
 /**
