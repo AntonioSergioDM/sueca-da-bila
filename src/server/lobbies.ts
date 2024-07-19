@@ -1,9 +1,9 @@
 /* eslint-disable no-param-reassign */
 import type { ClientToServerEvents, OurServerSocket } from '@/shared/SocketTypes';
 
+import type { Card } from '@/shared/Card';
 import Lobby from './classes/Lobby';
 import Player from './classes/Player';
-import { Card } from '@/shared/Card';
 
 export const joinLobby = (socket: OurServerSocket): ClientToServerEvents['joinLobby'] => (
   async (lobbyHash, playerName, callback) => {

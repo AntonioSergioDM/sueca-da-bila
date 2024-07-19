@@ -16,6 +16,7 @@ import {
   createLobby,
   joinLobby,
   lobbyPlayers,
+  playCard,
   playerReady,
 } from './lobbies';
 
@@ -66,6 +67,7 @@ const SocketHandler = (_: NextApiRequest, res: SocketIOResponse) => {
     socket.on('joinLobby', joinLobby(socket));
     socket.on('createLobby', createLobby(socket));
     socket.on('playerReady', playerReady(socket));
+    socket.on('playCard', playCard(socket));
     socket.on('lobbyPlayers', lobbyPlayers(socket));
   });
 

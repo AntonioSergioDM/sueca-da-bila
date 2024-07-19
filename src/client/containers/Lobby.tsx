@@ -95,7 +95,7 @@ const Lobby = () => {
 
       <Button onClick={onReady} disabled={!players.length || isReady}>READY!</Button>
 
-      {!!myHand && <CardHolding hand={myHand} />}
+      {!!myHand.length && <CardHolding hand={myHand} />}
 
       <ShareUrlButton url={urlLobby} />
     </>
