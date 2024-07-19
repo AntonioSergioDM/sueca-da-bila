@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 
 import { Server } from 'Socket.IO';
 import type { Http2Server } from 'http2';
+import { instrument } from '@socket.io/admin-ui';
 
 import type {
   SocketData,
@@ -9,6 +10,7 @@ import type {
   ClientToServerEvents,
   ServerToClientEvents,
 } from '../shared/SocketTypes';
+import { IN_DEV } from '../globals';
 
 import { createLobby, joinLobby, lobbyPlayers } from './lobbies';
 
@@ -39,6 +41,10 @@ const SocketHandler = (_: NextApiRequest, res: SocketIOResponse) => {
         // whether to skip middlewares upon successful recovery
         skipMiddlewares: true,
       },
+      cors: {
+        // Allow any origin in dev, prod might need a fix later
+        origin: IN_DEV ? true : undefined,
+      }
     },
   );
 
@@ -55,6 +61,13 @@ const SocketHandler = (_: NextApiRequest, res: SocketIOResponse) => {
     socket.on('createLobby', createLobby(socket));
     socket.on('lobbyPlayers', lobbyPlayers(socket));
   });
+
+  if (IN_DEV) {
+    instrument(io, {
+      auth: false,
+      mode: "development",
+    });
+  }
 
   res.socket!.server.io = io;
   res.end();
