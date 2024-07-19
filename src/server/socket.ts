@@ -16,11 +16,12 @@ import { createLobby, joinLobby, lobbyPlayers } from './lobbies';
 
 type SocketIOResponse = NextApiResponse & {
   socket: NextApiResponse['socket'] & {
-    server: Http2Server
+    server: Http2Server;
   };
 };
 
-export let io:Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData> | null = null;
+// eslint-disable-next-line import/no-mutable-exports
+export let io: Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData> | null = null;
 
 const SocketHandler = (_: NextApiRequest, res: SocketIOResponse) => {
   if (io) {
@@ -44,7 +45,7 @@ const SocketHandler = (_: NextApiRequest, res: SocketIOResponse) => {
       cors: {
         // Allow any origin in dev, prod might need a fix later
         origin: IN_DEV ? true : undefined,
-      }
+      },
     },
   );
 
@@ -65,7 +66,7 @@ const SocketHandler = (_: NextApiRequest, res: SocketIOResponse) => {
   if (IN_DEV) {
     instrument(io, {
       auth: false,
-      mode: "development",
+      mode: 'development',
     });
   }
 

@@ -6,11 +6,15 @@ import { ThemeProvider } from '@mui/material/styles';
 import { AppCacheProvider } from '@mui/material-nextjs/v14-pagesRouter';
 
 import Layout from '@/client/components/Layout';
+import { useSocket } from '@/client/tools/useSocket';
 
 import theme from '../theme';
 
 const MyApp = (props: AppProps) => {
   const { Component, pageProps } = props;
+
+  // every page using socket to initialize it
+  useSocket();
 
   return (
     <AppCacheProvider {...props}>

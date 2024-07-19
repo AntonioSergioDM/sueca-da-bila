@@ -78,6 +78,7 @@ module.exports = {
         'func-names': 0,
         'import/no-cycle': 0,
         'react/prop-types': 0,
+        'prefer-destructuring': 0,
         'import/no-unresolved': 0,
         'react/react-in-jsx-scope': 0,
         'react/no-unused-prop-types': 0,

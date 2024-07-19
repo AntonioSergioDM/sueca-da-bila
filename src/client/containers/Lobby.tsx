@@ -49,18 +49,16 @@ const Lobby = () => {
 
   const updatePlayers = (players: Array<string>) => {
     setPlayerNames(players);
-  }
-    
-  useEffect(() => {
+  };
 
+  useEffect(() => {
     socket.on('playerJoined', updatePlayers);
 
     return () => {
-      socket.off('playerJoined', updatePlayers)
-      //TODO leave lobby
-    }
-
-  }, []);
+      socket.off('playerJoined', updatePlayers);
+      // TODO leave lobby
+    };
+  }, [socket]);
 
   const shareURL = useMemo(() => (
     `${process.env.NEXT_PUBLIC_URL}${SiteRoute.JoinLobby}/${urlLobby}`
@@ -69,7 +67,6 @@ const Lobby = () => {
   const onCopy = useCallback(async () => {
     await navigator.clipboard.writeText(shareURL);
   }, [shareURL]);
-
 
   return (
     <>

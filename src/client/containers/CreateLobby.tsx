@@ -31,7 +31,6 @@ const CreateLobby = () => {
 
   const onCreate = useCallback<SubmitHandler<FormValues>>((values) => {
     socket.emit('createLobby', values.playerName, (hash) => {
-      console.log(`Created lobby with hash: ${hash}`);
       if (hash) {
         void push(`${SiteRoute.Lobby}/${hash}`);
       } else {

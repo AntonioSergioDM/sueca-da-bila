@@ -5,7 +5,7 @@ import Lobby from './classes/Lobby';
 import Player from './classes/Player';
 
 export const joinLobby = (socket: Socket): ClientToServerEvents['joinLobby'] => (
-  (lobbyHash, playerName, callback) => {
+  async (lobbyHash, playerName, callback) => {
     if (!lobbyHash) {
       return callback('');
     }
@@ -17,7 +17,7 @@ export const joinLobby = (socket: Socket): ClientToServerEvents['joinLobby'] => 
 
     const player = new Player(socket, playerName);
 
-    if (!lobby.addPlayer(player)) {
+    if (!(await lobby.addPlayer(player))) {
       return callback('');
     }
 
@@ -30,13 +30,13 @@ export const joinLobby = (socket: Socket): ClientToServerEvents['joinLobby'] => 
 );
 
 export const createLobby = (socket: Socket): ClientToServerEvents['createLobby'] => (
-  (playerName, callback) => {
+  async (playerName, callback) => {
     const lobby = new Lobby();
     Lobby.lobbies.set(lobby.hash, lobby);
 
     const player = new Player(socket, playerName);
 
-    if (!lobby.addPlayer(player)) {
+    if (!(await lobby.addPlayer(player))) {
       return callback('');
     }
 
