@@ -75,7 +75,7 @@ const Lobby = () => {
     }
 
     return () => {
-      if (!mountedRef) {
+      if (!mountedRef.current) {
         socket.off('playerJoined', updatePlayers);
         socket.off('gameStart', onGameStart);
         socket.off('gameChange', onGameChange);
