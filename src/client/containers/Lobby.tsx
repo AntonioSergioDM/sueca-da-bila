@@ -64,17 +64,24 @@ const Lobby = () => {
   }, []);
 
   useEffect(() => {
-    socket.on('playerJoined', updatePlayers);
-    socket.on('gameStart', onGameStart);
-    socket.on('gameChange', onGameChange);
-
-    return () => {
-      console.log('unmounting | leaving');
+    const cleanup = () => {
+      console.log('🚀 ~ cleanup ~ cleanup:');
       socket.off('playerJoined', updatePlayers);
       socket.off('gameStart', onGameStart);
       socket.off('gameChange', onGameChange);
 
       socket.emit('leaveLobby');
+    };
+
+    socket.on('playerJoined', updatePlayers);
+    socket.on('gameStart', onGameStart);
+    socket.on('gameChange', onGameChange);
+    window.addEventListener('beforeunload', cleanup);
+
+    return () => {
+      console.log('unmounting | leaving');
+      cleanup();
+      window.removeEventListener('beforeunload', cleanup);
     };
   }, [onGameStart, socket, updatePlayers, onGameChange]);
 
