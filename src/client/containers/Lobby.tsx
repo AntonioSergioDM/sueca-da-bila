@@ -10,8 +10,8 @@ import { Typography, CircularProgress, Button } from '@mui/material';
 
 import type { GameState, PlayerState } from '@/shared/GameTypes';
 
+import type { LobbyPlayerState, ServerToClientEvents } from '@/shared/SocketTypes';
 import type { Card } from '@/shared/Card';
-import type { ServerToClientEvents } from '@/shared/SocketTypes';
 import Table from '../components/Table';
 import { useSocket } from '../tools/useSocket';
 import PlayerHand from '../components/PlayerHand';
@@ -21,7 +21,7 @@ const Lobby = () => {
   const socket = useSocket();
   const { query } = useRouter();
 
-  const [players, setPlayers] = useState<string[]>([]);
+  const [players, setPlayers] = useState<LobbyPlayerState[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [isReady, setIsReady] = useState(false);
@@ -38,7 +38,7 @@ const Lobby = () => {
     return '';
   }, [query.lobby]);
 
-  const updatePlayers = useCallback((newPlayers: Array<string>) => {
+  const updatePlayers = useCallback<ServerToClientEvents['playersListUpdated']>((newPlayers) => {
     setPlayers(newPlayers);
   }, []);
 
@@ -71,14 +71,14 @@ const Lobby = () => {
 
   useEffect(() => {
     const cleanup = () => {
-      socket.off('playerJoined', updatePlayers);
+      socket.off('playersListUpdated', updatePlayers);
       socket.off('gameStart', onGameStart);
       socket.off('gameChange', onGameChange);
 
       socket.emit('leaveLobby');
     };
 
-    socket.on('playerJoined', updatePlayers);
+    socket.on('playersListUpdated', updatePlayers);
     socket.on('gameStart', onGameStart);
     socket.on('gameChange', onGameChange);
     window.addEventListener('beforeunload', cleanup);
@@ -102,7 +102,13 @@ const Lobby = () => {
       {loading && <CircularProgress />}
       {(!loading && !players.length) && <Typography>No players or error</Typography>}
       {(!loading && !!players.length && !playerState) && (
-        <pre>{JSON.stringify(players, null, 2)}</pre>
+        players.map((p, i) => (
+          // eslint-disable-next-line react/no-array-index-key
+          <p key={`${p.name}${i}`}>
+            {p.name}
+            {p.ready ? '✅' : '❌'}
+          </p>
+        ))
       )}
 
       {!playerState && (

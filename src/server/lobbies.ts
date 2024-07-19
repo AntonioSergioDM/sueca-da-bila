@@ -81,7 +81,7 @@ export const lobbyPlayers = (socket: OurServerSocket): ClientToServerEvents['lob
     }
 
     // returning lobby hash so the client knows it was successful at least
-    return callback(lobby.hash, lobby.players.map((p) => p.name));
+    return callback(lobby.hash, lobby.players.map((p) => ({ name: p.name, ready: p.ready })));
   }
 );
 

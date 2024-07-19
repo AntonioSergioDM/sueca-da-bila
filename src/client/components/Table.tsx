@@ -3,11 +3,12 @@ import { useMemo } from 'react';
 import { Box, Stack } from '@mui/material';
 
 import type { GameState, PlayerState } from '@/shared/GameTypes';
+import type { LobbyPlayerState } from '@/shared/SocketTypes';
 
 import OtherPlayer from './OtherPlayer';
 
 type TableProps = {
-  players: string[];
+  players: LobbyPlayerState[];
   playerState: PlayerState;
   gameState: GameState;
 };
@@ -41,7 +42,7 @@ const Table = ({ players, playerState, gameState }: TableProps) => {
     >
       {/* top player */}
       <OtherPlayer
-        name={players[topPlayerIdx]}
+        name={players[topPlayerIdx].name}
         numCards={gameState.hands[topPlayerIdx] || 0}
         itsame={gameState.currentPlayer === topPlayerIdx}
       />
@@ -49,14 +50,14 @@ const Table = ({ players, playerState, gameState }: TableProps) => {
       <Stack direction="row" justifyContent="space-between" width="100%">
         {/* left player */}
         <OtherPlayer
-          name={players[leftPlayerIdx]}
+          name={players[leftPlayerIdx].name}
           numCards={gameState.hands[leftPlayerIdx] || 0}
           itsame={gameState.currentPlayer === leftPlayerIdx}
         />
 
         {/* right player */}
         <OtherPlayer
-          name={players[rightPlayerIdx]}
+          name={players[rightPlayerIdx].name}
           numCards={gameState.hands[rightPlayerIdx] || 0}
           itsame={gameState.currentPlayer === rightPlayerIdx}
         />

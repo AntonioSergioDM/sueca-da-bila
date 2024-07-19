@@ -9,9 +9,9 @@ import type { ServerToClientEvents, SocketData } from '@/shared/SocketTypes';
 
 import { cardName, Suit, type Card } from '@/shared/Card';
 import { IN_DEV } from 'src/globals';
+import type { PlayerState } from '@/shared/GameTypes';
 import Game from './Game';
 import type Player from './Player';
-import { PlayerState } from '@/shared/GameTypes';
 
 export type LobbyRoom = BroadcastOperator<DecorateAcknowledgementsWithMultipleResponses<ServerToClientEvents>, SocketData>;
 
@@ -73,7 +73,7 @@ export default class Lobby {
       return;
     }
 
-    this.room?.emit('playerJoined', this.players.map((p) => p.name));
+    this.emitLobbyUpdate();
     this.resetGame();
   }
 
@@ -83,7 +83,7 @@ export default class Lobby {
     }
 
     this.players.push(player);
-    this.room?.emit('playerJoined', this.players.map((p) => p.name));
+    this.emitLobbyUpdate();
     this.room = await player.joinRoom(this.hash);
 
     if (IN_DEV) {
@@ -93,6 +93,10 @@ export default class Lobby {
     }
 
     return true;
+  }
+
+  emitLobbyUpdate() {
+    this.room?.emit('playersListUpdated', this.players.map((p) => ({ name: p.name, ready: p.ready })));
   }
 
   setPlayerReady(playerId: string) {
@@ -109,6 +113,8 @@ export default class Lobby {
         allReady = false;
       }
     });
+
+    this.emitLobbyUpdate();
 
     if (allReady && this.players.length >= 4) {
       this.startGame();
