@@ -49,21 +49,17 @@ export const createLobby = (socket: Socket): ClientToServerEvents['createLobby']
 
 export const lobbyPlayers = (socket: Socket): ClientToServerEvents['lobbyPlayers'] => (
   (lobbyHash, callback) => {
-    console.log('🚀 ~ lobbyHash:', lobbyHash);
     if (!lobbyHash) {
       return callback('', []);
     }
 
     const lobby = Lobby.lobbies.get(lobbyHash);
-    console.log('🚀 ~ lobby:', lobby);
     if (!lobby) {
       return callback('', []);
     }
 
-    // TODO: change this check to the playerId that should be stored in the browser
     // checking if this player is part of this lobby
     const player = lobby.players.find((p) => p.id === socket.data.playerId);
-    console.log('🚀 ~ player:', player);
     if (!player) {
       return callback('', []);
     }

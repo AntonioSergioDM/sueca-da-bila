@@ -4,6 +4,8 @@ import type { ReactNode } from 'react';
 import { Stack } from '@mui/material';
 
 import logo from '@/public/favicon.ico';
+import Link from 'next/link';
+import { SiteRoute } from '@/shared/Routes';
 
 type LayoutProps = {
   children: ReactNode;
@@ -19,7 +21,9 @@ const Layout = ({ children }: LayoutProps) => (
     alignItems="center"
     justifyContent="center"
   >
-    <Image alt="Logo" src={logo} priority width={200} height={200} />
+    <Link href={SiteRoute.Home}>
+      <Image alt="Logo" src={logo} priority width={200} height={200} />
+    </Link>
 
     <Stack
       gap={3}

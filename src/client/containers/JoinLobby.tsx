@@ -1,7 +1,15 @@
 import { useCallback, useEffect, useMemo } from 'react';
+
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 
-import { Button, TextField } from '@mui/material';
+import {
+  Stack,
+  Button,
+  TextField,
+  IconButton,
+} from '@mui/material';
+import { ArrowBack } from '@mui/icons-material';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 
 import { SiteRoute } from '@/shared/Routes';
@@ -54,18 +62,26 @@ const JoinLobby = () => {
   }, [push, socket]);
 
   return (
-    <FormWrapper {...form} onSuccess={onJoin}>
-      <TextField
-        {...form.register('playerName', { required: true })}
-        label="Player name"
-      />
-      <TextField
-        {...form.register('lobbyHash', { required: true })}
-        label="Lobby hash"
-      />
+    <>
+      <Stack alignItems="flex-end">
+        <IconButton LinkComponent={Link} href={SiteRoute.Home}>
+          <ArrowBack />
+        </IconButton>
+      </Stack>
 
-      <Button type="submit">Join</Button>
-    </FormWrapper>
+      <FormWrapper {...form} onSuccess={onJoin}>
+        <TextField
+          {...form.register('playerName', { required: true })}
+          label="Player name"
+        />
+        <TextField
+          {...form.register('lobbyHash', { required: true })}
+          label="Lobby hash"
+        />
+
+        <Button type="submit">Join</Button>
+      </FormWrapper>
+    </>
   );
 };
 

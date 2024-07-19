@@ -1,7 +1,15 @@
 import { useCallback } from 'react';
+
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 
-import { Button, TextField } from '@mui/material';
+import {
+  Stack,
+  Button,
+  TextField,
+  IconButton,
+} from '@mui/material';
+import { ArrowBack } from '@mui/icons-material';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 
 import { SiteRoute } from '@/shared/Routes';
@@ -33,14 +41,22 @@ const CreateLobby = () => {
   }, [push, socket]);
 
   return (
-    <FormWrapper {...form} onSuccess={onCreate}>
-      <TextField
-        {...form.register('playerName', { required: true })}
-        label="Player name"
-      />
+    <>
+      <Stack alignItems="flex-end">
+        <IconButton LinkComponent={Link} href={SiteRoute.Home}>
+          <ArrowBack />
+        </IconButton>
+      </Stack>
 
-      <Button type="submit">Create</Button>
-    </FormWrapper>
+      <FormWrapper {...form} onSuccess={onCreate}>
+        <TextField
+          {...form.register('playerName', { required: true })}
+          label="Player name"
+        />
+
+        <Button type="submit">Create</Button>
+      </FormWrapper>
+    </>
   );
 };
 
