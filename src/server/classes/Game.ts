@@ -43,11 +43,12 @@ export default class Game {
             return false;
         }
 
+        const tableSuit = this.tableSuit;
         let canAssist = false;
         let foundIdx = -1;
 
         this.decks[player].forEach((playerCard, cardIdx) => {
-            if (playerCard.suit === this.tableSuit) {
+            if (playerCard.suit === tableSuit) {
                 canAssist = true;
             }
 
@@ -131,6 +132,7 @@ export default class Game {
     }
 
     clearTable() {
+        const isBiggerThan = this.isBiggerThan;
         let winnerId = 0;
         let points = 0;
         let winningCard = this.onTable[0];
@@ -142,7 +144,7 @@ export default class Game {
 
             points += pointsOf(card);
 
-            if (this.isBiggerThan(card, winningCard)) {
+            if (isBiggerThan(card, winningCard)) {
                 winningCard = card;
                 winnerId = playerIdx;
             }
