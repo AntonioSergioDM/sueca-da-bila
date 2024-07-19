@@ -49,8 +49,9 @@ const CreateLobby = () => {
 
       <FormWrapper {...form} onSuccess={onCreate}>
         <TextField
-          {...form.register('playerName', { required: true })}
+          autoFocus
           label="Player name"
+          {...form.register('playerName', { required: true })}
         />
 
         <Button type="submit">Create</Button>

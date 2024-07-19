@@ -3,6 +3,7 @@ import {
   useState,
   useEffect,
   useCallback,
+  useRef,
 } from 'react';
 import { useRouter } from 'next/router';
 
@@ -17,6 +18,7 @@ import ShareUrlButton from '../components/ShareUrlButton';
 const Lobby = () => {
   const socket = useSocket();
   const { query } = useRouter();
+  const mountedRef = useRef(false);
 
   const [players, setPlayers] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -60,20 +62,26 @@ const Lobby = () => {
   const onGameChange = useCallback((newGameState: GameState) => {
     console.log(newGameState);
 
-  // TODO show it
+    // TODO show it
   }, []);
 
   useEffect(() => {
-    socket.on('playerJoined', updatePlayers);
-    socket.on('gameStart', onGameStart);
-    socket.on('gameChange', onGameChange);
+    if (!mountedRef.current) {
+      socket.on('playerJoined', updatePlayers);
+      socket.on('gameStart', onGameStart);
+      socket.on('gameChange', onGameChange);
+
+      mountedRef.current = true;
+    }
 
     return () => {
-      socket.off('playerJoined', updatePlayers);
-      socket.off('gameStart', onGameStart);
-      socket.off('gameChange', onGameChange);
+      if (!mountedRef) {
+        socket.off('playerJoined', updatePlayers);
+        socket.off('gameStart', onGameStart);
+        socket.off('gameChange', onGameChange);
 
-      socket.emit('leaveLobby');
+        socket.emit('leaveLobby');
+      }
     };
   }, [onGameStart, socket, updatePlayers, onGameChange]);
 

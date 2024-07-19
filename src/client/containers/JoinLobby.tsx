@@ -71,12 +71,13 @@ const JoinLobby = () => {
 
       <FormWrapper {...form} onSuccess={onJoin}>
         <TextField
-          {...form.register('playerName', { required: true })}
+          autoFocus
           label="Player name"
+          {...form.register('playerName', { required: true })}
         />
         <TextField
-          {...form.register('lobbyHash', { required: true })}
           label="Lobby hash"
+          {...form.register('lobbyHash', { required: true })}
         />
 
         <Button type="submit">Join</Button>
