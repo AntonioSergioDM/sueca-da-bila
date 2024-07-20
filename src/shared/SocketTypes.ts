@@ -11,7 +11,7 @@ export interface ServerToClientEvents {
   gameStart: (playerState: PlayerState) => void;
   gameChange: (gameState: GameState) => void;
   gameReset: () => void;
-  gameResults: (gameSscore: Score[]) => void;
+  gameResults: (gameScore: Score[]) => void;
 }
 
 type GenericCallbackResponse<T = any> = {

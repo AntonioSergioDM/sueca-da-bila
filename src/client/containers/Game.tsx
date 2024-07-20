@@ -5,6 +5,7 @@ import {
   useCallback,
 } from 'react';
 import { useRouter } from 'next/router';
+import { useSnackbar } from 'notistack';
 
 import type { Card } from '@/shared/Card';
 import type { GameState, PlayerState } from '@/shared/GameTypes';
@@ -15,6 +16,8 @@ import LobbyRoom from '../components/LobbyRoom';
 import GameTable from '../components/GameTable';
 
 const Game = () => {
+  const { enqueueSnackbar } = useSnackbar();
+
   const socket = useSocket();
   const { query } = useRouter();
 
@@ -37,6 +40,13 @@ const Game = () => {
   const onGameChange = useCallback<ServerToClientEvents['gameChange']>((newGameState) => {
     setGameState(newGameState);
   }, []);
+
+  const onGameResults = useCallback<ServerToClientEvents['gameResults']>((res) => {
+    enqueueSnackbar({
+      variant: 'info',
+      message: `Game ended: ${JSON.stringify(res, null, 2)}`,
+    });
+  }, [enqueueSnackbar]);
 
   useEffect(() => {
     if (lobbyHash) {
@@ -85,6 +95,7 @@ const Game = () => {
     socket.on('playersListUpdated', updatePlayers);
     socket.on('gameStart', onGameStart);
     socket.on('gameChange', onGameChange);
+    socket.on('gameResults', onGameResults);
     socket.on('gameReset', onGameReset);
 
     // cleanup when browser/tab closes
