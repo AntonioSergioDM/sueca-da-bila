@@ -15,10 +15,6 @@ const getSocket = () => {
     console.log('connected');
   });
 
-  socket.on('lobbyJoined', () => {
-    alert('lobbyJoined');
-  });
-
   socket.connect();
 
   return socket;

@@ -6,9 +6,7 @@ import type { Card } from './Card';
 export type LobbyPlayerState = { name: string; ready: boolean };
 
 export interface ServerToClientEvents {
-  lobbyJoined: () => void;
   error: () => void;
-  withAck: (d: string, callback: (e: number) => void) => void;
   playersListUpdated: (players: LobbyPlayerState[]) => void;
   gameStart: (playerState: PlayerState) => void;
   gameChange: (gameState: GameState) => void;

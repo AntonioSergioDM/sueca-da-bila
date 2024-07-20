@@ -52,7 +52,7 @@ export default class Game {
         canAssist = true;
       }
 
-      if (card.value === playerCard.value && card.suit === playerCard.suit) {
+      if ((card.value === playerCard.value) && (card.suit === playerCard.suit)) {
         foundIdx = cardIdx;
       }
     });
@@ -67,7 +67,7 @@ export default class Game {
     }
 
     // One must always assist
-    if (card.suit !== this.tableSuit && canAssist) {
+    if ((card.suit !== this.tableSuit) && canAssist) {
       return false;
     }
 
