@@ -99,17 +99,22 @@ export const lobbyPlayers = (socket: OurServerSocket): ClientToServerEvents['lob
 export const playCard = (socket: OurServerSocket): ClientToServerEvents['playCard'] => (
   (card: Card, callback) => {
     if (!socket?.data?.lobbyHash || !socket.data.playerId) {
-      callback(null);
+      callback({ error: 'Invalid lobby' });
       return;
     }
 
     const lobby = Lobby.lobbies.get(socket.data.lobbyHash);
     if (!lobby) {
-      callback(null);
+      callback({ error: 'Invalid lobby' });
       return;
     }
 
-    callback(lobby.playCard(socket.data.playerId, card));
+    const playCardRes = lobby.playCard(socket.data.playerId, card);
+    if (typeof playCardRes === 'string') {
+      callback({ error: playCardRes });
+    } else {
+      callback({ data: playCardRes });
+    }
   }
 );
 

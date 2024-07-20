@@ -121,18 +121,20 @@ export default class Lobby {
     }
   }
 
-  playCard(playerId: string, card: Card): PlayerState | null {
+  playCard(playerId: string, card: Card): PlayerState | string {
     const foundIdx = this.players.findIndex((p) => p.id === playerId);
     if (foundIdx === -1) {
-      return null;
+      return 'Invalid player';
     }
 
     if (IN_DEV) {
       console.info(`😉 PlayerID: ${playerId} played ${cardName(card)} of ${Suit[card.suit]}\n`);
     }
 
-    if (!this.game.play(foundIdx, card)) {
-      return null;
+    const playRes = this.game.play(foundIdx, card);
+
+    if (typeof playRes === 'string') {
+      return playRes;
     }
 
     if (IN_DEV) {

@@ -59,16 +59,24 @@ const Game = () => {
   }, []);
 
   const onPlayCard = useCallback((card: Card) => {
-    socket.emit('playCard', card, (newPlayerState) => {
-      if (newPlayerState) setPlayerState(newPlayerState);
+    socket.emit('playCard', card, (res) => {
+      if (typeof res.error === 'string') {
+        enqueueSnackbar({
+          variant: 'error',
+          message: res.error,
+        });
+      } else {
+        setPlayerState(res.data);
+      }
     });
-  }, [socket]);
+  }, [enqueueSnackbar, socket]);
 
   useEffect(() => {
     const cleanup = () => {
       socket.off('playersListUpdated', updatePlayers);
       socket.off('gameStart', onGameStart);
       socket.off('gameChange', onGameChange);
+      socket.off('gameResults', onGameResults);
       socket.off('gameReset', onGameReset);
 
       socket.emit('leaveLobby');

@@ -5,6 +5,7 @@ import { pointsOf, Suit } from '../../shared/Card';
 const getRandom = (range: number) => Math.floor(Math.random() * range);
 
 export default class Game {
+  // Adjust this to 1 for a very fast game!
   static cardsPerPlayer = 10;
 
   static numPlayers = 4;
@@ -38,9 +39,9 @@ export default class Game {
     this.currPlayer = this.shufflePlayer;
   }
 
-  play(player: number, card: Card): boolean {
+  play(player: number, card: Card): string | true {
     if (player !== this.currPlayer) {
-      return false;
+      return 'Not your turn';
     }
 
     const { tableSuit } = this;
@@ -58,7 +59,7 @@ export default class Game {
     });
 
     if (foundIdx === -1) {
-      return false;
+      return 'Invalid card';
     }
 
     // First card of the round
@@ -68,7 +69,7 @@ export default class Game {
 
     // One must always assist
     if ((card.suit !== this.tableSuit) && canAssist) {
-      return false;
+      return 'You must assist!';
     }
 
     // From the hand to the table
@@ -166,7 +167,7 @@ export default class Game {
   }
 
   private chooseTrump() {
-    this.trumpCard = this.decks[this.getPreviousPlayer(this.shufflePlayer)][getRandom(10)];
+    this.trumpCard = this.decks[this.getPreviousPlayer(this.shufflePlayer)][getRandom(Game.cardsPerPlayer)];
     this.trump = this.trumpCard.suit;
   }
 
