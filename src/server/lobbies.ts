@@ -49,17 +49,28 @@ export const createLobby = (socket: OurServerSocket): ClientToServerEvents['crea
 );
 
 export const playerReady = (socket: OurServerSocket): ClientToServerEvents['playerReady'] => (
-  () => {
+  (callback) => {
     if (!socket?.data?.lobbyHash || !socket.data.playerId) {
+      callback(null);
       return;
     }
 
     const lobby = Lobby.lobbies.get(socket.data.lobbyHash);
     if (!lobby) {
+      callback(null);
       return;
     }
 
     lobby.setPlayerReady(socket.data.playerId);
+
+    const foundIdx = lobby.players.findIndex((player) => player.id === socket.data.playerId);
+
+    if (foundIdx === -1) {
+      callback(null);
+      return;
+    }
+
+    callback(foundIdx);
   }
 );
 
@@ -81,7 +92,7 @@ export const lobbyPlayers = (socket: OurServerSocket): ClientToServerEvents['lob
     }
 
     // returning lobby hash so the client knows it was successful at least
-    return callback(lobby.hash, lobby.players.map((p) => ({ name: p.name, ready: p.ready })));
+    return callback(lobby.hash, lobby.players.map((p) => ({ name: p.name || '____', ready: p.ready })));
   }
 );
 

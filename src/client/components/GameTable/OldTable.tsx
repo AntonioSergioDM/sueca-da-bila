@@ -3,12 +3,13 @@ import { useMemo } from 'react';
 import Image from 'next/image';
 import { Box, Stack } from '@mui/material';
 
-import type { GameState, PlayerState } from '@/shared/GameTypes';
 import type { LobbyPlayerState } from '@/shared/SocketTypes';
+import type { GameState, PlayerState } from '@/shared/GameTypes';
+
+import getCardId from '../../tools/getCardId';
 
 import OtherPlayer from './OtherPlayer';
 import { CARD_RATIO } from './PlayerCard';
-import getCardId from '../tools/getCardId';
 
 type TableProps = {
   players: LobbyPlayerState[];
@@ -28,7 +29,7 @@ const getNextPlayer = (idx: number) => {
   return idx + 1;
 };
 
-const Table = ({ players, playerState, gameState }: TableProps) => {
+const OldTable = ({ players, playerState, gameState }: TableProps) => {
   const { rightPlayerIdx, topPlayerIdx, leftPlayerIdx } = useMemo(() => ({
     rightPlayerIdx: getNextPlayer(playerState.index),
     topPlayerIdx: getNextPlayer(getNextPlayer(playerState.index)),
@@ -53,7 +54,7 @@ const Table = ({ players, playerState, gameState }: TableProps) => {
     >
       {/* top player */}
       <OtherPlayer
-        name={players[topPlayerIdx].name}
+        name={players[topPlayerIdx]?.name}
         numCards={gameState.hands[topPlayerIdx] || 0}
         itsame={gameState.currentPlayer === topPlayerIdx}
         trumpCard={(topPlayerIdx === getPreviousPlayer(gameState.shufflePlayer) && gameState.trumpCard) || null}
@@ -62,7 +63,7 @@ const Table = ({ players, playerState, gameState }: TableProps) => {
       <Stack direction="row" justifyContent="space-between" width="100%">
         {/* left player */}
         <OtherPlayer
-          name={players[leftPlayerIdx].name}
+          name={players[leftPlayerIdx]?.name}
           numCards={gameState.hands[leftPlayerIdx] || 0}
           itsame={gameState.currentPlayer === leftPlayerIdx}
           trumpCard={(leftPlayerIdx === getPreviousPlayer(gameState.shufflePlayer) && gameState.trumpCard) || null}
@@ -82,7 +83,7 @@ const Table = ({ players, playerState, gameState }: TableProps) => {
 
         {/* right player */}
         <OtherPlayer
-          name={players[rightPlayerIdx].name}
+          name={players[rightPlayerIdx]?.name}
           numCards={gameState.hands[rightPlayerIdx] || 0}
           itsame={gameState.currentPlayer === rightPlayerIdx}
           trumpCard={(rightPlayerIdx === getPreviousPlayer(gameState.shufflePlayer) && gameState.trumpCard) || null}
@@ -101,4 +102,4 @@ const Table = ({ players, playerState, gameState }: TableProps) => {
   );
 };
 
-export default Table;
+export default OldTable;

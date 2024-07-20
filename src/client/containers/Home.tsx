@@ -4,8 +4,10 @@ import { Button } from '@mui/material';
 
 import { SiteRoute } from '@/shared/Routes';
 
+import Layout from '../components/Layout';
+
 const Home = () => (
-  <>
+  <Layout>
     <Button
       LinkComponent={Link}
       href={SiteRoute.CreateLobby}
@@ -20,7 +22,7 @@ const Home = () => (
     >
       Join lobby
     </Button>
-  </>
+  </Layout>
 );
 
 export default Home;

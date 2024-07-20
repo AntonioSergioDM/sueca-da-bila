@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo } from 'react';
 
 import Link from 'next/link';
+import { useSnackbar } from 'notistack';
 import { useRouter } from 'next/router';
+import { useForm, type SubmitHandler } from 'react-hook-form';
 
 import {
   Stack,
@@ -10,14 +12,12 @@ import {
   IconButton,
   InputAdornment,
 } from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
-
 import { ArrowBack } from '@mui/icons-material';
-import { useForm, type SubmitHandler } from 'react-hook-form';
+import RefreshIcon from '@mui/icons-material/Refresh';
 
 import { SiteRoute } from '@/shared/Routes';
 
-import { useSnackbar } from 'notistack';
+import Layout from '../components/Layout';
 import { useSocket } from '../tools/useSocket';
 import FormWrapper from '../components/FormWrapper';
 import { playerNameTools } from '../tools/playerNameTools';
@@ -67,7 +67,7 @@ const JoinLobby = () => {
           message: res.error,
         });
       } else {
-        void push(`${SiteRoute.Lobby}/${res.data.lobbyHash}`);
+        void push(`${SiteRoute.Game}/${res.data.lobbyHash}`);
       }
     });
   }, [enqueueSnackbar, push, socket]);
@@ -78,7 +78,7 @@ const JoinLobby = () => {
   }, [form]);
 
   return (
-    <>
+    <Layout>
       <Stack alignItems="flex-start">
         <IconButton LinkComponent={Link} href={SiteRoute.Home}>
           <ArrowBack />
@@ -110,7 +110,7 @@ const JoinLobby = () => {
 
         <Button type="submit">Join</Button>
       </FormWrapper>
-    </>
+    </Layout>
   );
 };
 

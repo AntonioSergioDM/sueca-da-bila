@@ -5,8 +5,7 @@ import Image from 'next/image';
 import { ButtonBase } from '@mui/material';
 
 import { type Card } from '@/shared/Card';
-
-import getCardId from '../tools/getCardId';
+import getCardId from '@/client/tools/getCardId';
 
 export const CARD_WIDTH = 180;
 export const CARD_HEIGHT = 250;

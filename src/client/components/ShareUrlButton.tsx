@@ -1,45 +1,40 @@
 import { useCallback, useMemo } from 'react';
 
 import { CopyAll } from '@mui/icons-material';
-import { Box, IconButton } from '@mui/material';
+import { Card, IconButton, Typography } from '@mui/material';
 
 import { SiteRoute } from '@/shared/Routes';
 
 type ShareUrlButtonProps = {
-  url: string;
+  lobbyHash: string;
 };
 
-const ShareUrlButton = ({ url }: ShareUrlButtonProps) => {
+const ShareUrlButton = ({ lobbyHash }: ShareUrlButtonProps) => {
   const shareURL = useMemo(() => (
-    `${process.env.NEXT_PUBLIC_URL}${SiteRoute.JoinLobby}/${url}`
-  ), [url]);
+    `${process.env.NEXT_PUBLIC_URL}${SiteRoute.JoinLobby}/${lobbyHash}`
+  ), [lobbyHash]);
 
   const onCopy = useCallback(async () => {
     await navigator.clipboard.writeText(shareURL);
   }, [shareURL]);
 
   return (
-    <Box
-      component="div"
+    <Card
       sx={{
-        alignSelf: 'flex-end',
-        display: 'flex',
         p: 1,
         gap: 1,
+        flexGrow: 1,
+        width: '100%',
+        paddingLeft: 2,
+        display: 'flex',
+        direction: 'row',
         alignItems: 'center',
-        bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#101010' : '#fff'),
-        color: (theme) => (theme.palette.mode === 'dark' ? 'grey.300' : 'grey.800'),
-        border: '1px solid',
-        borderColor: (theme) => (theme.palette.mode === 'dark' ? 'grey.800' : 'grey.300'),
-        borderRadius: 2,
-        fontSize: '0.875rem',
-        fontWeight: '700',
       }}
     >
-      Share link
+      <Typography flexGrow={1}>Share link</Typography>
 
       <IconButton onClick={onCopy}><CopyAll /></IconButton>
-    </Box>
+    </Card>
   );
 };
 

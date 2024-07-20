@@ -1,19 +1,27 @@
 import type { BroadcastOperator } from 'socket.io';
 import type { DecorateAcknowledgementsWithMultipleResponses } from 'socket.io/dist/typed-events';
+
 import {
+  names,
+  colors,
+  animals,
+  countries,
+  adjectives,
   uniqueNamesGenerator,
-  adjectives, colors, names, animals, countries,
 } from 'unique-names-generator';
 
 import type { ServerToClientEvents, SocketData } from '@/shared/SocketTypes';
 
-import { cardName, Suit, type Card } from '@/shared/Card';
-import { IN_DEV } from 'src/globals';
+import { IN_DEV } from '@/globals';
 import type { PlayerState } from '@/shared/GameTypes';
+import { cardName, Suit, type Card } from '@/shared/Card';
+
 import Game from './Game';
 import type Player from './Player';
 
 export type LobbyRoom = BroadcastOperator<DecorateAcknowledgementsWithMultipleResponses<ServerToClientEvents>, SocketData>;
+
+const MAX_PLAYERS = 4;
 
 export default class Lobby {
   static lobbies: Map<string, Lobby> = new Map();
@@ -78,7 +86,7 @@ export default class Lobby {
   }
 
   async addPlayer(player: Player): Promise<boolean> {
-    if (this.players.length >= 4) {
+    if (this.players.length >= MAX_PLAYERS) {
       return false;
     }
 
@@ -116,7 +124,7 @@ export default class Lobby {
 
     this.emitLobbyUpdate();
 
-    if (allReady && this.players.length >= 4) {
+    if (allReady && this.players.length >= MAX_PLAYERS) {
       this.startGame();
     }
   }

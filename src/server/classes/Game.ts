@@ -194,7 +194,7 @@ export default class Game {
   private end() {
     // end game no one can play
     this.currPlayer = -1;
-    //TODO fix it
-    console.log(`equipa par|   ${this.score[0]}\n_________________________\nequipa impar| ${this.score[0]}\n`);
+    // TODO fix it
+    console.log(`equipa par|   ${this.score[0]}\n_________________________\nequipa impar| ${this.score[1]}\n`);
   }
 }

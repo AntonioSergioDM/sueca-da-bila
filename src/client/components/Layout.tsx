@@ -3,10 +3,12 @@ import type { ReactNode } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 
-import { Box, Stack, Typography } from '@mui/material';
+import { Stack } from '@mui/material';
 
 import logo from '@/public/favicon.ico';
 import { SiteRoute } from '@/shared/Routes';
+
+import Footer from './Footer';
 
 type LayoutProps = {
   children: ReactNode;
@@ -33,15 +35,8 @@ const Layout = ({ children }: LayoutProps) => (
     >
       {children}
     </Stack>
-    <Box>
-      <Typography variant="body2" color="text.secondary" align="center">
-        {'Sueca da Bila © '}
-        {new Date().getFullYear()}
-      </Typography>
-      <Typography variant="body2" color="text.secondary" align="center">
-        {`Build ${process.env.BUILD_DATETIME}`}
-      </Typography>
-    </Box>
+
+    <Footer />
   </Stack>
 );
 

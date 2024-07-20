@@ -3,9 +3,9 @@ import Image from 'next/image';
 import { Box, CircularProgress } from '@mui/material';
 
 import type { Card } from '@/shared/Card';
+import getCardId from '@/client/tools/getCardId';
 
 import { CARD_RATIO } from './PlayerCard';
-import getCardId from '../tools/getCardId';
 
 type OtherPlayerProps = {
   name: string;

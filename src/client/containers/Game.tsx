@@ -6,31 +6,23 @@ import {
 } from 'react';
 import { useRouter } from 'next/router';
 
-import { Typography, CircularProgress, Button } from '@mui/material';
-
-import type { GameState, PlayerState } from '@/shared/GameTypes';
-
-import type { LobbyPlayerState, ServerToClientEvents } from '@/shared/SocketTypes';
 import type { Card } from '@/shared/Card';
-import Table from '../components/Table';
-import { useSocket } from '../tools/useSocket';
-import PlayerHand from '../components/PlayerHand';
-import ShareUrlButton from '../components/ShareUrlButton';
+import type { GameState, PlayerState } from '@/shared/GameTypes';
+import type { LobbyPlayerState, ServerToClientEvents } from '@/shared/SocketTypes';
 
-const Lobby = () => {
+import { useSocket } from '../tools/useSocket';
+import LobbyRoom from '../components/LobbyRoom';
+import GameTable from '../components/GameTable';
+
+const Game = () => {
   const socket = useSocket();
   const { query } = useRouter();
 
   const [players, setPlayers] = useState<LobbyPlayerState[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const [isReady, setIsReady] = useState(false);
-
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [playerState, setPlayerState] = useState<PlayerState | null>(null);
 
-  // TODO: verify if this lobby is valid
-  const urlLobby = useMemo(() => {
+  const lobbyHash = useMemo(() => {
     if (!query?.lobby) return '';
 
     if (typeof query?.lobby === 'string') return query.lobby;
@@ -42,25 +34,23 @@ const Lobby = () => {
     setPlayers(newPlayers);
   }, []);
 
+  const onGameChange = useCallback<ServerToClientEvents['gameChange']>((newGameState) => {
+    setGameState(newGameState);
+  }, []);
+
   useEffect(() => {
-    if (urlLobby) {
-      socket.emit('lobbyPlayers', urlLobby, (validHash, newPlayers) => {
+    if (lobbyHash) {
+      // get current players in lobby
+      socket.emit('lobbyPlayers', lobbyHash, (validHash, newPlayers) => {
         if (validHash) {
           updatePlayers(newPlayers);
-          setLoading(false);
-        } else {
-          setLoading(false);
         }
       });
     }
-  }, [socket, updatePlayers, urlLobby]);
+  }, [socket, updatePlayers, lobbyHash]);
 
   const onGameStart = useCallback<ServerToClientEvents['gameStart']>((newPlayerState) => {
     setPlayerState(newPlayerState);
-  }, []);
-
-  const onGameChange = useCallback<ServerToClientEvents['gameChange']>((newGameState) => {
-    setGameState(newGameState);
   }, []);
 
   const onPlayCard = useCallback((card: Card) => {
@@ -81,53 +71,30 @@ const Lobby = () => {
     socket.on('playersListUpdated', updatePlayers);
     socket.on('gameStart', onGameStart);
     socket.on('gameChange', onGameChange);
+
+    // cleanup when browser/tab closes
     window.addEventListener('beforeunload', cleanup);
 
     return () => {
       cleanup();
       window.removeEventListener('beforeunload', cleanup);
     };
-  }, [onGameStart, socket, updatePlayers, onGameChange]);
-
-  const onReady = useCallback(() => {
-    setIsReady(true);
-
-    if (players.length) {
-      socket.emit('playerReady');
-    }
-  }, [players.length, socket]);
+  }, [onGameChange, onGameStart, socket, updatePlayers]);
 
   return (
     <>
-      {loading && <CircularProgress />}
-      {(!loading && !players.length) && <Typography>No players or error</Typography>}
-      {(!loading && !!players.length && !playerState) && (
-        players.map((p, i) => (
-          // eslint-disable-next-line react/no-array-index-key
-          <p key={`${p.name}${i}`}>
-            {p.name}
-            {p.ready ? '✅' : '❌'}
-          </p>
-        ))
-      )}
-
-      {!playerState && (
-        <Button onClick={onReady} disabled={!players.length || isReady}>
-          READY!
-        </Button>
-      )}
+      {!playerState && <LobbyRoom players={players} lobbyHash={lobbyHash} />}
 
       {(!!playerState && !!gameState) && (
-        <>
-          <Table playerState={playerState} gameState={gameState} players={players} />
-
-          <PlayerHand playerState={playerState} onPlayCard={onPlayCard} gameState={gameState} />
-        </>
+        <GameTable
+          players={players}
+          gameState={gameState}
+          onPlayCard={onPlayCard}
+          playerState={playerState}
+        />
       )}
-
-      <ShareUrlButton url={urlLobby} />
     </>
   );
 };
 
-export default Lobby;
+export default Game;
