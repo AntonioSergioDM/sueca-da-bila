@@ -1,5 +1,7 @@
 import type { Card } from './Card';
 
+export type Score = [number, number];
+
 export type Table = [Card | null, Card | null, Card | null, Card | null];
 
 export type Hand = Array<Card>;

@@ -149,6 +149,18 @@ export default class Lobby {
 
     this.room?.emit('gameChange', this.game.getState());
 
+    if (this.game.currPlayer < 0) {
+      // eslint-disable-next-line @typescript-eslint/no-this-alias
+      const that = this;
+      setTimeout(
+        () => {
+          that.game.clearTable();
+          that.room?.emit('gameChange', that.game.getState());
+        },
+        2000,
+      );
+    }
+
     return {
       index: foundIdx,
       hand: this.game.decks[foundIdx],

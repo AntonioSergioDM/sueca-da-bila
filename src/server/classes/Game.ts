@@ -1,4 +1,4 @@
-import type { GameState, Table } from '@/shared/GameTypes';
+import type { GameState, Score, Table } from '@/shared/GameTypes';
 import type { Card } from '../../shared/Card';
 import { pointsOf, Suit } from '../../shared/Card';
 
@@ -23,7 +23,10 @@ const getFullDeck = () => {
 const getRandom = (range: number) => Math.floor(Math.random() * range);
 
 export default class Game {
-  score: [number, number] = [0, 0];
+  /** [even team, odd team] */
+  roundScore: Score = [0, 0];
+
+  gameScore: Score[] = [];
 
   /** each 'deck' corresponds to a player hand */
   decks: [Array<Card>, Array<Card>, Array<Card>, Array<Card>] = [[], [], [], []];
@@ -88,7 +91,7 @@ export default class Game {
       this.currPlayer = this.getNextPlayer();
     } else {
       // Everyone placed a card, let's see who wins
-      this.clearTable();
+      this.currPlayer = -1;
     }
     return true;
   }
@@ -101,6 +104,40 @@ export default class Game {
       shufflePlayer: this.shufflePlayer,
       hands: this.decks.map((hand) => hand.length),
     };
+  }
+
+  clearTable() {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const that = this;
+    let winnerId = 0;
+    let points = 0;
+    let winningCard = this.onTable[0];
+
+    this.onTable.forEach((card, playerIdx) => {
+      if (card === null || winningCard === null) {
+        throw new Error('You stupid piece of shit! No nulls can reach here!');
+      }
+
+      points += pointsOf(card);
+
+      if (that.isBiggerThan(card, winningCard)) {
+        winningCard = card;
+        winnerId = playerIdx;
+      }
+    });
+
+    this.roundScore[winnerId % 2] += points;
+
+    // Reset the table
+    this.tableSuit = null;
+    this.onTable = [null, null, null, null];
+
+    if (!this.decks[0].length) {
+      this.end();
+    } else {
+      // The player that wins is the first to play
+      this.currPlayer = winnerId;
+    }
   }
 
   // --------------- Private Methods --------------- //
@@ -141,40 +178,6 @@ export default class Game {
     this.trump = this.trumpCard.suit;
   }
 
-  private clearTable() {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const that = this;
-    let winnerId = 0;
-    let points = 0;
-    let winningCard = this.onTable[0];
-
-    this.onTable.forEach((card, playerIdx) => {
-      if (card === null || winningCard === null) {
-        throw new Error('You stupid piece of shit! No nulls can reach here!');
-      }
-
-      points += pointsOf(card);
-
-      if (that.isBiggerThan(card, winningCard)) {
-        winningCard = card;
-        winnerId = playerIdx;
-      }
-    });
-
-    this.score[winnerId % 2] += points;
-
-    // Reset the table
-    this.tableSuit = null;
-    this.onTable = [null, null, null, null];
-
-    if (!this.decks[0].length) {
-      this.end();
-    } else {
-      // The player that wins is the first to play
-      this.currPlayer = winnerId;
-    }
-  }
-
   private isBiggerThan(card1: Card, card2: Card): boolean {
     if (card1.suit === card2.suit) {
       return card1.value > card2.value;
@@ -195,6 +198,6 @@ export default class Game {
     // end game no one can play
     this.currPlayer = -1;
     // TODO fix it
-    console.log(`equipa par|   ${this.score[0]}\n_________________________\nequipa impar| ${this.score[1]}\n`);
+    console.log(`equipa par|   ${this.roundScore[0]}\n_________________________\nequipa impar| ${this.roundScore[1]}\n`);
   }
 }
