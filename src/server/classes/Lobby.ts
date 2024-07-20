@@ -161,7 +161,10 @@ export default class Lobby {
     this.emitGameChange();
     if (this.game.isEnded()) {
       this.room?.emit('gameResults', this.game.gameScore);
-      this.game.start();
+      // TODO: Maybe we don't want to automaticly start another game? idk
+      setTimeout(() => {
+        this.startGame();
+      }, 5000);
     }
   }
 
