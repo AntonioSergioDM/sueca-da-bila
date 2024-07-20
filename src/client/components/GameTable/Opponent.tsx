@@ -39,13 +39,13 @@ const Opponent = (props: OpponentProps) => {
     switch (position) {
       case 'left':
         return {
-          rotation: '90' as const,
-          justify: 'justify-start',
+          rotation: '-90' as const,
+          justify: 'justify-center',
         };
       case 'right':
         return {
-          rotation: '-90' as const,
-          justify: 'justify-end',
+          rotation: '90' as const,
+          justify: 'justify-center',
         };
 
       case 'top':
