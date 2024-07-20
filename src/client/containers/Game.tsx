@@ -49,6 +49,11 @@ const Game = () => {
     }
   }, [socket, updatePlayers, lobbyHash]);
 
+  const onGameReset = useCallback<ServerToClientEvents['gameReset']>(() => {
+    setGameState(null);
+    setPlayerState(null);
+  }, []);
+
   const onGameStart = useCallback<ServerToClientEvents['gameStart']>((newPlayerState) => {
     setPlayerState(newPlayerState);
   }, []);
@@ -64,6 +69,7 @@ const Game = () => {
       socket.off('playersListUpdated', updatePlayers);
       socket.off('gameStart', onGameStart);
       socket.off('gameChange', onGameChange);
+      socket.off('gameReset', onGameReset);
 
       socket.emit('leaveLobby');
     };
@@ -71,6 +77,7 @@ const Game = () => {
     socket.on('playersListUpdated', updatePlayers);
     socket.on('gameStart', onGameStart);
     socket.on('gameChange', onGameChange);
+    socket.on('gameReset', onGameReset);
 
     // cleanup when browser/tab closes
     window.addEventListener('beforeunload', cleanup);
@@ -79,13 +86,13 @@ const Game = () => {
       cleanup();
       window.removeEventListener('beforeunload', cleanup);
     };
-  }, [onGameChange, onGameStart, socket, updatePlayers]);
+  }, [onGameChange, onGameReset, onGameStart, socket, updatePlayers]);
 
   return (
     <>
       {!playerState && <LobbyRoom players={players} lobbyHash={lobbyHash} />}
 
-      {(!!playerState && !!gameState) && (
+      {(!!playerState && !!gameState && players.length >= 4) && (
         <GameTable
           players={players}
           gameState={gameState}

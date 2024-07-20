@@ -18,3 +18,15 @@ export type GameState = {
   shufflePlayer: number;
   currentPlayer: number;
 };
+
+export const getPreviousPlayer = (idx: number) => {
+  if (idx === 0) return 3;
+
+  return idx - 1;
+};
+
+export const getNextPlayer = (idx: number) => {
+  if (idx === 3) return 0;
+
+  return idx + 1;
+};

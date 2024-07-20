@@ -74,7 +74,7 @@ module.exports = {
         }],
         "indent": 0,
         "no-tabs": 0,
-        "max-len": ["error", 150],
+        "max-len": 0,
         'func-names': 0,
         'import/no-cycle': 0,
         'react/prop-types': 0,

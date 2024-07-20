@@ -1,3 +1,4 @@
+import '../index.css';
 import Head from 'next/head';
 import type { AppProps } from 'next/app';
 import { SnackbarProvider } from 'notistack';
@@ -25,6 +26,7 @@ const MyApp = (props: AppProps) => {
 
       <ThemeProvider theme={theme}>
         <CssBaseline />
+
         <SnackbarProvider>
           <Component {...pageProps} />
         </SnackbarProvider>
