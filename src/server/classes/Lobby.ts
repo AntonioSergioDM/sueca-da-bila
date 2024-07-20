@@ -160,6 +160,10 @@ export default class Lobby {
     this.game.clearTable();
     this.emitGameChange();
     if (this.game.isEnded()) {
+      if (IN_DEV) {
+        this.game.gameScore.reduce((str, s, i) => `${str} ${i}: ${s[0]} | ${s[1]}`, 'Results: Even | Odd \n');
+      }
+
       this.room?.emit('gameResults', this.game.gameScore);
       // TODO: Maybe we don't want to automaticly start another game? idk
       setTimeout(() => {

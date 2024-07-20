@@ -12,10 +12,15 @@ export default class Game {
 
   static numTeams = 2;
 
+  static maxPoints = 120; // +1 if the team wins all turns
+
   /** [even team, odd team] */
   roundScore: Score = [0, 0];
 
   gameScore: Score[] = [];
+
+  /** stars as -1, switches to winnning team idx, until another teams wins an hand. Then it becomes numTeams */
+  bandeira = -1;
 
   /** each 'deck' corresponds to a player hand */
   decks: [Array<Card>, Array<Card>, Array<Card>, Array<Card>] = [[], [], [], []];
@@ -34,6 +39,8 @@ export default class Game {
   tableSuit: Suit | `${Suit}` | null = null;
 
   start() {
+    this.roundScore = [0, 0];
+    this.bandeira = -1;
     this.shuffleAndDistribute();
     this.chooseTrump();
     this.currPlayer = this.shufflePlayer;
@@ -115,7 +122,15 @@ export default class Game {
       }
     });
 
-    this.roundScore[winnerId % Game.numTeams] += points;
+    const winnerTeam = winnerId % Game.numTeams;
+
+    if (this.bandeira === -1) {
+      this.bandeira = winnerTeam;
+    } else if (this.bandeira !== winnerTeam) {
+      this.bandeira = Game.numTeams;
+    }
+
+    this.roundScore[winnerTeam] += points;
 
     // Reset the table
     this.tableSuit = null;
@@ -190,8 +205,21 @@ export default class Game {
   private end() {
     // end game no one can play
     this.currPlayer = -1;
+
+    // Check for "bandeira"
+    let i = 0;
+    while (i < Game.numTeams) {
+      if (this.roundScore[i] === Game.maxPoints && this.bandeira === i) {
+        this.roundScore[i]++;
+      }
+      i++;
+    }
+
+    this.gameScore.push(this.roundScore);
     this.shufflePlayer = this.getNextPlayer(this.shufflePlayer);
   }
+
+  // -------------- Private Static Methods -------------- //
 
   // eslint-disable-next-line class-methods-use-this
   private static getFullDeck() {
