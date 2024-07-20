@@ -1,8 +1,9 @@
 /* eslint-disable @next/next/no-img-element */
-import { useMemo } from 'react';
-import { Typography } from '@mui/material';
+import { useCallback, useMemo } from 'react';
+import { Box, Typography } from '@mui/material';
 
 import type { Card } from '@/shared/Card';
+import getCardId from '@/client/tools/getCardId';
 import type { LobbyPlayerState } from '@/shared/SocketTypes';
 import { getPreviousPlayer, type GameState, type PlayerState } from '@/shared/GameTypes';
 
@@ -40,12 +41,60 @@ const PlayerHand = (props: PlayerHandProps) => {
     || null
   ), [gameState.shufflePlayer, gameState.trumpCard, playerState.index]);
 
+  const handWithoutTrump = useMemo(() => {
+    if (!trumpCard) return playerState.hand;
+
+    return playerState.hand.filter((card) => getCardId(card) !== getCardId(trumpCard));
+  }, [playerState.hand, trumpCard]);
+
+  const onPlayTrump = useCallback(() => {
+    if (trumpCard) {
+      onPlayCard(trumpCard);
+    }
+  }, [onPlayCard, trumpCard]);
+
   return (
     <div>
+      {!!trumpCard && (
+        <Box
+          draggable={false}
+          onClick={onPlayTrump}
+          sx={{
+            width: PLAYER_CARD_WIDTH,
+            height: PLAYER_CARD_HEIGHT,
+            overflow: 'hidden',
+            position: 'absolute',
+            userSelect: 'none',
+            borderWidth: 2,
+            borderRadius: '4px',
+            borderColor: 'black',
+            borderStyle: 'solid',
+            animation: isPlaying ? 'pulse 1s infinite alternate' : 'none',
+
+            ...(isPlaying ? {
+              ':hover': {
+                cursor: 'pointer',
+                scale: '110%',
+              },
+            } : {}),
+
+            '@keyframes pulse': {
+              from: { borderColor: 'black' },
+              to: { borderColor: 'gold' },
+            },
+          }}
+        >
+          <CardImg
+            card={trumpCard}
+            width={PLAYER_CARD_WIDTH}
+            height={PLAYER_CARD_HEIGHT}
+          />
+        </Box>
+      )}
       {/* hand with fan effect */}
       <div className="flex relative justify-center items-start flex-row">
         <FanCards
-          cards={playerState.hand}
+          cards={handWithoutTrump}
           pulse={isPlaying}
           width={PLAYER_CARD_WIDTH}
           height={PLAYER_CARD_HEIGHT}
@@ -55,14 +104,6 @@ const PlayerHand = (props: PlayerHandProps) => {
       </div>
 
       <Typography>{name}</Typography>
-
-      {!!trumpCard && (
-        <CardImg
-          card={trumpCard}
-          width={PLAYER_CARD_WIDTH}
-          height={PLAYER_CARD_HEIGHT}
-        />
-      )}
     </div>
   );
 };

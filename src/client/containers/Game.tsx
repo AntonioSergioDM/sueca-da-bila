@@ -105,7 +105,7 @@ const Game = () => {
       cleanup();
       window.removeEventListener('beforeunload', cleanup);
     };
-  }, [onGameChange, onGameReset, onGameStart, socket, updatePlayers]);
+  }, [onGameChange, onGameReset, onGameResults, onGameStart, socket, updatePlayers]);
 
   return (
     <>
