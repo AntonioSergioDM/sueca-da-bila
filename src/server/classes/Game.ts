@@ -63,6 +63,11 @@ export default class Game {
       if ((card.value === playerCard.value) && (card.suit === playerCard.suit)) {
         foundIdx = cardIdx;
       }
+
+      if (card.suit === this.trump && card.value === this.trumpCard?.value) {
+        // We are playing the trump card... no more trump card
+        this.trumpCard = null;
+      }
     });
 
     if (foundIdx === -1) {
