@@ -2,11 +2,15 @@ import type { GameState, Score, Table } from '@/shared/GameTypes';
 import type { Card } from '../../shared/Card';
 import { pointsOf, Suit } from '../../shared/Card';
 
+const cardsPerPlayer = 10;
+const numPlayers = 4;
+const numTeams = 2;
+
 const getFullDeck = () => {
   const fulldeck: Array<Card> = [];
 
   [Suit.Diamonds, Suit.Spades, Suit.Hearts, Suit.Clubs].forEach((suit) => {
-    let i: number = 10;
+    let i: number = cardsPerPlayer;
     while (i) {
       fulldeck.push({
         suit,
@@ -126,7 +130,7 @@ export default class Game {
       }
     });
 
-    this.roundScore[winnerId % 2] += points;
+    this.roundScore[winnerId % numTeams] += points;
 
     // Reset the table
     this.tableSuit = null;
@@ -147,9 +151,9 @@ export default class Game {
   }
 
   private addCardRandom(card: Card): void {
-    const playerNum = getRandom(4);
+    const playerNum = getRandom(numPlayers);
 
-    if (this.decks[playerNum].length > 9) {
+    if (this.decks[playerNum].length >= cardsPerPlayer) {
       this.addCardRandom(card);
       return;
     }
@@ -158,7 +162,7 @@ export default class Game {
   }
 
   private getNextPlayer(player = this.currPlayer) {
-    if (player === 3) {
+    if (player === numPlayers - 1) {
       return 0;
     }
 
@@ -167,7 +171,7 @@ export default class Game {
 
   private getPreviousPlayer(player = this.currPlayer) {
     if (player === 0) {
-      return 3;
+      return numPlayers - 1;
     }
 
     return player - 1;
