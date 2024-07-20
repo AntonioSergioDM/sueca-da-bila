@@ -37,7 +37,7 @@ export default class Lobby {
   }
 
   static generateNewHash(): string {
-    const newHash = uniqueNamesGenerator({
+    const newHash = IN_DEV ? Lobby.lobbies.size.toString() : uniqueNamesGenerator({
       dictionaries: [adjectives, colors, names, animals, countries],
       length: 3,
       separator: '-',
@@ -145,7 +145,7 @@ export default class Lobby {
 
     if (this.game.currPlayer < 0) {
       setTimeout(
-        this.endTurn.bind(this),
+        () => this.endTurn(),
         2000,
       );
     }
@@ -161,7 +161,10 @@ export default class Lobby {
     this.emitGameChange();
     if (this.game.isEnded()) {
       if (IN_DEV) {
-        this.game.gameScore.reduce((str, s, i) => `${str} ${i}: ${s[0]} | ${s[1]}`, 'Results: Even | Odd \n');
+        console.info(this.game.gameScore.reduce(
+          (str, s, i) => `${str}${i.toString().padStart(7, ' ')}:  ${s[0].toString().padStart(3, ' ')} | ${s[1].toString().padStart(3, ' ')}\n`,
+          'Results: Even | Odd \n',
+        ));
       }
 
       this.room?.emit('gameResults', this.game.gameScore);
@@ -184,7 +187,7 @@ export default class Lobby {
     this.game.start();
 
     if (IN_DEV) {
-      console.info(`♠️ ♦️ ♣️ ♥️ Game started on Lobby ${this.hash}\n`);
+      console.info(`♠️ ♦️ Game started on Lobby ${this.hash} ♣️ ♥️\n`);
     }
 
     this.players.forEach((player, idx) => {

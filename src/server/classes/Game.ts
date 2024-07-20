@@ -103,8 +103,6 @@ export default class Game {
   }
 
   clearTable() {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const that = this;
     let winnerId = 0;
     let points = 0;
     let winningCard = this.onTable[0];
@@ -116,7 +114,7 @@ export default class Game {
 
       points += pointsOf(card);
 
-      if (that.isBiggerThan(card, winningCard)) {
+      if (this.isBiggerThan(card, winningCard)) {
         winningCard = card;
         winnerId = playerIdx;
       }
@@ -151,7 +149,7 @@ export default class Game {
   // --------------- Private Methods --------------- //
 
   private shuffleAndDistribute() {
-    Game.getFullDeck().forEach(this.addCardRandom.bind(this));
+    Game.getFullDeck().forEach((c) => this.addCardRandom(c));
   }
 
   private addCardRandom(card: Card): void {
