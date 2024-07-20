@@ -1,6 +1,6 @@
 import type { Socket as SocketIoSocket } from 'socket.io';
 
-import type { GameState, PlayerState } from '@/shared/GameTypes';
+import type { GameState, PlayerState, Score } from '@/shared/GameTypes';
 import type { Card } from './Card';
 
 export type LobbyPlayerState = { name: string; ready: boolean };
@@ -13,6 +13,7 @@ export interface ServerToClientEvents {
   gameStart: (playerState: PlayerState) => void;
   gameChange: (gameState: GameState) => void;
   gameReset: () => void;
+  gameResults: (gameSscore: Score[]) => void;
 }
 
 type GenericCallbackResponse<T = any> = {

@@ -144,6 +144,10 @@ export default class Game {
     }
   }
 
+  isEnded() {
+    return this.currPlayer === -1 && !this.decks[0].length;
+  }
+
   // --------------- Private Methods --------------- //
 
   private shuffleAndDistribute() {
@@ -201,7 +205,6 @@ export default class Game {
   private end() {
     // end game no one can play
     this.currPlayer = -1;
-    // TODO fix it
-    console.log(`equipa par|   ${this.roundScore[0]}\n_________________________\nequipa impar| ${this.roundScore[1]}\n`);
+    this.shufflePlayer = this.getNextPlayer(this.shufflePlayer);
   }
 }

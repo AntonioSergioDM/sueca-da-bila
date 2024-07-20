@@ -30,8 +30,6 @@ export default class Lobby {
 
   players: Array<Player> = [];
 
-  results: Array<number> = [];
-
   game: Game = new Game();
 
   room: LobbyRoom | null = null;
@@ -103,10 +101,6 @@ export default class Lobby {
     return true;
   }
 
-  emitLobbyUpdate() {
-    this.room?.emit('playersListUpdated', this.players.map((p) => ({ name: p.name, ready: p.ready })));
-  }
-
   setPlayerReady(playerId: string) {
     let allReady = true;
     this.players.forEach((p) => {
@@ -147,16 +141,11 @@ export default class Lobby {
       console.info('    Card Played');
     }
 
-    this.room?.emit('gameChange', this.game.getState());
+    this.emitGameChange();
 
     if (this.game.currPlayer < 0) {
-      // eslint-disable-next-line @typescript-eslint/no-this-alias
-      const that = this;
       setTimeout(
-        () => {
-          that.game.clearTable();
-          that.room?.emit('gameChange', that.game.getState());
-        },
+        this.endTurn.bind(this),
         2000,
       );
     }
@@ -165,6 +154,23 @@ export default class Lobby {
       index: foundIdx,
       hand: this.game.decks[foundIdx],
     };
+  }
+
+  endTurn() {
+    this.game.clearTable();
+    this.emitGameChange();
+    if (this.game.isEnded()) {
+      this.room?.emit('gameResults', this.game.gameScore);
+      this.game.start();
+    }
+  }
+
+  emitLobbyUpdate() {
+    this.room?.emit('playersListUpdated', this.players.map((p) => ({ name: p.name, ready: p.ready })));
+  }
+
+  emitGameChange() {
+    this.room?.emit('gameChange', this.game.getState());
   }
 
   private startGame() {
@@ -181,12 +187,11 @@ export default class Lobby {
       });
     });
 
-    this.room?.emit('gameChange', this.game.getState());
+    this.emitGameChange();
   }
 
   private resetGame() {
     this.game = new Game();
-    this.results = [];
     this.players.forEach((p) => {
       p.setReady(false);
       if (IN_DEV) {
@@ -199,5 +204,6 @@ export default class Lobby {
     }
 
     this.room?.emit('gameReset');
+    this.emitLobbyUpdate();
   }
 }
