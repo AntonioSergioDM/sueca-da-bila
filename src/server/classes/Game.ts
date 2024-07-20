@@ -2,31 +2,15 @@ import type { GameState, Score, Table } from '@/shared/GameTypes';
 import type { Card } from '../../shared/Card';
 import { pointsOf, Suit } from '../../shared/Card';
 
-const cardsPerPlayer = 10;
-const numPlayers = 4;
-const numTeams = 2;
-
-const getFullDeck = () => {
-  const fulldeck: Array<Card> = [];
-
-  [Suit.Diamonds, Suit.Spades, Suit.Hearts, Suit.Clubs].forEach((suit) => {
-    let i: number = cardsPerPlayer;
-    while (i) {
-      fulldeck.push({
-        suit,
-        value: i,
-      });
-
-      i--;
-    }
-  });
-
-  return fulldeck;
-};
-
 const getRandom = (range: number) => Math.floor(Math.random() * range);
 
 export default class Game {
+  static cardsPerPlayer = 10;
+
+  static numPlayers = 4;
+
+  static numTeams = 2;
+
   /** [even team, odd team] */
   roundScore: Score = [0, 0];
 
@@ -130,7 +114,7 @@ export default class Game {
       }
     });
 
-    this.roundScore[winnerId % numTeams] += points;
+    this.roundScore[winnerId % Game.numTeams] += points;
 
     // Reset the table
     this.tableSuit = null;
@@ -151,13 +135,13 @@ export default class Game {
   // --------------- Private Methods --------------- //
 
   private shuffleAndDistribute() {
-    getFullDeck().forEach(this.addCardRandom.bind(this));
+    Game.getFullDeck().forEach(this.addCardRandom.bind(this));
   }
 
   private addCardRandom(card: Card): void {
-    const playerNum = getRandom(numPlayers);
+    const playerNum = getRandom(Game.numPlayers);
 
-    if (this.decks[playerNum].length >= cardsPerPlayer) {
+    if (this.decks[playerNum].length >= Game.cardsPerPlayer) {
       this.addCardRandom(card);
       return;
     }
@@ -166,7 +150,7 @@ export default class Game {
   }
 
   private getNextPlayer(player = this.currPlayer) {
-    if (player === numPlayers - 1) {
+    if (player === Game.numPlayers - 1) {
       return 0;
     }
 
@@ -175,7 +159,7 @@ export default class Game {
 
   private getPreviousPlayer(player = this.currPlayer) {
     if (player === 0) {
-      return numPlayers - 1;
+      return Game.numPlayers - 1;
     }
 
     return player - 1;
@@ -206,5 +190,24 @@ export default class Game {
     // end game no one can play
     this.currPlayer = -1;
     this.shufflePlayer = this.getNextPlayer(this.shufflePlayer);
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  private static getFullDeck() {
+    const fulldeck: Array<Card> = [];
+
+    [Suit.Diamonds, Suit.Spades, Suit.Hearts, Suit.Clubs].forEach((suit) => {
+      let i: number = Game.cardsPerPlayer;
+      while (i) {
+        fulldeck.push({
+          suit,
+          value: i,
+        });
+
+        i--;
+      }
+    });
+
+    return fulldeck;
   }
 }
