@@ -14,11 +14,11 @@ const ScorePad = ({ gameResults }: TableProps) => {
 
   return (
     <Paper elevation={3} className="p-0 flex gap-0 flex-col font-mono bg-white">
-      <Typography className="font-mono text-black text-xs">{text.top}</Typography>
-      <Typography className="font-mono text-black text-xs">{text.middleTop}</Typography>
-      <Typography className="font-mono text-black text-xs">{text.middle}</Typography>
-      <Typography className="font-mono text-black text-xs">{text.middleBottom}</Typography>
-      <Typography className="font-mono text-black text-xs">{text.bottom}</Typography>
+      <Typography style={{ whiteSpace: 'pre' }} className="font-mono text-black text-xs">{text.top}</Typography>
+      <Typography style={{ whiteSpace: 'pre' }} className="font-mono text-black text-xs">{text.middleTop}</Typography>
+      <Typography style={{ whiteSpace: 'pre' }} className="font-mono text-black text-xs">{text.middle}</Typography>
+      <Typography style={{ whiteSpace: 'pre' }} className="font-mono text-black text-xs">{text.middleBottom}</Typography>
+      <Typography style={{ whiteSpace: 'pre' }} className="font-mono text-black text-xs">{text.bottom}</Typography>
     </Paper>
   );
 };
