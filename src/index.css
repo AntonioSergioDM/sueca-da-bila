@@ -4,10 +4,10 @@
 
 ::-webkit-scrollbar {
     @apply w-2 h-2;
-    }
-    
-    ::-webkit-scrollbar:hover {
-        @apply w-4 h-4;
+}
+
+::-webkit-scrollbar:hover {
+    @apply w-4 h-4;
 }
 
 /* Track */

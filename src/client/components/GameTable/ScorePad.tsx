@@ -10,8 +10,6 @@ type TableProps = {
 const ScorePad = ({ gameResults }: TableProps) => {
   const text = useMemo(() => bestOfThree(gameResults), [gameResults]);
 
-  console.log(`${text.top}\n${text.middleTop}\n${text.middle}\n${text.middleBottom}\n${text.bottom}`);
-
   return (
     <div className="flex items-center w-full">
       <Paper elevation={5} className="p-2 flex flex-col gap-0 font-mono bg-white overflow-x-auto rounded-md w-full">
