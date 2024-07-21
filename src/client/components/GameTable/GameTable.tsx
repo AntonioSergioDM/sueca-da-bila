@@ -45,12 +45,16 @@ const GameTable = (props: GameTableProps) => {
   const [gameResults, setGameResults] = useState<Score[] | []>([]);
 
   const onGameResults = useCallback<ServerToClientEvents['gameResults']>((results) => {
+    if (!results.length) {
+      return;
+    }
+    setGameResults(results);
     const myTeam = playerState.index % 2;
+    const result = results.pop() || [0, 0];
     enqueueSnackbar({
       variant: 'info',
-      message: `Game ended: You ${results[-1][myTeam] > results[-1][myTeam ? 0 : 1] ? 'won' : 'lost'}! Points: ${results[-1][myTeam]}`,
+      message: `Game ended: You ${result[myTeam] > result[myTeam ? 0 : 1] ? 'won' : 'lost'}! Points: ${result[myTeam]}`,
     });
-    setGameResults(results);
   }, [enqueueSnackbar, playerState]);
 
   useEffect(() => {
