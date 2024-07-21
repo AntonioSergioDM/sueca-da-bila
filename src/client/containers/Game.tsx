@@ -8,7 +8,7 @@ import { useRouter } from 'next/router';
 import { useSnackbar } from 'notistack';
 
 import type { Card } from '@/shared/Card';
-import type { GameState, PlayerState, Score } from '@/shared/GameTypes';
+import type { GameState, PlayerState } from '@/shared/GameTypes';
 import type { LobbyPlayerState, ServerToClientEvents } from '@/shared/SocketTypes';
 
 import { useSocket } from '../tools/useSocket';
@@ -24,7 +24,6 @@ const Game = () => {
   const [players, setPlayers] = useState<LobbyPlayerState[]>([]);
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [playerState, setPlayerState] = useState<PlayerState | null>(null);
-  const [gameResults, setGameResults] = useState<Score[] | []>([]);
 
   const lobbyHash = useMemo(() => {
     if (!query?.lobby) return '';
@@ -41,15 +40,6 @@ const Game = () => {
   const onGameChange = useCallback<ServerToClientEvents['gameChange']>((newGameState) => {
     setGameState(newGameState);
   }, []);
-
-  const onGameResults = useCallback<ServerToClientEvents['gameResults']>((results) => {
-    const myTeam = playerState?.index % 2;
-    enqueueSnackbar({
-      variant: 'info',
-      message: `Game ended: You ${results[-1][myTeam] > results[-1][myTeam ? 0 : 1] ? 'won' : 'lost'}! Points: ${results[-1][myTeam]}`,
-    });
-    setGameResults(results);
-  }, [enqueueSnackbar, playerState]);
 
   useEffect(() => {
     if (lobbyHash) {
@@ -89,7 +79,6 @@ const Game = () => {
       socket.off('playersListUpdated', updatePlayers);
       socket.off('gameStart', onGameStart);
       socket.off('gameChange', onGameChange);
-      socket.off('gameResults', onGameResults);
       socket.off('gameReset', onGameReset);
 
       socket.emit('leaveLobby');
@@ -98,7 +87,6 @@ const Game = () => {
     socket.on('playersListUpdated', updatePlayers);
     socket.on('gameStart', onGameStart);
     socket.on('gameChange', onGameChange);
-    socket.on('gameResults', onGameResults);
     socket.on('gameReset', onGameReset);
 
     // cleanup when browser/tab closes
@@ -108,7 +96,7 @@ const Game = () => {
       cleanup();
       window.removeEventListener('beforeunload', cleanup);
     };
-  }, [onGameChange, onGameReset, onGameResults, onGameStart, socket, updatePlayers]);
+  }, [onGameChange, onGameReset, onGameStart, socket, updatePlayers]);
 
   return (
     <>
@@ -120,7 +108,6 @@ const Game = () => {
           gameState={gameState}
           onPlayCard={onPlayCard}
           playerState={playerState}
-          gameResults={gameResults}
         />
       )}
     </>

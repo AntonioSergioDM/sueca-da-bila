@@ -1,26 +1,34 @@
-import { useMemo } from 'react';
+import {
+  useMemo,
+  useState,
+  useEffect,
+  useCallback,
+} from 'react';
+
+import { useSnackbar } from 'notistack';
 
 import {
+  type Score,
   getNextPlayer,
   type GameState,
   type PlayerState,
   getPreviousPlayer,
-  type Score,
 } from '@/shared/GameTypes';
 import type { Card } from '@/shared/Card';
-import type { LobbyPlayerState } from '@/shared/SocketTypes';
+import type { LobbyPlayerState, ServerToClientEvents } from '@/shared/SocketTypes';
 
-import Opponent from './Opponent';
-import PlayerHand from './PlayerHand';
+import { useSocket } from '@/client/tools/useSocket';
+
 import Table from './Table';
+import Opponent from './Opponent';
 import ScorePad from './ScorePad';
+import PlayerHand from './PlayerHand';
 
 type GameTableProps = {
   gameState: GameState;
   playerState: PlayerState;
   players: LobbyPlayerState[];
   onPlayCard: (card: Card) => void;
-  gameResults: Score[];
 };
 
 const GameTable = (props: GameTableProps) => {
@@ -29,8 +37,29 @@ const GameTable = (props: GameTableProps) => {
     gameState,
     onPlayCard,
     playerState,
-    gameResults,
   } = props;
+
+  const socket = useSocket();
+  const { enqueueSnackbar } = useSnackbar();
+
+  const [gameResults, setGameResults] = useState<Score[] | []>([]);
+
+  const onGameResults = useCallback<ServerToClientEvents['gameResults']>((results) => {
+    const myTeam = playerState.index % 2;
+    enqueueSnackbar({
+      variant: 'info',
+      message: `Game ended: You ${results[-1][myTeam] > results[-1][myTeam ? 0 : 1] ? 'won' : 'lost'}! Points: ${results[-1][myTeam]}`,
+    });
+    setGameResults(results);
+  }, [enqueueSnackbar, playerState]);
+
+  useEffect(() => {
+    socket.on('gameResults', onGameResults);
+
+    return () => {
+      socket.off('gameResults', onGameResults);
+    };
+  }, [onGameResults, socket]);
 
   const topPlayer = useMemo(() => {
     // top player is 2 seats to the right (or two seats to the left)
