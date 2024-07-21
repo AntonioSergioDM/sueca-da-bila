@@ -42,13 +42,14 @@ const Game = () => {
     setGameState(newGameState);
   }, []);
 
-  const onGameResults = useCallback<ServerToClientEvents['gameResults']>((res) => {
+  const onGameResults = useCallback<ServerToClientEvents['gameResults']>((results) => {
+    const myTeam = playerState?.index % 2;
     enqueueSnackbar({
       variant: 'info',
-      message: `Game ended: ${JSON.stringify(res, null, 2)}`,
+      message: `Game ended: You ${results[-1][myTeam] > results[-1][myTeam ? 0 : 1] ? 'won' : 'lost'}! Points: ${results[-1][myTeam]}`,
     });
-    setGameResults(res);
-  }, [enqueueSnackbar]);
+    setGameResults(results);
+  }, [enqueueSnackbar, playerState]);
 
   useEffect(() => {
     if (lobbyHash) {
