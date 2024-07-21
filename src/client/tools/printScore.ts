@@ -36,11 +36,11 @@ export const bestOfThree = (results: Score[]): ScoreLines => {
     if ((ourWin ? nBigWins : vBigWins) > 1) {
       nBigWins = 0;
       vBigWins = 0;
-      nScore += ' \\   /    ';
+      nScore += '          ';
       niddle += '  \\ /     ';
-      viddle += '  / \\     ';
-      vScore += ' /   \\    ';
       line += '---X------';
+      viddle += '  / \\     ';
+      vScore += '          ';
     }
   };
 

@@ -4,6 +4,10 @@ module.exports = {
   important: '#__next',
   theme: {
     extend: {},
+    fontSize: {
+      xxs: ['10px', '12px'],
+      xxxs: ['8px', '8px'],
+    }
   },
   plugins: [],
   corePlugins: {

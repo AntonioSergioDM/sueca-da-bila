@@ -13,13 +13,15 @@ const ScorePad = ({ gameResults }: TableProps) => {
   console.log(`${text.top}\n${text.middleTop}\n${text.middle}\n${text.middleBottom}\n${text.bottom}`);
 
   return (
-    <Paper elevation={3} className="p-0 flex gap-0 flex-col font-mono bg-white">
-      <Typography style={{ whiteSpace: 'pre' }} className="font-mono text-black text-xs">{text.top}</Typography>
-      <Typography style={{ whiteSpace: 'pre' }} className="font-mono text-black text-xs">{text.middleTop}</Typography>
-      <Typography style={{ whiteSpace: 'pre' }} className="font-mono text-black text-xs">{text.middle}</Typography>
-      <Typography style={{ whiteSpace: 'pre' }} className="font-mono text-black text-xs">{text.middleBottom}</Typography>
-      <Typography style={{ whiteSpace: 'pre' }} className="font-mono text-black text-xs">{text.bottom}</Typography>
-    </Paper>
+    <div className="flex items-center w-full">
+      <Paper elevation={5} className="p-2 flex flex-col gap-0 font-mono bg-white overflow-x-auto rounded-md w-full">
+        <Typography style={{ whiteSpace: 'pre' }} className="font-mono text-black text-xxxs">{text.top}</Typography>
+        <Typography style={{ whiteSpace: 'pre' }} className="font-mono text-black text-xxxs">{text.middleTop}</Typography>
+        <Typography style={{ whiteSpace: 'pre' }} className="font-mono text-black text-xxxs">{text.middle}</Typography>
+        <Typography style={{ whiteSpace: 'pre' }} className="font-mono text-black text-xxxs">{text.middleBottom}</Typography>
+        <Typography style={{ whiteSpace: 'pre' }} className="font-mono text-black text-xxxs">{text.bottom}</Typography>
+      </Paper>
+    </div>
   );
 };
 
