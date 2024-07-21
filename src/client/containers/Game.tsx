@@ -8,7 +8,7 @@ import { useRouter } from 'next/router';
 import { useSnackbar } from 'notistack';
 
 import type { Card } from '@/shared/Card';
-import type { GameState, PlayerState } from '@/shared/GameTypes';
+import type { GameState, PlayerState, Score } from '@/shared/GameTypes';
 import type { LobbyPlayerState, ServerToClientEvents } from '@/shared/SocketTypes';
 
 import { useSocket } from '../tools/useSocket';
@@ -24,6 +24,7 @@ const Game = () => {
   const [players, setPlayers] = useState<LobbyPlayerState[]>([]);
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [playerState, setPlayerState] = useState<PlayerState | null>(null);
+  const [gameResults, setGameResults] = useState<Score[] | []>([]);
 
   const lobbyHash = useMemo(() => {
     if (!query?.lobby) return '';
@@ -46,6 +47,7 @@ const Game = () => {
       variant: 'info',
       message: `Game ended: ${JSON.stringify(res, null, 2)}`,
     });
+    setGameResults(res);
   }, [enqueueSnackbar]);
 
   useEffect(() => {
@@ -117,6 +119,7 @@ const Game = () => {
           gameState={gameState}
           onPlayCard={onPlayCard}
           playerState={playerState}
+          gameResults={gameResults}
         />
       )}
     </>

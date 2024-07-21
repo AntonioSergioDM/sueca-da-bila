@@ -5,6 +5,7 @@ import {
   type GameState,
   type PlayerState,
   getPreviousPlayer,
+  type Score,
 } from '@/shared/GameTypes';
 import type { Card } from '@/shared/Card';
 import type { LobbyPlayerState } from '@/shared/SocketTypes';
@@ -12,12 +13,14 @@ import type { LobbyPlayerState } from '@/shared/SocketTypes';
 import Opponent from './Opponent';
 import PlayerHand from './PlayerHand';
 import Table from './Table';
+import ScorePad from './ScorePad';
 
 type GameTableProps = {
   gameState: GameState;
   playerState: PlayerState;
   players: LobbyPlayerState[];
   onPlayCard: (card: Card) => void;
+  gameResults: Score[];
 };
 
 const GameTable = (props: GameTableProps) => {
@@ -26,6 +29,7 @@ const GameTable = (props: GameTableProps) => {
     gameState,
     onPlayCard,
     playerState,
+    gameResults,
   } = props;
 
   const topPlayer = useMemo(() => {
@@ -107,7 +111,7 @@ const GameTable = (props: GameTableProps) => {
         {rightPlayer ? <Opponent {...rightPlayer} position="right" /> : <div />}
 
         {/* RESULTS */}
-        <div />
+        <ScorePad gameResults={gameResults} />
 
         {/* ME */}
         <PlayerHand
