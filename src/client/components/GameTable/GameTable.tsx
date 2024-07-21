@@ -111,7 +111,7 @@ const GameTable = (props: GameTableProps) => {
         {rightPlayer ? <Opponent {...rightPlayer} position="right" /> : <div />}
 
         {/* RESULTS */}
-        <ScorePad gameResults={gameResults} />
+        <ScorePad gameResults={gameResults} playerIdx={playerState.index} />
 
         {/* ME */}
         <PlayerHand

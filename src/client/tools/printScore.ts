@@ -8,7 +8,7 @@ export type ScoreLines = {
   bottom: string;
 };
 
-export const bestOfThree = (results: Score[]): ScoreLines => {
+export const bestOfThree = (results: Score[], team: boolean = false): ScoreLines => {
   let nScore = '|\\ | |  ';
   let niddle = '| \\| |  ';
   let line = '--------';
@@ -45,32 +45,34 @@ export const bestOfThree = (results: Score[]): ScoreLines => {
   };
 
   results.forEach((score) => {
-    if (score[0] > 120) { // We gain 4 points
+    const ourScore = score[team ? 1 : 0];
+    const yourScore = score[team ? 0 : 1];
+    if (ourScore > 120) { // We gain 4 points
       close(true);
-    } else if (score[0] > 90) { // We gain 2 points
+    } else if (ourScore > 90) { // We gain 2 points
       if (nWins >= 2) {
         close(true);
       } else {
         nScore += '<-> ';
         nWins += 2;
       }
-    } else if (score[0] > 60) { // We gain 1 point
+    } else if (ourScore > 60) { // We gain 1 point
       if (nWins >= 3) {
         close(true);
       } else {
         nScore += 'o ';
         nWins += 1;
       }
-    } else if (score[0] === 60) { // It's a tie
+    } else if (ourScore === 60) { // It's a tie
       // Do nothing
-    } else if (score[0] >= 30) { // They gain 1 point
+    } else if (ourScore >= 30) { // They gain 1 point
       if (vWins >= 3) {
         close(false);
       } else {
         vScore += 'o ';
         vWins += 1;
       }
-    } else if (score[0] > 0 || score[1] === 120) { // They gain 2 points
+    } else if (ourScore > 0 || yourScore === 120) { // They gain 2 points
       if (vWins >= 2) {
         close(false);
       } else {

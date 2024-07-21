@@ -5,10 +5,11 @@ import { Paper, Typography } from '@mui/material';
 
 type TableProps = {
   gameResults: Score[];
+  playerIdx: number;
 };
 
-const ScorePad = ({ gameResults }: TableProps) => {
-  const text = useMemo(() => bestOfThree(gameResults), [gameResults]);
+const ScorePad = ({ gameResults, playerIdx: playerOrder }: TableProps) => {
+  const text = useMemo(() => bestOfThree(gameResults, playerOrder % 2 === 0), [gameResults, playerOrder]);
 
   return (
     <div className="flex items-center w-full">
