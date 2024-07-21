@@ -22,13 +22,16 @@ export const bestOfThree = (results: Score[], team: boolean = false): ScoreLines
 
   const closeWin = (s: string, w: number) => `${s.substring(0, s.length - 1 - (w * 2))}<${w ? s.substring(s.length - (w * 2), s.length - 1).replaceAll(' ', '-') : ''}${w === 0 ? '-----' : '-'.repeat((3 - w) * 2)}>   `;
   const closeLost = (s: string, w: number) => `${s}${'  '.repeat((3 - w))}   `;
+  const closeMiddle = () => {
+    niddle += '| | |    ';
+    viddle += '| | |    ';
+    line += '+-+-+----';
+  };
 
   const close = (ourWin: boolean) => {
     nScore = ourWin ? closeWin(nScore, nWins) : closeLost(nScore, nWins);
     vScore = ourWin ? closeLost(vScore, vWins) : closeWin(vScore, vWins);
-    niddle += '| | |    ';
-    viddle += '| | |    ';
-    line += '+-+-+----';
+    closeMiddle();
     nWins = 0;
     vWins = 0;
     nBigWins += ourWin ? 1 : 0;
@@ -84,6 +87,11 @@ export const bestOfThree = (results: Score[], team: boolean = false): ScoreLines
       close(false);
     }
   });
+
+  // finish the drawing
+  if (nWins || vWins) {
+    closeMiddle();
+  }
 
   return {
     top: nScore,

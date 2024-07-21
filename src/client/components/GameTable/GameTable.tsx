@@ -50,7 +50,7 @@ const GameTable = (props: GameTableProps) => {
     }
     setGameResults(results);
     const myTeam = playerState.index % 2;
-    const result = results.pop() || [0, 0];
+    const result = results[results.length - 1] || [0, 0];
     enqueueSnackbar({
       variant: 'info',
       message: `Game ended: You ${result[myTeam] > result[myTeam ? 0 : 1] ? 'won' : 'lost'}! Points: ${result[myTeam]}`,

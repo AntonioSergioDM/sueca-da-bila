@@ -9,7 +9,7 @@ type TableProps = {
 };
 
 const ScorePad = ({ gameResults, playerIdx: playerOrder }: TableProps) => {
-  const text = useMemo(() => bestOfThree(gameResults, playerOrder % 2 === 0), [gameResults, playerOrder]);
+  const text = useMemo(() => bestOfThree(gameResults, playerOrder % 2 === 1), [gameResults, playerOrder]);
 
   return (
     <div className="flex items-center w-full">
