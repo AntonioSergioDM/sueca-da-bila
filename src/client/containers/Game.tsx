@@ -41,13 +41,6 @@ const Game = () => {
     setGameState(newGameState);
   }, []);
 
-  const onGameResults = useCallback<ServerToClientEvents['gameResults']>((res) => {
-    enqueueSnackbar({
-      variant: 'info',
-      message: `Game ended: ${JSON.stringify(res, null, 2)}`,
-    });
-  }, [enqueueSnackbar]);
-
   useEffect(() => {
     if (lobbyHash) {
       // get current players in lobby
@@ -86,7 +79,6 @@ const Game = () => {
       socket.off('playersListUpdated', updatePlayers);
       socket.off('gameStart', onGameStart);
       socket.off('gameChange', onGameChange);
-      socket.off('gameResults', onGameResults);
       socket.off('gameReset', onGameReset);
 
       socket.emit('leaveLobby');
@@ -95,7 +87,6 @@ const Game = () => {
     socket.on('playersListUpdated', updatePlayers);
     socket.on('gameStart', onGameStart);
     socket.on('gameChange', onGameChange);
-    socket.on('gameResults', onGameResults);
     socket.on('gameReset', onGameReset);
 
     // cleanup when browser/tab closes
@@ -105,7 +96,7 @@ const Game = () => {
       cleanup();
       window.removeEventListener('beforeunload', cleanup);
     };
-  }, [onGameChange, onGameReset, onGameResults, onGameStart, socket, updatePlayers]);
+  }, [onGameChange, onGameReset, onGameStart, socket, updatePlayers]);
 
   return (
     <>
