@@ -24,17 +24,21 @@ const Table = (props: TableProps) => {
     gameState,
   } = props;
 
-  const {
-    topCard,
-    rightCard,
-    bottomCard,
-    leftCard,
-  } = useMemo(() => ({
-    topCard: gameState.table[topIdx] || null,
-    rightCard: gameState.table[rightIdx] || null,
-    bottomCard: gameState.table[bottomIdx] || null,
-    leftCard: gameState.table[leftIdx] || null,
-  }), [bottomIdx, gameState.table, leftIdx, rightIdx, topIdx]);
+  const topCard = useMemo(() => (
+    gameState.table[topIdx] || null
+  ), [gameState.table, topIdx]);
+
+  const rightCard = useMemo(() => (
+    gameState.table[rightIdx] || null
+  ), [gameState.table, rightIdx]);
+
+  const bottomCard = useMemo(() => (
+    gameState.table[bottomIdx] || null
+  ), [gameState.table, bottomIdx]);
+
+  const leftCard = useMemo(() => (
+    gameState.table[leftIdx] || null
+  ), [gameState.table, leftIdx]);
 
   const topVariant = useMemo((): TableCardVariants => {
     const randY = getRandomRange(25, 75);
@@ -55,10 +59,7 @@ const Table = (props: TableProps) => {
         },
       },
     };
-
-    // depends on its card to randomize position
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [topCard]);
+  }, []);
 
   const rightVariant = useMemo((): TableCardVariants => {
     const randY = getRandomRange(25, 75);
@@ -79,10 +80,7 @@ const Table = (props: TableProps) => {
         },
       },
     };
-
-    // depends on its card to randomize position
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rightCard]);
+  }, []);
 
   const bottomVariant = useMemo((): TableCardVariants => {
     const randY = getRandomRange(25, 75);
@@ -103,10 +101,7 @@ const Table = (props: TableProps) => {
         },
       },
     };
-
-    // depends on its card to randomize position
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bottomCard]);
+  }, []);
 
   const leftVariant = useMemo((): TableCardVariants => {
     const randY = getRandomRange(25, 75);
@@ -127,10 +122,7 @@ const Table = (props: TableProps) => {
         },
       },
     };
-
-    // depends on its card to randomize position
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [leftCard]);
+  }, []);
 
   return (
     <div

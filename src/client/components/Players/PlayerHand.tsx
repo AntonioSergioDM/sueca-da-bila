@@ -36,8 +36,9 @@ const PlayerHand = (props: PlayerHandProps) => {
     <AnimatePresence>
       {!!trumpCard && (
         <motion.div
-          animate={{ x: `${25 * cards.length}%`, y: '50%' }}
+          animate={{ x: `${cards.length <= 2 ? 125 : (25 * cards.length)}%`, y: '65%' }}
           className="absolute bottom-0 select-none"
+          onClick={(isPlayer && handleOnClick(trumpCard)) || undefined}
         >
           <AnimatedCard
             rgb={isRgb}

@@ -9,7 +9,8 @@ const getCardFanVariants = (idx: number, numCards: number): Variants => {
   const xPosition = idx * CARD_CLOSENESS - offset;
   const yPosition = numCards > 1 ? (1 - Math.abs(idx - (numCards - 1) / 2) / ((numCards - 1) / 2)) * MAX_BUMP : 0;
 
-  const rotation = numCards > 1 ? (idx - (numCards - 1) / 2) * (MAX_ROTATION / (numCards - 1)) : 0;
+  const maxRotation = numCards > 3 ? MAX_ROTATION : 20;
+  const rotation = numCards > 1 ? (idx - (numCards - 1) / 2) * (maxRotation / (numCards - 1)) : 0;
 
   return {
     fromDeck: {
