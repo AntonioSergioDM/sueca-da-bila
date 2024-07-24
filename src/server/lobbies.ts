@@ -132,3 +132,24 @@ export const leaveLobby = (socket: OurServerSocket): ClientToServerEvents['leave
     await lobby.removePlayer(socket.data.playerId);
   }
 );
+
+export const onChatMsg = (socket: OurServerSocket): ClientToServerEvents['chatMsg'] => (
+  (msg) => {
+    if (typeof msg !== 'string' || !msg.trim() || !socket.data.lobbyHash || !socket.data.playerId) {
+      return;
+    }
+
+    const lobby = Lobby.lobbies.get(socket.data.lobbyHash);
+    if (!lobby) {
+      return;
+    }
+
+    const player = lobby.players.find((p) => p.id === socket.data.playerId);
+
+    if (!player) {
+      return;
+    }
+
+    lobby.emitChatMsg({ from: player.name, msg });
+  }
+);

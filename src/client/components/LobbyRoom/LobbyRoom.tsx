@@ -21,6 +21,7 @@ import { useSocket } from '../../tools/useSocket';
 
 import LobbyRoomPlayer from './LobbyRoomPlayer';
 import LobbyRoomCounter from './LobbyRoomCounter';
+import Chat from '../Chat';
 
 type LobbyRoomProps = {
   lobbyHash: string;
@@ -57,6 +58,7 @@ const LobbyRoom = ({ lobbyHash, players }: LobbyRoomProps) => {
       display="flex"
       alignItems="center"
       justifyContent="center"
+      border="1px solid"
     >
       <Stack gap={1} width="100%" maxWidth={500}>
         <Link href={SiteRoute.Home} style={{ alignSelf: 'center' }}>
@@ -96,6 +98,8 @@ const LobbyRoom = ({ lobbyHash, players }: LobbyRoomProps) => {
           </Stack>
         </Card>
       </Stack>
+
+      <Chat />
     </Box>
   );
 };

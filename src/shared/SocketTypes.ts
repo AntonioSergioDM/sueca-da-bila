@@ -5,6 +5,13 @@ import type { Card } from './Card';
 
 export type LobbyPlayerState = { name: string; ready: boolean };
 
+export type LobbyChatMsg = {
+  /** ISO STRING DATE+TIME */
+  time: string;
+  from: string | null;
+  msg: string;
+};
+
 export interface ServerToClientEvents {
   error: () => void;
   playersListUpdated: (players: LobbyPlayerState[]) => void;
@@ -12,6 +19,7 @@ export interface ServerToClientEvents {
   gameChange: (gameState: GameState) => void;
   gameReset: () => void;
   gameResults: (gameScore: Score[]) => void;
+  chatMsg: (data: LobbyChatMsg) => void;
 }
 
 type GenericCallbackResponse<T = any> = {
@@ -29,6 +37,7 @@ export interface ClientToServerEvents {
   lobbyPlayers: (lobbyHash: string, callback: (lobbyHash: string, players: LobbyPlayerState[]) => void) => void;
   playerReady: (callback: (playerIndex: number | null) => void) => void;
   playCard: (card: Card, callback: (res: GenericCallbackResponse<PlayerState | null>) => void) => void;
+  chatMsg: (msg: string) => void;
 }
 
 /**

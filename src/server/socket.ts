@@ -17,6 +17,7 @@ import {
   joinLobby,
   leaveLobby,
   lobbyPlayers,
+  onChatMsg,
   playCard,
   playerReady,
 } from './lobbies';
@@ -74,6 +75,7 @@ const SocketHandler = (_: NextApiRequest, res: SocketIOResponse) => {
       socket.on('leaveLobby', leaveLobby(socket));
       socket.on('playCard', playCard(socket));
       socket.on('lobbyPlayers', lobbyPlayers(socket));
+      socket.on('chatMsg', onChatMsg(socket));
     }
   });
 

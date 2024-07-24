@@ -10,7 +10,7 @@ import {
   uniqueNamesGenerator,
 } from 'unique-names-generator';
 
-import type { ServerToClientEvents, SocketData } from '@/shared/SocketTypes';
+import type { LobbyChatMsg, ServerToClientEvents, SocketData } from '@/shared/SocketTypes';
 
 import { IN_DEV } from '@/globals';
 import type { PlayerState } from '@/shared/GameTypes';
@@ -77,6 +77,7 @@ export default class Lobby {
       return;
     }
 
+    this.emitChatMsg({ from: null, msg: `Player '${player.name}' left!` });
     this.emitLobbyUpdate();
     this.resetGame();
   }
@@ -95,6 +96,8 @@ export default class Lobby {
       console.info(`      Players on Lobby ${this.hash}`);
       console.info(this.players.reduce((info, p, idx) => (`${info}       ${idx}.  ${p.name} (ID: ${p.id})\n`), ''));
     }
+
+    this.emitChatMsg({ from: null, msg: `Player '${player.name}' just joined!` });
 
     return true;
   }
@@ -181,6 +184,10 @@ export default class Lobby {
 
   emitGameChange() {
     this.room?.emit('gameChange', this.game.getState());
+  }
+
+  emitChatMsg(data: Omit<LobbyChatMsg, 'time'>) {
+    this.room?.emit('chatMsg', { ...data, time: new Date().toISOString() });
   }
 
   private startGame() {
