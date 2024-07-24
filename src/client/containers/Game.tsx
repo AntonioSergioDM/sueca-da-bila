@@ -13,7 +13,7 @@ import type { LobbyPlayerState, ServerToClientEvents } from '@/shared/SocketType
 
 import { useSocket } from '../tools/useSocket';
 import LobbyRoom from '../components/LobbyRoom';
-import GameTable from '../components/GameTable';
+import FramerGame from '../components/FramerGame';
 
 const Game = () => {
   const { enqueueSnackbar } = useSnackbar();
@@ -103,7 +103,7 @@ const Game = () => {
       {!playerState && <LobbyRoom players={players} lobbyHash={lobbyHash} />}
 
       {(!!playerState && !!gameState && players.length >= 4) && (
-        <GameTable
+        <FramerGame
           players={players}
           gameState={gameState}
           onPlayCard={onPlayCard}

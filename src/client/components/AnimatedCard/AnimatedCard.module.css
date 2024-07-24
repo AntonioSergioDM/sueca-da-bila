@@ -1,0 +1,50 @@
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 #eab308;
+  }
+
+  100% {
+    box-shadow: 0 0 0 4px #eab308;
+  }
+}
+
+.pulse {
+  animation: pulse 1s infinite;
+  animation-direction: alternate;
+}
+
+@keyframes pulseRgb {
+  0% {
+    box-shadow: 0 0 0 rgba(255, 0, 0, 0.8), 0 0 0 rgba(255, 0, 0, 0.8),
+      0 0 0 rgba(0, 255, 0, 0.8), 0 0 0 rgba(0, 255, 0, 0.8),
+      0 0 0 rgba(0, 0, 255, 0.8), 0 0 0 rgba(0, 0, 255, 0.8);
+  }
+
+  25% {
+    box-shadow: 0 0 2px rgba(255, 0, 0, 0.8), 0 0 4px rgba(255, 0, 0, 0.8),
+      0 0 6px rgba(0, 255, 0, 0.8), 0 0 8px rgba(0, 255, 0, 0.8),
+      0 0 10px rgba(0, 0, 255, 0.8), 0 0 12px rgba(0, 0, 255, 0.8);
+  }
+
+  50% {
+    box-shadow: 0 0 2px rgba(0, 255, 0, 0.8), 0 0 4px rgba(0, 255, 0, 0.8),
+      0 0 6px rgba(0, 0, 255, 0.8), 0 0 8px rgba(0, 0, 255, 0.8),
+      0 0 10px rgba(255, 0, 0, 0.8), 0 0 12px rgba(255, 0, 0, 0.8);
+  }
+
+  75% {
+    box-shadow: 0 0 2px rgba(0, 0, 255, 0.8), 0 0 4px rgba(0, 0, 255, 0.8),
+      0 0 6px rgba(255, 0, 0, 0.8), 0 0 8px rgba(255, 0, 0, 0.8),
+      0 0 10px rgba(0, 255, 0, 0.8), 0 0 12px rgba(0, 255, 0, 0.8);
+  }
+
+  100% {
+    box-shadow: 0 0 2px rgba(255, 0, 0, 0.8), 0 0 4px rgba(255, 0, 0, 0.8),
+      0 0 6px rgba(0, 255, 0, 0.8), 0 0 8px rgba(0, 255, 0, 0.8),
+      0 0 10px rgba(0, 0, 255, 0.8), 0 0 12px rgba(0, 0, 255, 0.8);
+  }
+}
+
+.pulseRgb {
+  animation: pulseRgb 2s infinite;
+}
