@@ -121,7 +121,7 @@ export default class Lobby {
     }
   }
 
-  playCard(playerId: string, card: Card): PlayerState | string {
+  playCard(playerId: string, card: Card, allowRenounce = false): PlayerState | string {
     const foundIdx = this.players.findIndex((p) => p.id === playerId);
     if (foundIdx === -1) {
       return 'Invalid player';
@@ -131,7 +131,7 @@ export default class Lobby {
       console.info(`😉 PlayerID: ${playerId} played ${cardName(card)} of ${Suit[card.suit]}\n`);
     }
 
-    const playRes = this.game.play(foundIdx, card);
+    const playRes = this.game.play(foundIdx, card, allowRenounce);
 
     if (typeof playRes === 'string') {
       return playRes;

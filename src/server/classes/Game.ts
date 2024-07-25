@@ -1,4 +1,4 @@
-import type { GameState, Score, Table } from '@/shared/GameTypes';
+import { GameState, PlayErrors, Score, Table } from '@/shared/GameTypes';
 import type { Card } from '../../shared/Card';
 import { pointsOf, Suit } from '../../shared/Card';
 
@@ -22,6 +22,9 @@ export default class Game {
   /** stars as -1, switches to winnning team idx, until another teams wins an hand. Then it becomes numTeams */
   bandeira = -1;
 
+  /** renounce */
+  renounce: boolean[] = [false, false];
+
   /** each 'deck' corresponds to a player hand */
   decks: [Array<Card>, Array<Card>, Array<Card>, Array<Card>] = [[], [], [], []];
 
@@ -41,14 +44,15 @@ export default class Game {
   start() {
     this.roundScore = [0, 0];
     this.bandeira = -1;
+    this.renounce = [false, false];
     this.shuffleAndDistribute();
     this.chooseTrump();
     this.currPlayer = this.shufflePlayer;
   }
 
-  play(player: number, card: Card): string | true {
+  play(player: number, card: Card, allowRenounce = false): PlayErrors | true {
     if (player !== this.currPlayer) {
-      return 'Not your turn';
+      return PlayErrors.wrongTurn;
     }
 
     const { tableSuit } = this;
@@ -71,7 +75,7 @@ export default class Game {
     });
 
     if (foundIdx === -1) {
-      return 'Invalid card';
+      return PlayErrors.invalidCard;
     }
 
     // First card of the round
@@ -81,7 +85,11 @@ export default class Game {
 
     // One must always assist
     if ((card.suit !== this.tableSuit) && canAssist) {
-      return 'You must assist!';
+      if (!allowRenounce) {
+        return PlayErrors.mustAssist;
+      }
+
+      this.renounce[player % Game.numTeams] = true;
     }
 
     // From the hand to the table
