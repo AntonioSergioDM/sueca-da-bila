@@ -14,6 +14,7 @@ import { IN_DEV } from '../globals';
 
 import {
   createLobby,
+  denounce,
   joinLobby,
   leaveLobby,
   lobbyPlayers,
@@ -74,6 +75,7 @@ const SocketHandler = (_: NextApiRequest, res: SocketIOResponse) => {
       socket.on('leaveLobby', leaveLobby(socket));
       socket.on('playCard', playCard(socket));
       socket.on('lobbyPlayers', lobbyPlayers(socket));
+      socket.on('denounce', denounce(socket));
     }
   });
 

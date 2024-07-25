@@ -17,6 +17,7 @@ import {
 import { type Card } from '@/shared/Card';
 import type { LobbyPlayerState, ServerToClientEvents } from '@/shared/SocketTypes';
 
+import { Button } from '@mui/material';
 import { useSocket } from '@/client/tools/useSocket';
 
 import ScorePad from '../ScorePad';
@@ -26,18 +27,19 @@ import RightPlayer from '../Players/RightPlayer';
 import BottomPlayer from '../Players/BottomPlayer';
 
 import Table from './Table';
+import DenounceOverlay from '../DenounceOverlay';
 
 type FramerGameProps = {
   gameState: GameState;
-  playerState: PlayerState;
   players: LobbyPlayerState[];
+  playerState: PlayerState;
   onPlayCard: (card: Card) => void;
 };
 
 const FramerGame = (props: FramerGameProps) => {
   const {
     gameState,
-    // players,
+    players,
     onPlayCard,
     playerState,
   } = props;
@@ -46,6 +48,12 @@ const FramerGame = (props: FramerGameProps) => {
   const { enqueueSnackbar } = useSnackbar();
 
   const [gameResults, setGameResults] = useState<Score[] | []>([]);
+  const [denounceOverlayState, setDenounceOverlayState] = useState(false);
+
+  const denounce = (idx) => {
+    console.log('denounce' + idx);
+    socket.emit('denounce', idx);
+  };
 
   const onGameResults = useCallback<ServerToClientEvents['gameResults']>((results) => {
     if (!results.length) {
@@ -86,6 +94,13 @@ const FramerGame = (props: FramerGameProps) => {
 
   return (
     <div className="relative w-screen h-screen bg-red-950 p-2">
+      <DenounceOverlay
+        open={denounceOverlayState}
+        onClose={() => setDenounceOverlayState(false)}
+        denounce={denounce}
+        playerLeft={{ name: players[leftIdx].name, index: leftIdx }}
+        playerRight={{ name: players[rightIdx].name, index: rightIdx }}
+      />
       <Table
         topIdx={topIdx}
         leftIdx={leftIdx}
@@ -93,27 +108,32 @@ const FramerGame = (props: FramerGameProps) => {
         gameState={gameState}
         bottomIdx={bottomIdx}
       />
+      <Button className="w-fit" onClick={() => { setDenounceOverlayState(true) }} color="primary">I spoted a cheater</Button>
 
       <TopPlayer
         isPlaying={gameState.currentPlayer === topIdx}
         cardNum={gameState.hands[topIdx]}
         trumpCard={(hasTrumpIdx === topIdx && gameState.trumpCard) || null}
+        name={players[topIdx].name}
       />
       <RightPlayer
         isPlaying={gameState.currentPlayer === rightIdx}
         cardNum={gameState.hands[rightIdx]}
         trumpCard={(hasTrumpIdx === rightIdx && gameState.trumpCard) || null}
+        name={players[rightIdx].name}
+      />
+      <LeftPlayer
+        isPlaying={gameState.currentPlayer === leftIdx}
+        cardNum={gameState.hands[leftIdx]}
+        trumpCard={(hasTrumpIdx === leftIdx && gameState.trumpCard) || null}
+        name={players[leftIdx].name}
       />
       <BottomPlayer
         onPlayCard={onPlayCard}
         isPlaying={gameState.currentPlayer === bottomIdx}
         cards={playerState.hand}
         trumpCard={(hasTrumpIdx === bottomIdx && gameState.trumpCard) || null}
-      />
-      <LeftPlayer
-        isPlaying={gameState.currentPlayer === leftIdx}
-        cardNum={gameState.hands[leftIdx]}
-        trumpCard={(hasTrumpIdx === leftIdx && gameState.trumpCard) || null}
+        name={players[bottomIdx].name}
       />
 
       <ScorePad gameResults={gameResults} playerIdx={playerState.index} />

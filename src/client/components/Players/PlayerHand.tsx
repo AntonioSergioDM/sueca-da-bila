@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import { Typography } from '@mui/material';
 import type { Card } from '@/shared/Card';
 
 import AnimatedCard from '../AnimatedCard';
@@ -14,6 +15,7 @@ type PlayerHandProps = {
   cards: (Card | 0)[];
   isPlaying?: boolean;
   trumpCard: Card | null;
+  name: string;
   onClick?: (card: Card) => void;
 };
 
@@ -25,6 +27,7 @@ const PlayerHand = (props: PlayerHandProps) => {
     trumpCard,
     isPlaying,
     isPlayer,
+    name,
     onClick,
   } = props;
 
@@ -49,6 +52,8 @@ const PlayerHand = (props: PlayerHandProps) => {
           />
         </motion.div>
       )}
+
+      <Typography>{name}</Typography>
 
       {cards.map((card, idx) => (
         <motion.div

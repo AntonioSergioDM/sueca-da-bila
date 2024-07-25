@@ -133,3 +133,18 @@ export const leaveLobby = (socket: OurServerSocket): ClientToServerEvents['leave
     await lobby.removePlayer(socket.data.playerId);
   }
 );
+
+export const denounce = (socket: OurServerSocket): ClientToServerEvents['denounce'] => (
+  (idx) => {
+    if (!socket?.data?.lobbyHash || !socket.data.playerId) {
+      return;
+    }
+
+    const lobby = Lobby.lobbies.get(socket.data.lobbyHash);
+    if (!lobby) {
+      return;
+    }
+
+    lobby.denounce(socket.data.playerId, idx);
+  }
+);

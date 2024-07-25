@@ -20,8 +20,8 @@ const RenounceOverlay = ({ card, onClose, onPlayCard }: LayoutProps) => {
       className="flex items-center justify-center"
       open={!!card}
       onClose={onClose}
-      aria-labelledby="child-modal-title"
-      aria-describedby="child-modal-description"
+      aria-labelledby="Play anyway"
+      aria-describedby="Do you want to cheat?"
     >
       <Box className="w-fit bg-black p-4 border border-solid border-red-600">
         <h2 id="child-modal-title">You must assist!</h2>

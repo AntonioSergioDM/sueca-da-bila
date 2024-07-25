@@ -36,3 +36,7 @@ export enum PlayErrors {
   invalidCard = 'Invalid card',
   wrongTurn = 'Not your turn',
 }
+
+export enum DenounceErrors {
+  sameTeam = "That's your teammate, you idiot",
+}

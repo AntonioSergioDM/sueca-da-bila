@@ -1,4 +1,5 @@
-import { GameState, PlayErrors, Score, Table } from '@/shared/GameTypes';
+import type { GameState, Score, Table } from '@/shared/GameTypes';
+import { DenounceErrors, PlayErrors } from '@/shared/GameTypes';
 import type { Card } from '../../shared/Card';
 import { pointsOf, Suit } from '../../shared/Card';
 
@@ -44,7 +45,7 @@ export default class Game {
   start() {
     this.roundScore = [0, 0];
     this.bandeira = -1;
-    this.renounce = [false, false];
+    this.renounce = [false, false, false, false];
     this.shuffleAndDistribute();
     this.chooseTrump();
     this.currPlayer = this.shufflePlayer;
@@ -89,7 +90,7 @@ export default class Game {
         return PlayErrors.mustAssist;
       }
 
-      this.renounce[player % Game.numTeams] = true;
+      this.renounce[player] = true;
     }
 
     // From the hand to the table
@@ -159,6 +160,30 @@ export default class Game {
     return this.currPlayer === -1 && !this.decks[0].length;
   }
 
+  denounce(playerIdx: number, denounceIdx: number): boolean | DenounceErrors {
+    if (playerIdx % Game.numTeams === denounceIdx % Game.numTeams) {
+      return DenounceErrors.sameTeam;
+    }
+
+    const score: Score = [0, 0];
+
+    // You are wrong - Lose 1 Game and keep playing
+    if (!this.renounce[denounceIdx]) {
+      score[playerIdx % Game.numTeams] = 50;
+      score[denounceIdx % Game.numTeams] = Game.maxPoints - 50;
+      this.gameScore.push(score);
+      return false;
+    }
+
+    // You are right - Win 4 Games
+    this.roundScore = [0, 0];
+    this.bandeira = playerIdx % Game.numTeams;
+    this.roundScore[playerIdx % Game.numTeams] = Game.maxPoints;
+    this.end();
+
+    return true;
+  }
+
   // --------------- Private Methods --------------- //
 
   private shuffleAndDistribute() {
@@ -216,6 +241,8 @@ export default class Game {
   private end() {
     // end game no one can play
     this.currPlayer = -1;
+    // all cards go away
+    this.decks = [[], [], [], []];
 
     // Check for "bandeira"
     let i = 0;

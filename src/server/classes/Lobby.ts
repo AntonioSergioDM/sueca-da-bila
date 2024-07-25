@@ -159,20 +159,15 @@ export default class Lobby {
   endTurn() {
     this.game.clearTable();
     this.emitGameChange();
-    if (this.game.isEnded()) {
-      if (IN_DEV) {
-        console.info(this.game.gameScore.reduce(
-          (str, s, i) => `${str}${i.toString().padStart(7, ' ')}:  ${s[0].toString().padStart(3, ' ')} | ${s[1].toString().padStart(3, ' ')}\n`,
-          'Results: Even | Odd \n',
-        ));
-      }
+    this.checkEnd();
+  }
 
-      this.room?.emit('gameResults', this.game.gameScore);
-      // TODO: Maybe we don't want to automaticly start another game? idk
-      setTimeout(() => {
-        this.startGame();
-      }, 5000);
-    }
+  denounce(playerIdx: number, denounceIdx: number) {
+    const res = this.game.denounce(playerIdx, denounceIdx);
+
+    // The game may have ended
+    this.checkEnd();
+    return res;
   }
 
   emitLobbyUpdate() {
@@ -198,6 +193,25 @@ export default class Lobby {
     });
 
     this.emitGameChange();
+  }
+
+  private checkEnd() {
+    if (!this.game.isEnded()) {
+      return;
+    }
+
+    if (IN_DEV) {
+      console.info(this.game.gameScore.reduce(
+        (str, s, i) => `${str}${i.toString().padStart(7, ' ')}:  ${s[0].toString().padStart(3, ' ')} | ${s[1].toString().padStart(3, ' ')}\n`,
+        'Results: Even | Odd \n',
+      ));
+    }
+
+    this.room?.emit('gameResults', this.game.gameScore);
+    // TODO: Maybe we don't want to automaticly start another game? idk
+    setTimeout(() => {
+      this.startGame();
+    }, 5000);
   }
 
   private resetGame() {
