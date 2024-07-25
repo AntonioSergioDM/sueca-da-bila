@@ -11,6 +11,11 @@ export const roboto = Roboto({
 // Create a theme instance.
 const theme = createTheme({
   components: {
+    MuiModal: {
+      defaultProps: {
+        container: () => document.getElementById('__next'),
+      },
+    },
     MuiButton: {
       defaultProps: {
         fullWidth: true,
