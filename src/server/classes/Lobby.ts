@@ -13,7 +13,7 @@ import {
 import type { ServerToClientEvents, SocketData } from '@/shared/SocketTypes';
 
 import { IN_DEV } from '@/globals';
-import type { PlayerState } from '@/shared/GameTypes';
+import { DenounceErrors, type PlayerState } from '@/shared/GameTypes';
 import { cardName, Suit, type Card } from '@/shared/Card';
 
 import Game from './Game';
@@ -162,11 +162,20 @@ export default class Lobby {
     this.checkEnd();
   }
 
-  denounce(playerIdx: number, denounceIdx: number) {
+  denounce(playerId: string, denounceIdx: number) {
+    const playerIdx = this.players.findIndex((p) => p.id === playerId);
+
+    if (playerIdx === -1) {
+      return DenounceErrors.invalidPlayer;
+    }
+
     const res = this.game.denounce(playerIdx, denounceIdx);
 
     // The game may have ended
-    this.checkEnd();
+    if (!this.checkEnd()) {
+      // Give an update even if the game continues
+      this.emitGameResults();
+    }
     return res;
   }
 
@@ -176,6 +185,10 @@ export default class Lobby {
 
   emitGameChange() {
     this.room?.emit('gameChange', this.game.getState());
+  }
+
+  emitGameResults() {
+    this.room?.emit('gameResults', this.game.gameScore);
   }
 
   private startGame() {
@@ -197,7 +210,7 @@ export default class Lobby {
 
   private checkEnd() {
     if (!this.game.isEnded()) {
-      return;
+      return false;
     }
 
     if (IN_DEV) {
@@ -207,11 +220,13 @@ export default class Lobby {
       ));
     }
 
-    this.room?.emit('gameResults', this.game.gameScore);
+    this.emitGameResults();
     // TODO: Maybe we don't want to automaticly start another game? idk
     setTimeout(() => {
       this.startGame();
     }, 5000);
+
+    return true;
   }
 
   private resetGame() {

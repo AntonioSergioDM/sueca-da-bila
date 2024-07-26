@@ -39,4 +39,5 @@ export enum PlayErrors {
 
 export enum DenounceErrors {
   sameTeam = "That's your teammate, you idiot",
+  invalidPlayer = 'You are not a player!',
 }

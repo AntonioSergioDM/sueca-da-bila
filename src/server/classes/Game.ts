@@ -145,8 +145,7 @@ export default class Game {
     this.roundScore[winnerTeam] += points;
 
     // Reset the table
-    this.tableSuit = null;
-    this.onTable = [null, null, null, null];
+    this.resetTable();
 
     if (!this.decks[0].length) {
       this.end();
@@ -154,6 +153,11 @@ export default class Game {
       // The player that wins is the first to play
       this.currPlayer = winnerId;
     }
+  }
+
+  resetTable() {
+    this.tableSuit = null;
+    this.onTable = [null, null, null, null];
   }
 
   isEnded() {
@@ -243,6 +247,8 @@ export default class Game {
     this.currPlayer = -1;
     // all cards go away
     this.decks = [[], [], [], []];
+    // The table is cleaned
+    this.resetTable();
 
     // Check for "bandeira"
     let i = 0;
