@@ -12,6 +12,7 @@ type BottomPlayerProps = {
   isRgb?: boolean;
   isPlaying?: boolean;
   trumpCard: Card | null;
+  name: string;
   onPlayCard: (card: Card) => void;
 };
 
@@ -21,6 +22,7 @@ const BottomPlayer = (props: BottomPlayerProps) => {
     isRgb,
     trumpCard,
     isPlaying,
+    name,
     onPlayCard,
   } = props;
 
@@ -42,6 +44,7 @@ const BottomPlayer = (props: BottomPlayerProps) => {
         trumpCard={trumpCard}
         isPlaying={isPlaying}
         onClick={onPlayCard}
+        name={name}
       />
     </div>
   );

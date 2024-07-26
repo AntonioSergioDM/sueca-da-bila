@@ -8,12 +8,13 @@ import { useRouter } from 'next/router';
 import { useSnackbar } from 'notistack';
 
 import type { Card } from '@/shared/Card';
-import type { GameState, PlayerState } from '@/shared/GameTypes';
+import { PlayErrors, type GameState, type PlayerState } from '@/shared/GameTypes';
 import type { LobbyPlayerState, ServerToClientEvents } from '@/shared/SocketTypes';
 
 import { useSocket } from '../tools/useSocket';
 import LobbyRoom from '../components/LobbyRoom';
 import FramerGame from '../components/FramerGame';
+import RenounceOverlay from '../components/RenounceOverlay';
 
 const Game = () => {
   const { enqueueSnackbar } = useSnackbar();
@@ -24,6 +25,7 @@ const Game = () => {
   const [players, setPlayers] = useState<LobbyPlayerState[]>([]);
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [playerState, setPlayerState] = useState<PlayerState | null>(null);
+  const [renounceOverlayState, setRenounceOverlayState] = useState<Card | null>(null);
 
   const lobbyHash = useMemo(() => {
     if (!query?.lobby) return '';
@@ -61,13 +63,17 @@ const Game = () => {
     setPlayerState(newPlayerState);
   }, []);
 
-  const onPlayCard = useCallback((card: Card) => {
-    socket.emit('playCard', card, (res) => {
+  const onPlayCard = useCallback((card: Card, allowRenounce = false) => {
+    socket.emit('playCard', card, allowRenounce, (res) => {
       if (typeof res.error === 'string') {
         enqueueSnackbar({
           variant: 'error',
           message: res.error,
         });
+
+        if (res.error === PlayErrors.mustAssist) {
+          setRenounceOverlayState(card);
+        }
       } else {
         setPlayerState(res.data);
       }
@@ -110,6 +116,7 @@ const Game = () => {
           playerState={playerState}
         />
       )}
+      <RenounceOverlay card={renounceOverlayState} onClose={() => setRenounceOverlayState(null)} onPlayCard={onPlayCard} />
     </>
   );
 };

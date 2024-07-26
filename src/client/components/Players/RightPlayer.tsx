@@ -10,6 +10,7 @@ type RightPlayerProps = {
   isRgb?: boolean;
   isPlaying?: boolean;
   trumpCard: Card | null;
+  name: string;
 };
 
 const RightPlayer = (props: RightPlayerProps) => {
@@ -18,6 +19,7 @@ const RightPlayer = (props: RightPlayerProps) => {
     cardNum,
     isPlaying,
     trumpCard,
+    name,
   } = props;
 
   const emptyCards = useMemo(() => {
@@ -36,6 +38,7 @@ const RightPlayer = (props: RightPlayerProps) => {
         cards={emptyCards}
         trumpCard={trumpCard}
         isPlaying={isPlaying}
+        name={name}
       />
     </div>
   );

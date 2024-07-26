@@ -1,4 +1,5 @@
 import type { GameState, Score, Table } from '@/shared/GameTypes';
+import { DenounceErrors, PlayErrors } from '@/shared/GameTypes';
 import type { Card } from '../../shared/Card';
 import { pointsOf, Suit } from '../../shared/Card';
 
@@ -22,6 +23,9 @@ export default class Game {
   /** stars as -1, switches to winnning team idx, until another teams wins an hand. Then it becomes numTeams */
   bandeira = -1;
 
+  /** renounce */
+  renounce: boolean[] = [false, false];
+
   /** each 'deck' corresponds to a player hand */
   decks: [Array<Card>, Array<Card>, Array<Card>, Array<Card>] = [[], [], [], []];
 
@@ -41,14 +45,15 @@ export default class Game {
   start() {
     this.roundScore = [0, 0];
     this.bandeira = -1;
+    this.renounce = [false, false, false, false];
     this.shuffleAndDistribute();
     this.chooseTrump();
     this.currPlayer = this.shufflePlayer;
   }
 
-  play(player: number, card: Card): string | true {
+  play(player: number, card: Card, allowRenounce = false): PlayErrors | true {
     if (player !== this.currPlayer) {
-      return 'Not your turn';
+      return PlayErrors.wrongTurn;
     }
 
     const { tableSuit } = this;
@@ -71,7 +76,7 @@ export default class Game {
     });
 
     if (foundIdx === -1) {
-      return 'Invalid card';
+      return PlayErrors.invalidCard;
     }
 
     // First card of the round
@@ -81,7 +86,11 @@ export default class Game {
 
     // One must always assist
     if ((card.suit !== this.tableSuit) && canAssist) {
-      return 'You must assist!';
+      if (!allowRenounce) {
+        return PlayErrors.mustAssist;
+      }
+
+      this.renounce[player] = true;
     }
 
     // From the hand to the table
@@ -136,8 +145,7 @@ export default class Game {
     this.roundScore[winnerTeam] += points;
 
     // Reset the table
-    this.tableSuit = null;
-    this.onTable = [null, null, null, null];
+    this.resetTable();
 
     if (!this.decks[0].length) {
       this.end();
@@ -147,8 +155,37 @@ export default class Game {
     }
   }
 
+  resetTable() {
+    this.tableSuit = null;
+    this.onTable = [null, null, null, null];
+  }
+
   isEnded() {
     return this.currPlayer === -1 && !this.decks[0].length;
+  }
+
+  denounce(playerIdx: number, denounceIdx: number): boolean | DenounceErrors {
+    if (playerIdx % Game.numTeams === denounceIdx % Game.numTeams) {
+      return DenounceErrors.sameTeam;
+    }
+
+    const score: Score = [0, 0];
+
+    // You are wrong - Lose 1 Game and keep playing
+    if (!this.renounce[denounceIdx]) {
+      score[playerIdx % Game.numTeams] = 50;
+      score[denounceIdx % Game.numTeams] = Game.maxPoints - 50;
+      this.gameScore.push(score);
+      return false;
+    }
+
+    // You are right - Win 4 Games
+    this.roundScore = [0, 0];
+    this.bandeira = playerIdx % Game.numTeams;
+    this.roundScore[playerIdx % Game.numTeams] = Game.maxPoints;
+    this.end();
+
+    return true;
   }
 
   // --------------- Private Methods --------------- //
@@ -208,6 +245,10 @@ export default class Game {
   private end() {
     // end game no one can play
     this.currPlayer = -1;
+    // all cards go away
+    this.decks = [[], [], [], []];
+    // The table is cleaned
+    this.resetTable();
 
     // Check for "bandeira"
     let i = 0;
