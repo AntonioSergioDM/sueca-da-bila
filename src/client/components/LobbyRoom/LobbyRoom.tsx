@@ -1,5 +1,4 @@
-/* eslint-disable react/no-array-index-key */
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import Link from 'next/link';
 import Image from 'next/image';
@@ -16,29 +15,24 @@ import type { LobbyPlayerState } from '@/shared/SocketTypes';
 
 import logo from '@/public/favicon.ico';
 
+import Chat from '../Chat';
 import ShareUrlButton from '../ShareUrlButton';
 import { useSocket } from '../../tools/useSocket';
 
 import LobbyRoomPlayer from './LobbyRoomPlayer';
 import LobbyRoomCounter from './LobbyRoomCounter';
-import Chat from '../Chat';
 
 type LobbyRoomProps = {
   lobbyHash: string;
+  playerIdx: number;
   players: LobbyPlayerState[];
 };
 
-const LobbyRoom = ({ lobbyHash, players }: LobbyRoomProps) => {
+const LobbyRoom = ({ lobbyHash, playerIdx, players }: LobbyRoomProps) => {
   const socket = useSocket();
 
-  const [playerIndex, setPlayerIndex] = useState<number | null>(null);
-
   const onReady = useCallback(() => {
-    socket.emit('playerReady', (newPlayerIndex) => {
-      if (typeof newPlayerIndex === 'number') {
-        setPlayerIndex(newPlayerIndex);
-      }
-    });
+    socket.emit('playerReady', () => null);
   }, [socket]);
 
   const missingPlayers = useMemo(() => {
@@ -47,9 +41,7 @@ const LobbyRoom = ({ lobbyHash, players }: LobbyRoomProps) => {
     return Array(4 - players.length).fill(0);
   }, [players.length]);
 
-  const isReady = useMemo(() => (
-    typeof playerIndex === 'number' && players[playerIndex].ready
-  ), [playerIndex, players]);
+  const isReady = useMemo(() => (players[playerIdx]?.ready), [playerIdx, players]);
 
   return (
     <Box
@@ -58,7 +50,6 @@ const LobbyRoom = ({ lobbyHash, players }: LobbyRoomProps) => {
       display="flex"
       alignItems="center"
       justifyContent="center"
-      border="1px solid"
     >
       <Stack gap={1} width="100%" maxWidth={500}>
         <Link href={SiteRoute.Home} style={{ alignSelf: 'center' }}>
@@ -77,10 +68,12 @@ const LobbyRoom = ({ lobbyHash, players }: LobbyRoomProps) => {
         >
           <Stack direction="row" gap={2}>
             {players.map((player, idx) => (
+              // eslint-disable-next-line react/no-array-index-key
               <LobbyRoomPlayer key={`${player.name}-${idx}`} name={player.name} ready={player.ready} />
             ))}
 
             {missingPlayers.map((_, idx) => (
+              // eslint-disable-next-line react/no-array-index-key
               <LobbyRoomPlayer key={idx} />
             ))}
           </Stack>
@@ -99,7 +92,7 @@ const LobbyRoom = ({ lobbyHash, players }: LobbyRoomProps) => {
         </Card>
       </Stack>
 
-      <Chat />
+      <Chat playerName={players[playerIdx]?.name || '-'} />
     </Box>
   );
 };

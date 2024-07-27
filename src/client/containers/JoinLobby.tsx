@@ -86,29 +86,36 @@ const JoinLobby = () => {
       </Stack>
 
       <FormWrapper {...form} onSuccess={onJoin}>
-        <TextField
-          autoFocus
-          label="Player name"
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton
-                  onClick={handleClearUsername}
-                  edge="end"
-                >
-                  <RefreshIcon />
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-          {...form.register('playerName', { required: true })}
-        />
-        <TextField
-          label="Lobby hash"
-          {...form.register('lobbyHash', { required: true })}
-        />
+        <Stack
+          gap={3}
+          useFlexGap
+          maxWidth={350}
+          direction="column"
+        >
+          <TextField
+            autoFocus
+            label="Player name"
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={handleClearUsername}
+                    edge="end"
+                  >
+                    <RefreshIcon />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+            {...form.register('playerName', { required: true })}
+          />
+          <TextField
+            label="Lobby hash"
+            {...form.register('lobbyHash', { required: true })}
+          />
 
-        <Button type="submit">Join</Button>
+          <Button type="submit">Join</Button>
+        </Stack>
       </FormWrapper>
     </Layout>
   );

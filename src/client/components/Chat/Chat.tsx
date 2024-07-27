@@ -1,82 +1,96 @@
 import {
-  useCallback, useEffect, useRef, useState,
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
 } from 'react';
-import type { KeyboardEventHandler } from 'react';
+
+import { useForm, type SubmitHandler } from 'react-hook-form';
 
 import {
-  Box, IconButton, InputAdornment, TextField,
+  TextField,
+  IconButton,
+  InputAdornment,
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 
-import dayjs from 'dayjs';
-
-import type { LobbyChatMsg, ServerToClientEvents } from '@/shared/SocketTypes';
-
 import { useSocket } from '@/client/tools/useSocket';
+import type { LobbyChatMsg, ServerToClientEvents } from '@/shared/SocketTypes';
+import FormWrapper from '../FormWrapper';
+import ChatMsg from './ChatMsg';
 
-const Chat = () => {
+type ChatProps = {
+  playerName: string;
+};
+
+const Chat = ({ playerName }: ChatProps) => {
   const socket = useSocket();
-  const inputRef = useRef<HTMLInputElement>();
 
+  const scrollToRef = useRef<HTMLDivElement>(null);
   const [msgs, setMsgs] = useState<LobbyChatMsg[]>([]);
 
-  const onChatMsg = useCallback<ServerToClientEvents['chatMsg']>((msg) => {
+  const form = useForm<{ chat: string }>({ defaultValues: { chat: '' } });
+
+  const onSendMessage = useCallback<SubmitHandler<{ chat: string }>>(({ chat }) => {
+    if (chat.trim()) {
+      socket.emit('chatMsg', chat.trim());
+    }
+
+    form.reset();
+  }, [form, socket]);
+
+  const onNewChatMsg = useCallback<ServerToClientEvents['chatMsg']>((msg) => {
     setMsgs((prev) => ([...prev, msg]));
   }, []);
 
-  const handleSubmit = useCallback(() => {
-    if (inputRef.current?.value) {
-      socket.emit('chatMsg', inputRef.current.value.trim());
-      inputRef.current.value = '';
-    }
-  }, [socket]);
-
   useEffect(() => {
-    socket.on('chatMsg', onChatMsg);
+    socket.on('chatMsg', onNewChatMsg);
 
     return () => {
-      socket.off('chatMsg', onChatMsg);
+      socket.off('chatMsg', onNewChatMsg);
     };
-  }, [onChatMsg, socket]);
+  }, [onNewChatMsg, socket]);
 
-  const handleKeyDown = useCallback<KeyboardEventHandler<HTMLDivElement>>((event) => {
-    if (event.key === 'Enter') {
-      handleSubmit();
+  useEffect(() => {
+    if (scrollToRef.current) {
+      scrollToRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }
-  }, [handleSubmit]);
+  }, [msgs.length]);
 
   return (
-    <Box position="absolute" width={400} height={300} right={0} bottom={0} margin={5} display="flex" flexDirection="column" border="1px solid red">
-      <Box border="1px solid green" flexGrow={1} overflow="auto">
-        {msgs.map((msg) => (
-          <Box display="flex" flexDirection="row" key={`${msg.time}${msg.from}`}>
-            <Box mr={1}>{dayjs(msg.time).format('HH:mm:ss')}</Box>
-            <Box mr={1}>{msg.from || ''}</Box>
-            <Box>{msg.msg}</Box>
-          </Box>
+    <div className="fixed bottom-4 right-4 w-[500px] h-[400px] rounded-md bg-[rgba(39,21,21,0.7)] border border-red-950 border-solid p-2 flex flex-col justify-between gap-2 z-50">
+      <div className="grow flex flex-col gap-[1px] overflow-y-auto">
+        {msgs.map((msg, idx) => (
+          <ChatMsg
+            key={`${msg.time}${msg.from}`}
+            msg={msg}
+            isPlayer={msg.from === playerName}
+            connectNext={!!msg.from && msgs[idx + 1]?.from === msg.from}
+            connectPrevious={!!msg.from && msgs[idx - 1]?.from === msg.from}
+          />
         ))}
-      </Box>
-      <Box>
+
+        <div ref={scrollToRef} />
+      </div>
+
+      <FormWrapper {...form} onSuccess={onSendMessage}>
         <TextField
-          inputRef={inputRef}
-          placeholder="Type your message here"
+          {...form.register('chat')}
           fullWidth
-          onKeyDown={handleKeyDown}
+          color="info"
+          variant="standard"
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
-                <IconButton
-                  onClick={handleSubmit}
-                  edge="end"
-                >
+                <IconButton type="submit">
                   <SendIcon />
                 </IconButton>
               </InputAdornment>
             ),
           }}
         />
-      </Box>
-    </Box>
+      </FormWrapper>
+    </div>
   );
 };
 

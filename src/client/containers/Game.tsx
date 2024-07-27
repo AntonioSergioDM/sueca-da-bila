@@ -100,7 +100,13 @@ const Game = () => {
 
   return (
     <>
-      {!playerState && <LobbyRoom players={players} lobbyHash={lobbyHash} />}
+      {!playerState && (
+        <LobbyRoom
+          players={players}
+          playerIdx={0} // TODO: well how about this? we need the idx before the game starts
+          lobbyHash={lobbyHash}
+        />
+      )}
 
       {(!!playerState && !!gameState && players.length >= 4) && (
         <FramerGame
