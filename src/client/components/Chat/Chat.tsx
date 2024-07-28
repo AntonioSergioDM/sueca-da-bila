@@ -1,8 +1,7 @@
 import {
-  useState,
+  useRef,
   useEffect,
   useCallback,
-  useRef,
 } from 'react';
 
 import { useForm, type SubmitHandler } from 'react-hook-form';
@@ -15,41 +14,35 @@ import {
 import SendIcon from '@mui/icons-material/Send';
 
 import { useSocket } from '@/client/tools/useSocket';
-import type { LobbyChatMsg, ServerToClientEvents } from '@/shared/SocketTypes';
+import { useAppChat } from '@/client/redux/store';
+
 import FormWrapper from '../FormWrapper';
+
 import ChatMsg from './ChatMsg';
+import { useChatListeners } from './useChatListeners';
 
 type ChatProps = {
-  playerName: string;
+  playerIdx: number;
 };
 
-const Chat = ({ playerName }: ChatProps) => {
+const Chat = ({ playerIdx }: ChatProps) => {
+  useChatListeners();
   const socket = useSocket();
+  const { msgs } = useAppChat();
 
   const scrollToRef = useRef<HTMLDivElement>(null);
-  const [msgs, setMsgs] = useState<LobbyChatMsg[]>([]);
 
   const form = useForm<{ chat: string }>({ defaultValues: { chat: '' } });
 
   const onSendMessage = useCallback<SubmitHandler<{ chat: string }>>(({ chat }) => {
-    if (chat.trim()) {
-      socket.emit('chatMsg', chat.trim());
+    const trimmed = chat.trim();
+
+    if (trimmed) {
+      socket.emit('chat:sendMsg', trimmed);
     }
 
     form.reset();
   }, [form, socket]);
-
-  const onNewChatMsg = useCallback<ServerToClientEvents['chatMsg']>((msg) => {
-    setMsgs((prev) => ([...prev, msg]));
-  }, []);
-
-  useEffect(() => {
-    socket.on('chatMsg', onNewChatMsg);
-
-    return () => {
-      socket.off('chatMsg', onNewChatMsg);
-    };
-  }, [onNewChatMsg, socket]);
 
   useEffect(() => {
     if (scrollToRef.current) {
@@ -60,15 +53,24 @@ const Chat = ({ playerName }: ChatProps) => {
   return (
     <div className="fixed bottom-4 right-4 w-[500px] h-[400px] rounded-md bg-[rgba(39,21,21,0.7)] border border-red-950 border-solid p-2 flex flex-col justify-between gap-2 z-50">
       <div className="grow flex flex-col gap-[1px] overflow-y-auto">
-        {msgs.map((msg, idx) => (
-          <ChatMsg
-            key={`${msg.time}${msg.from}`}
-            msg={msg}
-            isPlayer={msg.from === playerName}
-            connectNext={!!msg.from && msgs[idx + 1]?.from === msg.from}
-            connectPrevious={!!msg.from && msgs[idx - 1]?.from === msg.from}
-          />
-        ))}
+        {msgs.map((msg, idx) => {
+          const isPlayer = 'playerIdx' in msg;
+
+          const nextMsg = msgs[idx + 1] || undefined;
+          const connectNext = !!nextMsg && isPlayer && 'playerIdx' in nextMsg && nextMsg?.playerIdx === msg.playerIdx;
+          const previousMsg = msgs[idx - 1] || undefined;
+          const connectPrevious = !!previousMsg && isPlayer && 'playerIdx' in previousMsg && previousMsg?.playerIdx === msg.playerIdx;
+
+          return (
+            <ChatMsg
+              key={`${msg.timestamp}${isPlayer ? msg.playerIdx : '-'}`}
+              msg={msg}
+              connectNext={connectNext}
+              connectPrevious={connectPrevious}
+              isTheGuy={isPlayer && msg.playerIdx === playerIdx}
+            />
+          );
+        })}
 
         <div ref={scrollToRef} />
       </div>

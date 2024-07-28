@@ -10,11 +10,12 @@ import {
   uniqueNamesGenerator,
 } from 'unique-names-generator';
 
-import type { LobbyChatMsg, ServerToClientEvents, SocketData } from '@/shared/SocketTypes';
+import type { ServerToClientEvents, SocketData } from '@/shared/SocketTypes';
 
 import { IN_DEV } from '@/globals';
 import type { PlayerState } from '@/shared/GameTypes';
 import { cardName, Suit, type Card } from '@/shared/Card';
+import { ChatPlayerMsg, ChatSystemMsg } from '@/shared/Chat';
 
 import Game from './Game';
 import type Player from './Player';
@@ -54,12 +55,12 @@ export default class Lobby {
   }
 
   async removePlayer(playerId: string) {
-    const founIdx = this.players.findIndex((p) => p.id === playerId);
-    if (founIdx === -1) {
+    const playerIdx = this.players.findIndex((p) => p.id === playerId);
+    if (playerIdx === -1) {
       return;
     }
 
-    const player = this.players.splice(founIdx, 1)[0];
+    const player = this.players.splice(playerIdx, 1)[0];
 
     await player.leaveRoom(this.hash);
 
@@ -77,7 +78,7 @@ export default class Lobby {
       return;
     }
 
-    this.emitChatMsg({ from: null, msg: `Player '${player.name}' left!` });
+    this.emitChatPlayerJoined(playerIdx);
     this.emitLobbyUpdate();
     this.resetGame();
   }
@@ -97,7 +98,9 @@ export default class Lobby {
       console.info(this.players.reduce((info, p, idx) => (`${info}       ${idx}.  ${p.name} (ID: ${p.id})\n`), ''));
     }
 
-    this.emitChatMsg({ from: null, msg: `Player '${player.name}' just joined!` });
+    const playerIdx = this.players.findIndex((x) => x.id === player.id);
+
+    this.emitChatPlayerJoined(playerIdx);
 
     return true;
   }
@@ -186,12 +189,29 @@ export default class Lobby {
     this.room?.emit('gameChange', this.game.getState());
   }
 
-  emitChatMsg(data: Omit<LobbyChatMsg, 'time'>) {
-    this.room?.emit('chatMsg', { ...data, time: new Date().toISOString() });
+  emitChatPlayerMsg(playerIdx: number, content: string) {
+    this.room?.emit('chat:playerMsg', new ChatPlayerMsg(playerIdx, content));
+  }
+
+  emitChatPlayerJoined(playerIdx: number) {
+    this.room?.emit('chat:systemMsg', new ChatSystemMsg('playerJoined', playerIdx));
+  }
+
+  emitChatPlayerLeft(playerIdx: number) {
+    this.room?.emit('chat:systemMsg', new ChatSystemMsg('playerLeft', playerIdx));
+  }
+
+  emitChatGameStart() {
+    this.room?.emit('chat:systemMsg', new ChatSystemMsg('gameStarted'));
+  }
+
+  emitChatGameEnd() {
+    this.room?.emit('chat:systemMsg', new ChatSystemMsg('gameEnded'));
   }
 
   private startGame() {
     this.game.start();
+    this.emitChatGameStart();
 
     if (IN_DEV) {
       console.info(`♠️ ♦️ Game started on Lobby ${this.hash} ♣️ ♥️\n`);
@@ -221,6 +241,7 @@ export default class Lobby {
     }
 
     this.room?.emit('gameReset');
+    this.emitChatGameEnd();
     this.emitLobbyUpdate();
   }
 }

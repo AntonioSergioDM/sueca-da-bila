@@ -4,13 +4,15 @@ import { useDispatch, useSelector, useStore } from 'react-redux';
 
 import { IN_DEV } from '@/globals';
 
-import gameSlice from './game/gameSlice';
+import gameSlice from './gameSlice';
+import chatSlice from './chatSlice';
 
 export const makeStore = (_: Context) => (
   configureStore({
     devTools: IN_DEV,
     reducer: {
       [gameSlice.name]: gameSlice.reducer,
+      [chatSlice.name]: chatSlice.reducer,
     },
   })
 );
@@ -25,3 +27,7 @@ export const useAppSelector = useSelector.withTypes<RootState>();
 export const useAppStore = useStore.withTypes<AppStore>();
 
 export const reduxWrapper = createWrapper<AppStore>(makeStore, { debug: IN_DEV });
+
+// REDUCERS HOOKS
+export const useAppGame = () => useAppSelector((state) => state.game);
+export const useAppChat = () => useAppSelector((state) => state.chat);

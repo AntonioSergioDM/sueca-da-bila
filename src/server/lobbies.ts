@@ -133,7 +133,7 @@ export const leaveLobby = (socket: OurServerSocket): ClientToServerEvents['leave
   }
 );
 
-export const onChatMsg = (socket: OurServerSocket): ClientToServerEvents['chatMsg'] => (
+export const onChatMsg = (socket: OurServerSocket): ClientToServerEvents['chat:sendMsg'] => (
   (msg) => {
     if (typeof msg !== 'string' || !msg.trim() || !socket.data.lobbyHash || !socket.data.playerId) {
       return;
@@ -144,12 +144,12 @@ export const onChatMsg = (socket: OurServerSocket): ClientToServerEvents['chatMs
       return;
     }
 
-    const player = lobby.players.find((p) => p.id === socket.data.playerId);
+    const playerIdx = lobby.players.findIndex((p) => p.id === socket.data.playerId);
 
-    if (!player) {
+    if (playerIdx === -1) {
       return;
     }
 
-    lobby.emitChatMsg({ from: player.name, msg });
+    lobby.emitChatPlayerMsg(playerIdx, msg);
   }
 );

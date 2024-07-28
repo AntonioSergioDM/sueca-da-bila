@@ -94,7 +94,7 @@ const LobbyRoom = ({ lobbyHash, playerIdx, players }: LobbyRoomProps) => {
         </Card>
       </Stack>
 
-      <Chat playerName={players[playerIdx]?.name || '-'} />
+      <Chat playerIdx={playerIdx} />
     </Box>
   );
 };

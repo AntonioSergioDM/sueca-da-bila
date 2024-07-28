@@ -75,7 +75,9 @@ const SocketHandler = (_: NextApiRequest, res: SocketIOResponse) => {
       socket.on('leaveLobby', leaveLobby(socket));
       socket.on('playCard', playCard(socket));
       socket.on('lobbyPlayers', lobbyPlayers(socket));
-      socket.on('chatMsg', onChatMsg(socket));
+
+      // chat listeners
+      socket.on('chat:sendMsg', onChatMsg(socket));
     }
   });
 
