@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 
 import { AnimatePresence } from 'framer-motion';
 
-import type { GameState } from '@/shared/GameTypes';
+import { useGameTable } from '@/client/redux/store';
 import getRandomRange from '@/client/tools/getRandomRange';
 
 import TableCard, { type TableCardVariants } from './TableCard';
@@ -12,7 +12,6 @@ type TableProps = {
   rightIdx: number;
   bottomIdx: number;
   leftIdx: number;
-  gameState: GameState;
 };
 
 const Table = (props: TableProps) => {
@@ -21,24 +20,17 @@ const Table = (props: TableProps) => {
     rightIdx,
     bottomIdx,
     leftIdx,
-    gameState,
   } = props;
 
-  const topCard = useMemo(() => (
-    gameState.table[topIdx] || null
-  ), [gameState.table, topIdx]);
+  const table = useGameTable();
 
-  const rightCard = useMemo(() => (
-    gameState.table[rightIdx] || null
-  ), [gameState.table, rightIdx]);
+  const topCard = useMemo(() => (table[topIdx] || null), [table, topIdx]);
 
-  const bottomCard = useMemo(() => (
-    gameState.table[bottomIdx] || null
-  ), [gameState.table, bottomIdx]);
+  const rightCard = useMemo(() => (table[rightIdx] || null), [table, rightIdx]);
 
-  const leftCard = useMemo(() => (
-    gameState.table[leftIdx] || null
-  ), [gameState.table, leftIdx]);
+  const bottomCard = useMemo(() => (table[bottomIdx] || null), [table, bottomIdx]);
+
+  const leftCard = useMemo(() => (table[leftIdx] || null), [table, leftIdx]);
 
   const topVariant = useMemo((): TableCardVariants => {
     const randY = getRandomRange(25, 75);

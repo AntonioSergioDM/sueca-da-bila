@@ -5,7 +5,7 @@ import type { GameState, PlayerState, Score } from '@/shared/GameTypes';
 import type { Card } from './Card';
 import type { ChatPlayerMsg, ChatSystemMsg } from './Chat';
 
-export type LobbyPlayerState = { name: string; ready: boolean };
+export type LobbyPlayerState = { idx: number; name: string; ready: boolean };
 
 export interface ServerToClientEvents {
   error: () => void;
@@ -27,7 +27,7 @@ type GenericCallbackResponse<T = any> = {
 };
 
 export interface ClientToServerEvents {
-  joinLobby: (lobbyHash: string, playerName: string, callback: (res: GenericCallbackResponse<{ lobbyHash: string }>) => void) => void;
+  joinLobby: (lobbyHash: string, playerName: string, callback: (res: GenericCallbackResponse<{ lobbyHash: string; playerIdx: number }>) => void) => void;
   createLobby: (playerName: string, callback: (res: GenericCallbackResponse<{ lobbyHash: string }>) => void) => void;
   leaveLobby: () => void;
   lobbyPlayers: (lobbyHash: string, callback: (lobbyHash: string, players: LobbyPlayerState[]) => void) => void;

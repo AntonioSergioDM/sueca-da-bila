@@ -1,8 +1,7 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect } from 'react';
 
 import Link from 'next/link';
 import { useSnackbar } from 'notistack';
-import { useRouter } from 'next/router';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 
 import {
@@ -17,30 +16,26 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 
 import { SiteRoute } from '@/shared/Routes';
 
-import Layout from '../components/Layout';
 import { useSocket } from '../tools/useSocket';
-import FormWrapper from '../components/FormWrapper';
 import { playerNameTools } from '../tools/playerNameTools';
+
+import Layout from './Layout';
+import FormWrapper from './FormWrapper';
+import { joinGame } from '../redux/gameSlice';
+import { useAppDispatch } from '../redux/store';
 
 type FormValues = {
   playerName: string;
   lobbyHash: string;
 };
 
-const JoinLobby = () => {
-  // detect if this player already has an assigned playername in this browser
-  // fill it by default in the playerName
+type JoiningFormProps = {
+  lobbyHash: string;
+};
+
+const JoiningForm = ({ lobbyHash }: JoiningFormProps) => {
+  const dispatch = useAppDispatch();
   const { enqueueSnackbar } = useSnackbar();
-
-  const { query, push } = useRouter();
-
-  const urlLobby = useMemo(() => {
-    if (!query?.lobby) return '';
-
-    if (typeof query?.lobby === 'string') return query.lobby;
-
-    return '';
-  }, [query.lobby]);
 
   const form = useForm<FormValues>({
     defaultValues: {
@@ -50,10 +45,8 @@ const JoinLobby = () => {
   });
 
   useEffect(() => {
-    if (urlLobby) {
-      form.reset({ lobbyHash: urlLobby });
-    }
-  }, [form, urlLobby]);
+    if (lobbyHash) form.reset({ lobbyHash });
+  }, [form, lobbyHash]);
 
   const socket = useSocket();
 
@@ -67,10 +60,10 @@ const JoinLobby = () => {
           message: res.error,
         });
       } else {
-        void push(`${SiteRoute.Game}/${res.data.lobbyHash}`);
+        dispatch(joinGame(res.data.playerIdx));
       }
     });
-  }, [enqueueSnackbar, push, socket]);
+  }, [dispatch, enqueueSnackbar, socket]);
 
   const handleClearUsername = useCallback(() => {
     playerNameTools.reset();
@@ -79,7 +72,7 @@ const JoinLobby = () => {
 
   return (
     <Layout>
-      <Stack alignItems="flex-start">
+      <Stack alignSelf="flex-start">
         <IconButton LinkComponent={Link} href={SiteRoute.Home}>
           <ArrowBack />
         </IconButton>
@@ -121,4 +114,4 @@ const JoinLobby = () => {
   );
 };
 
-export default JoinLobby;
+export default JoiningForm;

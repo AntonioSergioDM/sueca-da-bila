@@ -1,23 +1,17 @@
-import {
-  useMemo,
-  useState,
-  useEffect,
-  useCallback,
-} from 'react';
+/* eslint-disable object-curly-newline */
+import { useCallback, useMemo } from 'react';
 
 import { useSnackbar } from 'notistack';
 
 import {
-  type Score,
   getNextPlayer,
-  type GameState,
-  type PlayerState,
   getPreviousPlayer,
 } from '@/shared/GameTypes';
-import { type Card } from '@/shared/Card';
-import type { LobbyPlayerState, ServerToClientEvents } from '@/shared/SocketTypes';
+import type { Card } from '@/shared/Card';
 
 import { useSocket } from '@/client/tools/useSocket';
+import { setPlayerState } from '@/client/redux/gameSlice';
+import { useAppDispatch, useGameState, useGamePlayer } from '@/client/redux/store';
 
 import ScorePad from '../ScorePad';
 import TopPlayer from '../Players/TopPlayer';
@@ -27,62 +21,44 @@ import BottomPlayer from '../Players/BottomPlayer';
 
 import Table from './Table';
 
-type FramerGameProps = {
-  gameState: GameState;
-  playerState: PlayerState;
-  players: LobbyPlayerState[];
-  onPlayCard: (card: Card) => void;
-};
-
-const FramerGame = (props: FramerGameProps) => {
-  const {
-    gameState,
-    // players,
-    onPlayCard,
-    playerState,
-  } = props;
-
+const FramerGame = () => {
   const socket = useSocket();
+  const dispatch = useAppDispatch();
   const { enqueueSnackbar } = useSnackbar();
 
-  const [gameResults, setGameResults] = useState<Score[] | []>([]);
-
-  const onGameResults = useCallback<ServerToClientEvents['gameResults']>((results) => {
-    if (!results.length) {
-      return;
-    }
-    setGameResults(results);
-    const myTeam = playerState.index % 2;
-    const result = results[results.length - 1] || [0, 0];
-    enqueueSnackbar({
-      variant: 'info',
-      message: `Game ended: You ${result[myTeam] > result[myTeam ? 0 : 1] ? 'won' : 'lost'}! Points: ${result[myTeam]}`,
-    });
-  }, [enqueueSnackbar, playerState.index]);
-
-  useEffect(() => {
-    socket.on('gameResults', onGameResults);
-
-    return () => {
-      socket.off('gameResults', onGameResults);
-    };
-  }, [onGameResults, socket]);
-
   const {
-    topIdx,
-    rightIdx,
-    bottomIdx,
-    leftIdx,
-  } = useMemo(() => ({
-    topIdx: getNextPlayer(getNextPlayer(playerState.index)),
-    rightIdx: getNextPlayer(playerState.index),
-    bottomIdx: playerState.index,
-    leftIdx: getPreviousPlayer(playerState.index),
-  }), [playerState.index]);
+    hands,
+    trumpCard,
+    currentPlayer,
+    shufflePlayer,
+  } = useGameState();
+  console.log('🚀 ~ FramerGame ~ hands:', hands);
+
+  const { index } = useGamePlayer()!; // if we are in FramerGame, there should be a player state
+
+  const onPlayCard = useCallback((card: Card) => {
+    socket.emit('playCard', card, (res) => {
+      if (typeof res.error === 'string') {
+        enqueueSnackbar({
+          variant: 'error',
+          message: res.error,
+        });
+      } else {
+        dispatch(setPlayerState(res.data));
+      }
+    });
+  }, [dispatch, enqueueSnackbar, socket]);
+
+  const { topIdx, rightIdx, bottomIdx, leftIdx } = useMemo(() => ({
+    topIdx: getNextPlayer(getNextPlayer(index)),
+    rightIdx: getNextPlayer(index),
+    bottomIdx: index,
+    leftIdx: getPreviousPlayer(index),
+  }), [index]);
 
   const hasTrumpIdx = useMemo(() => (
-    getPreviousPlayer(gameState.shufflePlayer)
-  ), [gameState.shufflePlayer]);
+    getPreviousPlayer(shufflePlayer)
+  ), [shufflePlayer]);
 
   return (
     <div className="relative w-screen h-screen bg-red-950 p-2">
@@ -90,33 +66,32 @@ const FramerGame = (props: FramerGameProps) => {
         topIdx={topIdx}
         leftIdx={leftIdx}
         rightIdx={rightIdx}
-        gameState={gameState}
         bottomIdx={bottomIdx}
       />
 
       <TopPlayer
-        isPlaying={gameState.currentPlayer === topIdx}
-        cardNum={gameState.hands[topIdx]}
-        trumpCard={(hasTrumpIdx === topIdx && gameState.trumpCard) || null}
+        isPlaying={currentPlayer === topIdx}
+        cardNum={hands[topIdx]}
+        trumpCard={(hasTrumpIdx === topIdx && trumpCard) || null}
       />
       <RightPlayer
-        isPlaying={gameState.currentPlayer === rightIdx}
-        cardNum={gameState.hands[rightIdx]}
-        trumpCard={(hasTrumpIdx === rightIdx && gameState.trumpCard) || null}
-      />
-      <BottomPlayer
-        onPlayCard={onPlayCard}
-        isPlaying={gameState.currentPlayer === bottomIdx}
-        cards={playerState.hand}
-        trumpCard={(hasTrumpIdx === bottomIdx && gameState.trumpCard) || null}
+        isPlaying={currentPlayer === rightIdx}
+        cardNum={hands[rightIdx]}
+        trumpCard={(hasTrumpIdx === rightIdx && trumpCard) || null}
       />
       <LeftPlayer
-        isPlaying={gameState.currentPlayer === leftIdx}
-        cardNum={gameState.hands[leftIdx]}
-        trumpCard={(hasTrumpIdx === leftIdx && gameState.trumpCard) || null}
+        isPlaying={currentPlayer === leftIdx}
+        cardNum={hands[leftIdx]}
+        trumpCard={(hasTrumpIdx === leftIdx && trumpCard) || null}
       />
 
-      <ScorePad gameResults={gameResults} playerIdx={playerState.index} />
+      <BottomPlayer
+        onPlayCard={onPlayCard}
+        isPlaying={currentPlayer === bottomIdx}
+        trumpCard={(hasTrumpIdx === bottomIdx && trumpCard) || null}
+      />
+
+      <ScorePad />
     </div>
   );
 };

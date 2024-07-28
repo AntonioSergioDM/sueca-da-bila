@@ -18,7 +18,9 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import { SiteRoute } from '@/shared/Routes';
 
 import Layout from '../components/Layout';
+import { joinGame } from '../redux/gameSlice';
 import { useSocket } from '../tools/useSocket';
+import { useAppDispatch } from '../redux/store';
 import FormWrapper from '../components/FormWrapper';
 import { playerNameTools } from '../tools/playerNameTools';
 
@@ -27,9 +29,10 @@ type FormValues = {
 };
 
 const CreateLobby = () => {
-  const { enqueueSnackbar } = useSnackbar();
   const socket = useSocket();
   const { push } = useRouter();
+  const dispatch = useAppDispatch();
+  const { enqueueSnackbar } = useSnackbar();
 
   const form = useForm<FormValues>({
     defaultValues: { playerName: playerNameTools.get() },
@@ -45,10 +48,11 @@ const CreateLobby = () => {
           message: res.error,
         });
       } else {
+        dispatch(joinGame(0));
         void push(`${SiteRoute.Game}/${res.data.lobbyHash}`);
       }
     });
-  }, [enqueueSnackbar, push, socket]);
+  }, [dispatch, enqueueSnackbar, push, socket]);
 
   const handleClearUsername = useCallback(() => {
     playerNameTools.reset();
@@ -57,7 +61,7 @@ const CreateLobby = () => {
 
   return (
     <Layout>
-      <Stack alignItems="flex-start">
+      <Stack alignSelf="flex-start">
         <IconButton LinkComponent={Link} href={SiteRoute.Home}>
           <ArrowBack />
         </IconButton>

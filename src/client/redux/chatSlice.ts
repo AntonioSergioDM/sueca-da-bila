@@ -1,7 +1,14 @@
 /* eslint-disable no-param-reassign */
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
-import type { ChatMsg } from '@/shared/Chat';
+type ChatMsgType = 'playerMsg' | 'playerJoined' | 'playerLeft' | 'gameStarted' | 'gameEnded';
+
+export type ChatMsg = {
+  timestamp: string;
+  playerIdx?: number;
+  content?: string;
+  type: ChatMsgType;
+};
 
 export type ChatState = {
   msgs: ChatMsg[];

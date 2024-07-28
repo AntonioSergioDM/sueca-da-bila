@@ -25,8 +25,10 @@ export const joinLobby = (socket: OurServerSocket): ClientToServerEvents['joinLo
     socket.data.lobbyHash = lobby.hash;
     socket.data.playerId = player.id;
 
+    const playerIdx = lobby.players.findIndex((p) => p.id === player.id);
+
     // returning lobby hash so the client knows it was successful at least
-    return callback({ data: { lobbyHash: lobby.hash } });
+    return callback({ data: { lobbyHash: lobby.hash, playerIdx } });
   }
 );
 
@@ -92,7 +94,14 @@ export const lobbyPlayers = (socket: OurServerSocket): ClientToServerEvents['lob
     }
 
     // returning lobby hash so the client knows it was successful at least
-    return callback(lobby.hash, lobby.players.map((p) => ({ name: p.name || '____', ready: p.ready })));
+    return callback(
+      lobby.hash,
+      lobby.players.map((p, idx) => ({
+        name: p.name || '____',
+        ready: p.ready,
+        idx,
+      })),
+    );
   }
 );
 

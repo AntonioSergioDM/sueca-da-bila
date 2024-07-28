@@ -3,8 +3,8 @@
 export class ChatMsg {
   timestamp: string;
 
-  constructor() {
-    this.timestamp = new Date().toISOString();
+  constructor(timestamp?: string) {
+    this.timestamp = timestamp || new Date().toISOString();
   }
 }
 
@@ -13,8 +13,8 @@ export class ChatPlayerMsg extends ChatMsg {
 
   content: string;
 
-  constructor(idx: number, content: string) {
-    super();
+  constructor(idx: number, content: string, timestamp?: string) {
+    super(timestamp);
 
     this.playerIdx = idx;
     this.content = content;
@@ -28,8 +28,8 @@ export class ChatSystemMsg extends ChatMsg {
 
   playerIdx?: number;
 
-  constructor(type: SystemMsgType, idx?: number) {
-    super();
+  constructor(type: SystemMsgType, idx?: number, timestamp?: string) {
+    super(timestamp);
 
     this.type = type;
     this.playerIdx = idx;

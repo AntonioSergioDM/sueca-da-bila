@@ -18,7 +18,7 @@ const Home = () => (
     <Button
       color="secondary"
       LinkComponent={Link}
-      href={SiteRoute.JoinLobby}
+      href={SiteRoute.Game}
     >
       Join lobby
     </Button>

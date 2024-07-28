@@ -1,12 +1,14 @@
+import { useMemo } from 'react';
+
 import clsx from 'clsx';
 import dayjs from 'dayjs';
 import { Typography } from '@mui/material';
-import { ChatPlayerMsg, ChatSystemMsg, type ChatMsg as SentChatMsg } from '@/shared/Chat';
-import { useAppGame } from '@/client/redux/store';
-import { useMemo } from 'react';
+
+import { useGameState } from '@/client/redux/store';
+import type { ChatMsg as ReduxChatMsg } from '@/client/redux/chatSlice';
 
 type ChatMsgProps = {
-  msg: SentChatMsg;
+  msg: ReduxChatMsg;
   /** The player in front of the goddamn screen */
   isTheGuy: boolean;
   connectNext: boolean;
@@ -21,10 +23,10 @@ const ChatMsg = (props: ChatMsgProps) => {
     connectPrevious,
   } = props;
 
-  const { players } = useAppGame();
+  const { players } = useGameState();
 
   const systemMsgContent = useMemo(() => {
-    if (!(msg instanceof ChatSystemMsg)) return '';
+    if (msg.type === 'playerMsg') return '';
 
     switch (msg.type) {
       case 'gameEnded':
@@ -51,11 +53,11 @@ const ChatMsg = (props: ChatMsgProps) => {
   return (
     <div className="flex flex-col px-2">
 
-      {msg instanceof ChatPlayerMsg ? (
+      {msg.type === 'playerMsg' ? (
         <>
           {!connectPrevious && (
             <Typography variant="caption" textAlign={isTheGuy ? 'right' : 'left'}>
-              {players[msg.playerIdx].name}
+              {players[msg.playerIdx!].name}
             </Typography>
           )}
 

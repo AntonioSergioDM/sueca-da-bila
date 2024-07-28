@@ -182,7 +182,7 @@ export default class Lobby {
   }
 
   emitLobbyUpdate() {
-    this.room?.emit('playersListUpdated', this.players.map((p) => ({ name: p.name, ready: p.ready })));
+    this.room?.emit('playersListUpdated', this.players.map((p, idx) => ({ idx, name: p.name, ready: p.ready })));
   }
 
   emitGameChange() {

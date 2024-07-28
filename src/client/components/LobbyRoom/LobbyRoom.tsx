@@ -11,9 +11,10 @@ import {
 } from '@mui/material';
 
 import { SiteRoute } from '@/shared/Routes';
-import type { LobbyPlayerState } from '@/shared/SocketTypes';
 
 import logo from '@/public/favicon.ico';
+
+import { useGamePlayer, useGamePlayers } from '@/client/redux/store';
 
 import Chat from '../Chat';
 import ShareUrlButton from '../ShareUrlButton';
@@ -24,12 +25,13 @@ import LobbyRoomCounter from './LobbyRoomCounter';
 
 type LobbyRoomProps = {
   lobbyHash: string;
-  playerIdx: number;
-  players: LobbyPlayerState[];
 };
 
-const LobbyRoom = ({ lobbyHash, playerIdx, players }: LobbyRoomProps) => {
+const LobbyRoom = ({ lobbyHash }: LobbyRoomProps) => {
   const socket = useSocket();
+
+  const player = useGamePlayer()!;
+  const players = useGamePlayers();
 
   const onReady = useCallback(() => {
     socket.emit('playerReady', () => null);
@@ -41,9 +43,7 @@ const LobbyRoom = ({ lobbyHash, playerIdx, players }: LobbyRoomProps) => {
     return Array(4 - players.length).fill(0);
   }, [players.length]);
 
-  // TODO: keep in mind idx is 0 coming from the parent component
-  // we need to have proper idx
-  const isReady = useMemo(() => (players[playerIdx]?.ready), [playerIdx, players]);
+  const isReady = useMemo(() => (players[player.index]?.ready), [player.index, players]);
 
   return (
     <Box
@@ -69,9 +69,12 @@ const LobbyRoom = ({ lobbyHash, playerIdx, players }: LobbyRoomProps) => {
           }}
         >
           <Stack direction="row" gap={2}>
-            {players.map((player, idx) => (
-              // eslint-disable-next-line react/no-array-index-key
-              <LobbyRoomPlayer key={`${player.name}-${idx}`} name={player.name} ready={player.ready} />
+            {players.map((x) => (
+              <LobbyRoomPlayer
+                key={`${x.name}-${x.idx}`}
+                name={x.name}
+                ready={x.ready}
+              />
             ))}
 
             {missingPlayers.map((_, idx) => (
@@ -94,7 +97,7 @@ const LobbyRoom = ({ lobbyHash, playerIdx, players }: LobbyRoomProps) => {
         </Card>
       </Stack>
 
-      <Chat playerIdx={playerIdx} />
+      <Chat />
     </Box>
   );
 };

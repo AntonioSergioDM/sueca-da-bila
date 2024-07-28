@@ -11,7 +11,7 @@ type ShareUrlButtonProps = {
 
 const ShareUrlButton = ({ lobbyHash }: ShareUrlButtonProps) => {
   const shareURL = useMemo(() => (
-    `${process.env.NEXT_PUBLIC_URL}${SiteRoute.JoinLobby}/${lobbyHash}`
+    `${process.env.NEXT_PUBLIC_URL}${SiteRoute.Game}/${lobbyHash}`
   ), [lobbyHash]);
 
   const onCopy = useCallback(async () => {

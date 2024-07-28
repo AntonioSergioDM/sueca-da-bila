@@ -14,21 +14,18 @@ import {
 import SendIcon from '@mui/icons-material/Send';
 
 import { useSocket } from '@/client/tools/useSocket';
-import { useAppChat } from '@/client/redux/store';
+import { useGameChat, useGamePlayer } from '@/client/redux/store';
+import { useChatListeners } from '@/client/tools/useChatListeners';
 
 import FormWrapper from '../FormWrapper';
 
 import ChatMsg from './ChatMsg';
-import { useChatListeners } from './useChatListeners';
 
-type ChatProps = {
-  playerIdx: number;
-};
-
-const Chat = ({ playerIdx }: ChatProps) => {
+const Chat = () => {
   useChatListeners();
   const socket = useSocket();
-  const { msgs } = useAppChat();
+  const { msgs } = useGameChat();
+  const { index } = useGamePlayer()!;
 
   const scrollToRef = useRef<HTMLDivElement>(null);
 
@@ -54,20 +51,23 @@ const Chat = ({ playerIdx }: ChatProps) => {
     <div className="fixed bottom-4 right-4 w-[500px] h-[400px] rounded-md bg-[rgba(39,21,21,0.7)] border border-red-950 border-solid p-2 flex flex-col justify-between gap-2 z-50">
       <div className="grow flex flex-col gap-[1px] overflow-y-auto">
         {msgs.map((msg, idx) => {
-          const isPlayer = 'playerIdx' in msg;
+          const isPlayerMsg = msg.type === 'playerMsg';
 
           const nextMsg = msgs[idx + 1] || undefined;
-          const connectNext = !!nextMsg && isPlayer && 'playerIdx' in nextMsg && nextMsg?.playerIdx === msg.playerIdx;
+          const nextIsPlayerMsg = nextMsg?.type === 'playerMsg';
+          const connectNext = !!nextMsg && isPlayerMsg && nextIsPlayerMsg && nextMsg?.playerIdx === msg.playerIdx;
+
           const previousMsg = msgs[idx - 1] || undefined;
-          const connectPrevious = !!previousMsg && isPlayer && 'playerIdx' in previousMsg && previousMsg?.playerIdx === msg.playerIdx;
+          const previousIsPlayerMsg = previousMsg?.type === 'playerMsg';
+          const connectPrevious = !!previousMsg && isPlayerMsg && previousIsPlayerMsg && previousMsg?.playerIdx === msg.playerIdx;
 
           return (
             <ChatMsg
-              key={`${msg.timestamp}${isPlayer ? msg.playerIdx : '-'}`}
+              key={`${msg.timestamp}${isPlayerMsg ? msg.playerIdx : '-'}`}
               msg={msg}
               connectNext={connectNext}
               connectPrevious={connectPrevious}
-              isTheGuy={isPlayer && msg.playerIdx === playerIdx}
+              isTheGuy={isPlayerMsg && msg.playerIdx === index}
             />
           );
         })}

@@ -1,15 +1,16 @@
 import { useMemo } from 'react';
-import { bestOfThree } from '@/client/tools/printScore';
-import type { Score } from '@/shared/GameTypes';
+
 import { Paper, Typography } from '@mui/material';
 
-type TableProps = {
-  gameResults: Score[];
-  playerIdx: number;
-};
+import { bestOfThree } from '@/client/tools/printScore';
 
-const ScorePad = ({ gameResults, playerIdx: playerOrder }: TableProps) => {
-  const text = useMemo(() => bestOfThree(gameResults, playerOrder % 2 === 1), [gameResults, playerOrder]);
+import { useGamePlayer, useGameScore } from '../redux/store';
+
+const ScorePad = () => {
+  const { index } = useGamePlayer()!; // if we are in FramerGame, there should be a player state
+  const score = useGameScore();
+
+  const text = useMemo(() => bestOfThree(score, index % 2 === 1), [score, index]);
 
   return (
     <div className="fixed bottom-0 left-0 bg-amber-800">

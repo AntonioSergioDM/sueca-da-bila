@@ -29,5 +29,10 @@ export const useAppStore = useStore.withTypes<AppStore>();
 export const reduxWrapper = createWrapper<AppStore>(makeStore, { debug: IN_DEV });
 
 // REDUCERS HOOKS
-export const useAppGame = () => useAppSelector((state) => state.game);
-export const useAppChat = () => useAppSelector((state) => state.chat);
+export const useGameState = () => useAppSelector((state) => state.game);
+export const useGameChat = () => useAppSelector((state) => state.chat);
+
+export const useGamePlayers = () => useAppSelector((state) => state.game.players);
+export const useGamePlayer = () => useAppSelector((state) => state.game.player);
+export const useGameScore = () => useAppSelector((state) => state.game.score);
+export const useGameTable = () => useAppSelector((state) => state.game.table);
