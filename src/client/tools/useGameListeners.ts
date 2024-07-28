@@ -38,11 +38,11 @@ export const useGameListeners = (lobbyHash: string) => {
   }, [dispatch]);
 
   const onGameChange = useCallback<ServerToClientEvents['gameChange']>((newGameState) => {
-    if (newGameState.currentPlayer) dispatch(setCurrentPlayer(newGameState.currentPlayer));
-    if (newGameState.hands) dispatch(setHands(newGameState.hands));
-    if (newGameState.shufflePlayer) dispatch(setShufflePlayer(newGameState.shufflePlayer));
-    if (newGameState.table) dispatch(setTable(newGameState.table));
-    if (newGameState.trumpCard) dispatch(setTrumpCard(newGameState.trumpCard));
+    dispatch(setCurrentPlayer(newGameState.currentPlayer));
+    dispatch(setHands(newGameState.hands));
+    dispatch(setShufflePlayer(newGameState.shufflePlayer));
+    dispatch(setTable(newGameState.table));
+    dispatch(setTrumpCard(newGameState.trumpCard));
   }, [dispatch]);
 
   const onGameReset = useCallback<ServerToClientEvents['gameReset']>(() => {
