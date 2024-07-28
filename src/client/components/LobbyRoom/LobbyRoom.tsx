@@ -41,6 +41,8 @@ const LobbyRoom = ({ lobbyHash, playerIdx, players }: LobbyRoomProps) => {
     return Array(4 - players.length).fill(0);
   }, [players.length]);
 
+  // TODO: keep in mind idx is 0 coming from the parent component
+  // we need to have proper idx
   const isReady = useMemo(() => (players[playerIdx]?.ready), [playerIdx, players]);
 
   return (
