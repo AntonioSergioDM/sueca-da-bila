@@ -4,6 +4,7 @@ import type { ClientToServerEvents, OurServerSocket } from '@/shared/SocketTypes
 import type { Card } from '@/shared/Card';
 import Lobby from './classes/Lobby';
 import Player from './classes/Player';
+import { PlayErrors } from '@/shared/GameTypes';
 
 export const joinLobby = (socket: OurServerSocket): ClientToServerEvents['joinLobby'] => (
   async (lobbyHash, playerName, callback) => {
@@ -106,7 +107,7 @@ export const lobbyPlayers = (socket: OurServerSocket): ClientToServerEvents['lob
 );
 
 export const playCard = (socket: OurServerSocket): ClientToServerEvents['playCard'] => (
-  (card: Card, callback) => {
+  (card: Card, allowRenounce, callback) => {
     if (!socket?.data?.lobbyHash || !socket.data.playerId) {
       callback({ error: 'Invalid lobby' });
       return;
@@ -118,7 +119,7 @@ export const playCard = (socket: OurServerSocket): ClientToServerEvents['playCar
       return;
     }
 
-    const playCardRes = lobby.playCard(socket.data.playerId, card);
+    const playCardRes = lobby.playCard(socket.data.playerId, card, allowRenounce);
     if (typeof playCardRes === 'string') {
       callback({ error: playCardRes });
     } else {
@@ -139,6 +140,21 @@ export const leaveLobby = (socket: OurServerSocket): ClientToServerEvents['leave
     }
 
     await lobby.removePlayer(socket.data.playerId);
+  }
+);
+
+export const denounce = (socket: OurServerSocket): ClientToServerEvents['denounce'] => (
+  (idx) => {
+    if (!socket?.data?.lobbyHash || !socket.data.playerId) {
+      return;
+    }
+
+    const lobby = Lobby.lobbies.get(socket.data.lobbyHash);
+    if (!lobby) {
+      return;
+    }
+
+    lobby.denounce(socket.data.playerId, idx);
   }
 );
 

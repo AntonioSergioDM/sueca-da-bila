@@ -13,7 +13,7 @@ import {
 import type { ServerToClientEvents, SocketData } from '@/shared/SocketTypes';
 
 import { IN_DEV } from '@/globals';
-import type { PlayerState } from '@/shared/GameTypes';
+import { DenounceErrors, type PlayerState } from '@/shared/GameTypes';
 import { cardName, Suit, type Card } from '@/shared/Card';
 import { ChatPlayerMsg, ChatSystemMsg } from '@/shared/Chat';
 
@@ -127,7 +127,7 @@ export default class Lobby {
     }
   }
 
-  playCard(playerId: string, card: Card): PlayerState | string {
+  playCard(playerId: string, card: Card, allowRenounce = false): PlayerState | string {
     const foundIdx = this.players.findIndex((p) => p.id === playerId);
     if (foundIdx === -1) {
       return 'Invalid player';
@@ -137,7 +137,7 @@ export default class Lobby {
       console.info(`😉 PlayerID: ${playerId} played ${cardName(card)} of ${Suit[card.suit]}\n`);
     }
 
-    const playRes = this.game.play(foundIdx, card);
+    const playRes = this.game.play(foundIdx, card, allowRenounce);
 
     if (typeof playRes === 'string') {
       return playRes;
@@ -165,20 +165,24 @@ export default class Lobby {
   endTurn() {
     this.game.clearTable();
     this.emitGameChange();
-    if (this.game.isEnded()) {
-      if (IN_DEV) {
-        console.info(this.game.gameScore.reduce(
-          (str, s, i) => `${str}${i.toString().padStart(7, ' ')}:  ${s[0].toString().padStart(3, ' ')} | ${s[1].toString().padStart(3, ' ')}\n`,
-          'Results: Even | Odd \n',
-        ));
-      }
+    this.checkEnd();
+  }
 
-      this.room?.emit('gameResults', this.game.gameScore);
-      // TODO: Maybe we don't want to automaticly start another game? idk
-      setTimeout(() => {
-        this.startGame();
-      }, 5000);
+  denounce(playerId: string, denounceIdx: number) {
+    const playerIdx = this.players.findIndex((p) => p.id === playerId);
+
+    if (playerIdx === -1) {
+      return DenounceErrors.invalidPlayer;
     }
+
+    const res = this.game.denounce(playerIdx, denounceIdx);
+
+    // The game may have ended
+    if (!this.checkEnd()) {
+      // Give an update even if the game continues
+      this.emitGameResults();
+    }
+    return res;
   }
 
   emitLobbyUpdate() {
@@ -187,6 +191,10 @@ export default class Lobby {
 
   emitGameChange() {
     this.room?.emit('gameChange', this.game.getState());
+  }
+
+  emitGameResults() {
+    this.room?.emit('gameResults', this.game.gameScore);
   }
 
   emitChatPlayerMsg(playerIdx: number, content: string) {
@@ -225,6 +233,27 @@ export default class Lobby {
     });
 
     this.emitGameChange();
+  }
+
+  private checkEnd() {
+    if (!this.game.isEnded()) {
+      return false;
+    }
+
+    if (IN_DEV) {
+      console.info(this.game.gameScore.reduce(
+        (str, s, i) => `${str}${i.toString().padStart(7, ' ')}:  ${s[0].toString().padStart(3, ' ')} | ${s[1].toString().padStart(3, ' ')}\n`,
+        'Results: Even | Odd \n',
+      ));
+    }
+
+    this.emitGameResults();
+    // TODO: Maybe we don't want to automaticly start another game? idk
+    setTimeout(() => {
+      this.startGame();
+    }, 5000);
+
+    return true;
   }
 
   private resetGame() {

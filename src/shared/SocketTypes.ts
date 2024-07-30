@@ -32,7 +32,8 @@ export interface ClientToServerEvents {
   leaveLobby: () => void;
   lobbyPlayers: (lobbyHash: string, callback: (lobbyHash: string, players: LobbyPlayerState[]) => void) => void;
   playerReady: (callback: (playerIndex: number | null) => void) => void;
-  playCard: (card: Card, callback: (res: GenericCallbackResponse<PlayerState | null>) => void) => void;
+  playCard: (card: Card, allowRenounce: boolean, callback: (res: GenericCallbackResponse<PlayerState | null>) => void) => void;
+  denounce: (playerId: number) => void;
   ['chat:sendMsg']: (msg: string) => void;
 }
 

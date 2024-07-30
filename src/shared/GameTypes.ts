@@ -30,3 +30,14 @@ export const getNextPlayer = (idx: number) => {
 
   return idx + 1;
 };
+
+export enum PlayErrors {
+  mustAssist = 'You must assist!',
+  invalidCard = 'Invalid card',
+  wrongTurn = 'Not your turn',
+}
+
+export enum DenounceErrors {
+  sameTeam = "That's your teammate, you idiot",
+  invalidPlayer = 'You are not a player!',
+}

@@ -9,6 +9,7 @@ import {
 } from '@/shared/GameTypes';
 import type { Card } from '@/shared/Card';
 
+import { Button } from '@mui/material';
 import { useSocket } from '@/client/tools/useSocket';
 import { setPlayerState } from '@/client/redux/gameSlice';
 import { useAppDispatch, useGameState, useGamePlayer } from '@/client/redux/store';
@@ -20,6 +21,7 @@ import RightPlayer from '../Players/RightPlayer';
 import BottomPlayer from '../Players/BottomPlayer';
 
 import Table from './Table';
+import DenounceOverlay from '../DenounceOverlay';
 
 const FramerGame = () => {
   const socket = useSocket();
@@ -33,6 +35,8 @@ const FramerGame = () => {
     shufflePlayer,
   } = useGameState();
   console.log('🚀 ~ FramerGame ~ hands:', hands);
+  const [gameResults, setGameResults] = useState<Score[] | []>([]);
+  const [denounceOverlayState, setDenounceOverlayState] = useState(false);
 
   const { index } = useGamePlayer()!; // if we are in FramerGame, there should be a player state
 
@@ -46,6 +50,10 @@ const FramerGame = () => {
       } else {
         dispatch(setPlayerState(res.data));
       }
+  const denounce = (idx) => {
+    console.log('denounce' + idx);
+    socket.emit('denounce', idx);
+  };
     });
   }, [dispatch, enqueueSnackbar, socket]);
 
@@ -62,12 +70,20 @@ const FramerGame = () => {
 
   return (
     <div className="relative w-screen h-screen bg-red-950 p-2">
+      <DenounceOverlay
+        open={denounceOverlayState}
+        onClose={() => setDenounceOverlayState(false)}
+        denounce={denounce}
+        playerLeft={{ name: players[leftIdx].name, index: leftIdx }}
+        playerRight={{ name: players[rightIdx].name, index: rightIdx }}
+      />
       <Table
         topIdx={topIdx}
         leftIdx={leftIdx}
         rightIdx={rightIdx}
         bottomIdx={bottomIdx}
       />
+      <Button className="w-fit" onClick={() => { setDenounceOverlayState(true) }} color="primary">I spoted a cheater</Button>
 
       <TopPlayer
         isPlaying={currentPlayer === topIdx}

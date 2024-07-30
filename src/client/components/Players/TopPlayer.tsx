@@ -11,6 +11,7 @@ type TopPlayerProps = {
   isRgb?: boolean;
   isPlaying?: boolean;
   trumpCard: Card | null;
+  name: string;
 };
 
 const TopPlayer = (props: TopPlayerProps) => {
@@ -19,6 +20,7 @@ const TopPlayer = (props: TopPlayerProps) => {
     cardNum,
     isPlaying,
     trumpCard,
+    name,
   } = props;
 
   const emptyCards = useMemo(() => {
@@ -35,6 +37,7 @@ const TopPlayer = (props: TopPlayerProps) => {
         cards={emptyCards}
         trumpCard={trumpCard}
         isPlaying={isPlaying}
+        name={name}
       />
     </div>
   );
