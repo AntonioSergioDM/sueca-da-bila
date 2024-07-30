@@ -36,12 +36,12 @@ const ChatMsg = (props: ChatMsgProps) => {
         return 'Game started';
 
       case 'playerJoined':
-        if (typeof msg.playerIdx !== 'number') return 'Player joined!';
+        if (typeof msg.playerIdx !== 'number' || !players[msg.playerIdx]) return 'Player joined!';
 
         return `Player ${players[msg.playerIdx].name} joined!`;
 
       case 'playerLeft':
-        if (typeof msg.playerIdx !== 'number') return 'Player left!';
+        if (typeof msg.playerIdx !== 'number' || !players[msg.playerIdx]) return 'Player left!';
 
         return `Player ${players[msg.playerIdx].name} left!`;
 
@@ -57,7 +57,7 @@ const ChatMsg = (props: ChatMsgProps) => {
         <>
           {!connectPrevious && (
             <Typography variant="caption" textAlign={isTheGuy ? 'right' : 'left'}>
-              {players[msg.playerIdx!].name}
+              {players[msg.playerIdx!]?.name}
             </Typography>
           )}
 

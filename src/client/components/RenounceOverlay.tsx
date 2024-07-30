@@ -1,5 +1,6 @@
-import type { Card } from '@/shared/Card';
 import { Box, Button, Modal } from '@mui/material';
+
+import type { Card } from '@/shared/Card';
 
 type LayoutProps = {
   card: Card | null;
@@ -12,6 +13,7 @@ const RenounceOverlay = ({ card, onClose, onPlayCard }: LayoutProps) => {
     if (card !== null) {
       onPlayCard(card, true);
     }
+
     onClose();
   };
 

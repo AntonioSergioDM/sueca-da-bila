@@ -8,9 +8,15 @@ type LayoutProps = {
   denounce: (idx: number) => void;
 };
 
-const DenounceOverlay = ({
-  open, onClose, denounce, playerLeft, playerRight,
-}: LayoutProps) => {
+const DenounceOverlay = (props: LayoutProps) => {
+  const {
+    open,
+    onClose,
+    denounce,
+    playerLeft,
+    playerRight,
+  } = props;
+
   const denounceThem = (idx: number) => (() => {
     denounce(idx);
     onClose();

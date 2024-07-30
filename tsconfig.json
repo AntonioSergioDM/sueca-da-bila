@@ -52,7 +52,7 @@
     "src",
     "next.config.js",
     "next-env.d.ts"
-  ],
+, "manifest.ts"  ],
   "exclude": [
     "node_modules",
   ]

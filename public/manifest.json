@@ -1,0 +1,17 @@
+{
+  "name": "Sueca da Bila",
+  "short_name": "SuecaBila",
+  "description": "Sueca da Bila",
+  "start_url": "/",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#121212",
+  "theme_color": "#5D0F80",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    }
+  ]
+}

@@ -46,59 +46,61 @@ const LobbyRoom = ({ lobbyHash }: LobbyRoomProps) => {
   const isReady = useMemo(() => (players[player.index]?.ready), [player.index, players]);
 
   return (
-    <Box
-      margin={5}
-      height="90vh"
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-    >
-      <Stack gap={1} width="100%" maxWidth={500}>
-        <Link href={SiteRoute.Home} style={{ alignSelf: 'center' }}>
-          <Image alt="Logo" src={logo} priority width={200} height={200} />
-        </Link>
+    <>
+      <Box
+        margin={5}
+        height="90vh"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <Stack gap={1} width="100%" maxWidth={500}>
+          <Link href={SiteRoute.Home} style={{ alignSelf: 'center' }}>
+            <Image alt="Logo" src={logo} priority width={200} height={200} />
+          </Link>
 
-        <ShareUrlButton lobbyHash={lobbyHash} />
+          <ShareUrlButton lobbyHash={lobbyHash} />
 
-        <Card
-          sx={{
-            p: 2,
-            gap: 3,
-            display: 'flex',
-            flexDirection: 'column',
-          }}
-        >
-          <Stack direction="row" gap={2}>
-            {players.map((x) => (
-              <LobbyRoomPlayer
-                key={`${x.name}-${x.idx}`}
-                name={x.name}
-                ready={x.ready}
-              />
-            ))}
+          <Card
+            sx={{
+              p: 2,
+              gap: 3,
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
+            <Stack direction="row" gap={2}>
+              {players.map((x) => (
+                <LobbyRoomPlayer
+                  key={`${x.name}-${x.idx}`}
+                  name={x.name}
+                  ready={x.ready}
+                />
+              ))}
 
-            {missingPlayers.map((_, idx) => (
-              // eslint-disable-next-line react/no-array-index-key
-              <LobbyRoomPlayer key={idx} />
-            ))}
-          </Stack>
+              {missingPlayers.map((_, idx) => (
+                // eslint-disable-next-line react/no-array-index-key
+                <LobbyRoomPlayer key={idx} />
+              ))}
+            </Stack>
 
-          <Stack px={1} direction="row" gap={5} justifyContent="space-between" alignItems="center">
-            <Button
-              onClick={onReady}
-              disabled={isReady}
-              sx={{ maxWidth: 100 }}
-            >
-              Ready
-            </Button>
+            <Stack px={1} direction="row" gap={5} justifyContent="space-between" alignItems="center">
+              <Button
+                onClick={onReady}
+                disabled={isReady}
+                sx={{ maxWidth: 100 }}
+              >
+                Ready
+              </Button>
 
-            <LobbyRoomCounter value={players.filter((p) => p.ready).length} outOf={4} />
-          </Stack>
-        </Card>
-      </Stack>
+              <LobbyRoomCounter value={players.filter((p) => p.ready).length} outOf={4} />
+            </Stack>
+          </Card>
+        </Stack>
+      </Box>
 
       <Chat />
-    </Box>
+    </>
   );
 };
 
