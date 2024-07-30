@@ -100,26 +100,26 @@ const FramerGame = () => {
       <Button className="w-fit" onClick={onOpenDenounceOverlay} color="primary">I spoted a cheater</Button>
 
       <TopPlayer
-        name={players[topIdx].name}
+        name={players[topIdx]?.name}
         isPlaying={currentPlayer === topIdx}
-        cardNum={hands[topIdx]}
+        cardNum={hands[topIdx] || 0}
         trumpCard={(hasTrumpIdx === topIdx && trumpCard) || null}
       />
       <RightPlayer
-        name={players[rightIdx].name}
+        name={players[rightIdx]?.name}
         isPlaying={currentPlayer === rightIdx}
-        cardNum={hands[rightIdx]}
+        cardNum={hands[rightIdx] || 0}
         trumpCard={(hasTrumpIdx === rightIdx && trumpCard) || null}
       />
       <LeftPlayer
-        name={players[leftIdx].name}
+        name={players[leftIdx]?.name}
         isPlaying={currentPlayer === leftIdx}
-        cardNum={hands[leftIdx]}
+        cardNum={hands[leftIdx] || 0}
         trumpCard={(hasTrumpIdx === leftIdx && trumpCard) || null}
       />
 
       <BottomPlayer
-        name={players[bottomIdx].name}
+        name={players[bottomIdx]?.name}
         isPlaying={currentPlayer === bottomIdx}
         trumpCard={(hasTrumpIdx === bottomIdx && trumpCard) || null}
         onPlayCard={onPlayCard}
@@ -137,8 +137,8 @@ const FramerGame = () => {
         open={denounceOverlayState}
         onClose={onCloseDenounceOverlay}
         denounce={denounce}
-        playerLeft={{ name: players[leftIdx].name, index: leftIdx }}
-        playerRight={{ name: players[rightIdx].name, index: rightIdx }}
+        playerLeft={{ name: players[leftIdx]?.name, index: leftIdx }}
+        playerRight={{ name: players[rightIdx]?.name, index: rightIdx }}
       />
     </div>
   );

@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import clsx from 'clsx';
 import SendIcon from '@mui/icons-material/Send';
-import { ChatBubble } from '@mui/icons-material';
+import { ChatBubble, Minimize } from '@mui/icons-material';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 
 import { useSocket } from '@/client/tools/useSocket';
@@ -111,7 +111,7 @@ const Chat = () => {
       )}
 
       <IconButton className="absolute left-0 top-0" onClick={onToggleChat}>
-        <ChatBubble />
+        {open ? <Minimize /> : <ChatBubble />}
       </IconButton>
     </div>
   );
