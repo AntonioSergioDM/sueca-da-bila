@@ -7,12 +7,12 @@ let socket: Socket<ServerToClientEvents, ClientToServerEvents>;
 
 const getSocket = () => {
   if (socket) { return socket; }
-  console.log('Initializing socket');
+  console.info('Initializing socket');
 
   socket = io({ path: '/api/socket', autoConnect: false });
 
   socket.on('connect', () => {
-    console.log('connected');
+    console.info('connected');
   });
 
   socket.connect();

@@ -4,13 +4,21 @@ import { Server } from 'socket.io';
 import type { Http2Server } from 'http2';
 import { instrument } from '@socket.io/admin-ui';
 
+import {
+  ADMIN_PASSWORD,
+  ADMIN_USERNAME,
+  IN_DEV,
+  NEXT_URL,
+} from '@/globals';
+
+import bcrypt from 'bcryptjs';
+import { SiteRoute } from '@/shared/Routes';
 import type {
   SocketData,
   InterServerEvents,
   ClientToServerEvents,
   ServerToClientEvents,
-} from '../shared/SocketTypes';
-import { IN_DEV } from '../globals';
+} from '@/shared/SocketTypes';
 
 import {
   createLobby,
@@ -42,7 +50,7 @@ const SocketHandler = (_: NextApiRequest, res: SocketIOResponse) => {
   io = new Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>(
     res.socket!.server,
     {
-      path: '/api/socket',
+      path: SiteRoute.Socket,
       addTrailingSlash: false,
       connectionStateRecovery: {
         // the backup duration of the sessions and the packets
@@ -79,13 +87,27 @@ const SocketHandler = (_: NextApiRequest, res: SocketIOResponse) => {
     }
   });
 
-  if (IN_DEV) {
+  if ((ADMIN_USERNAME && ADMIN_PASSWORD)) {
     instrument(io, {
-      auth: false,
-      mode: 'development',
+      namespaceName: '/admin',
+      auth: {
+        type: 'basic',
+        username: ADMIN_USERNAME,
+        password: bcrypt.hashSync(ADMIN_PASSWORD, 10),
+      },
+      mode: IN_DEV ? 'development' : 'production',
     });
 
-    console.info('\n\nAdmin website:    https://admin.socket.io \nURL:   http://localhost:3001\npath:   /api/socket\n\n');
+    console.info(`
+
+  Admin website:    ${NEXT_URL}/admin
+  URL:   ${NEXT_URL}
+  Username: ${ADMIN_USERNAME}
+  Password: ${ADMIN_PASSWORD.replace(/./g, '*')}
+  Admin namespace: /admin
+  Path:   ${SiteRoute.Socket}
+
+  `);
   }
 
   res.end();

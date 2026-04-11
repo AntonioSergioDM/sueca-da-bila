@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "env-cmd -f .env.dev next dev -p 3001",
+    "dev": "env-cmd -f .env.dev next dev -p 80",
     "build": "next build",
     "start": "next start",
     "errors:types": "tsc --noEmit && echo \"Type errors done\"",
@@ -19,6 +19,7 @@
     "@mui/material": "^5.16.4",
     "@mui/material-nextjs": "^5.16.4",
     "@socket.io/admin-ui": "^0.5.1",
+    "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
     "env-cmd": "^10.1.0",
     "framer-motion": "^11.3.8",

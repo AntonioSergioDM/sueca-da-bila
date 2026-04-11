@@ -3,4 +3,5 @@ export enum SiteRoute {
   CreateLobby = '/createLobby',
   JoinLobby = '/joinLobby',
   Game = '/game',
+  Socket = '/api/socket',
 }

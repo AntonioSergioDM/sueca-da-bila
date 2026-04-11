@@ -4,7 +4,6 @@ import type { ClientToServerEvents, OurServerSocket } from '@/shared/SocketTypes
 import type { Card } from '@/shared/Card';
 import Lobby from './classes/Lobby';
 import Player from './classes/Player';
-import { PlayErrors } from '@/shared/GameTypes';
 
 export const joinLobby = (socket: OurServerSocket): ClientToServerEvents['joinLobby'] => (
   async (lobbyHash, playerName, callback) => {

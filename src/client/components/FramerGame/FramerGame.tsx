@@ -50,8 +50,8 @@ const FramerGame = (props: FramerGameProps) => {
   const [gameResults, setGameResults] = useState<Score[] | []>([]);
   const [denounceOverlayState, setDenounceOverlayState] = useState(false);
 
-  const denounce = (idx) => {
-    console.log('denounce' + idx);
+  const denounce = (idx: number) => {
+    console.info(`denounce ${idx}`);
     socket.emit('denounce', idx);
   };
 
@@ -108,7 +108,7 @@ const FramerGame = (props: FramerGameProps) => {
         gameState={gameState}
         bottomIdx={bottomIdx}
       />
-      <Button className="w-fit" onClick={() => { setDenounceOverlayState(true) }} color="primary">I spoted a cheater</Button>
+      <Button className="w-fit" onClick={() => { setDenounceOverlayState(true); }} color="primary">I spoted a cheater</Button>
 
       <TopPlayer
         isPlaying={gameState.currentPlayer === topIdx}

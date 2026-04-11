@@ -10,11 +10,32 @@ function formatDate() {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}UTC`;
 }
 
+const requiredEnvVars = [
+  'NODE_ENV',
+  'NEXT_PUBLIC_URL',
+];
+
+// eslint-disable-next-line no-restricted-syntax
+for (const key of requiredEnvVars) {
+  if (!process.env[key]) {
+    throw new Error(`❌ Missing required environment variable: ${key}`);
+  }
+}
+
 /** @type {import('next').NextConfig} */
 module.exports = {
   reactStrictMode: false,
+  output: 'standalone',
   env: {
     NEXT_PUBLIC_URL: process.env.NEXT_PUBLIC_URL,
     BUILD_DATETIME: formatDate(),
+  },
+  rewrites() {
+    return [
+      {
+        source: '/admin',
+        destination: '/admin/index.html',
+      },
+    ];
   },
 };
