@@ -21,7 +21,7 @@ RUN npm run build
 FROM node:20-alpine AS runner
 WORKDIR /app
 
-ENV PORT 3000
+ENV PORT 3002
 
 # Create a secure user so you don't run as root
 RUN addgroup --system --gid 1001 nodejs
@@ -34,7 +34,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 USER nextjs
 
-EXPOSE 3000
+EXPOSE 3002
 
 # Next.js standalone mode generates a server.js file
 CMD ["node", "server.js"]
