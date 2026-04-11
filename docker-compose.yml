@@ -1,5 +1,5 @@
 services:
-  poker-app:
+  sueca-da-bila:
     build:
       context: .
       dockerfile: Dockerfile
