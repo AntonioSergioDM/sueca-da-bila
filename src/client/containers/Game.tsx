@@ -11,10 +11,13 @@ import type { Card } from '@/shared/Card';
 import { PlayErrors, type GameState, type PlayerState } from '@/shared/GameTypes';
 import type { LobbyPlayerState, ServerToClientEvents } from '@/shared/SocketTypes';
 
+import { Box } from '@mui/material';
+import { SoundBtn } from '@/client/components/SoundBtn';
 import { useSocket } from '../tools/useSocket';
 import LobbyRoom from '../components/LobbyRoom';
 import FramerGame from '../components/FramerGame';
 import RenounceOverlay from '../components/RenounceOverlay';
+import { sound } from '../tools/useSound';
 
 const Game = () => {
   const { enqueueSnackbar } = useSnackbar();
@@ -41,6 +44,8 @@ const Game = () => {
 
   const onGameChange = useCallback<ServerToClientEvents['gameChange']>((newGameState) => {
     setGameState(newGameState);
+    // Play the beep sound
+    sound('beep');
   }, []);
 
   useEffect(() => {
@@ -106,6 +111,13 @@ const Game = () => {
 
   return (
     <>
+      <Box className="absolute top-0 left-0 z-10 w-full p-4 flex flex-row gap-1 items-center justify-end">
+        {/* <ThemeBtn/> */}
+        <SoundBtn />
+        {/* <HelpBtn/> */}
+        {/* <ChatBtn/> */}
+      </Box>
+
       {!playerState && <LobbyRoom players={players} lobbyHash={lobbyHash} />}
 
       {(!!playerState && !!gameState && players.length >= 4) && (
