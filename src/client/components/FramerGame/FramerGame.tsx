@@ -108,7 +108,7 @@ const FramerGame = (props: FramerGameProps) => {
         gameState={gameState}
         bottomIdx={bottomIdx}
       />
-      <Button className="w-fit" onClick={() => { setDenounceOverlayState(true); }} color="primary">I spoted a cheater</Button>
+      <Button className="w-fit z-10" onClick={() => { setDenounceOverlayState(true); }} color="primary">I spoted a cheater</Button>
 
       <TopPlayer
         isPlaying={gameState.currentPlayer === topIdx}
