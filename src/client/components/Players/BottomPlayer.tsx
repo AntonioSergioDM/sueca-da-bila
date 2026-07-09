@@ -15,6 +15,7 @@ type BottomPlayerProps = {
   name: string;
   cardWidth?: number;
   canHideTrump?: boolean;
+  playableCards?: Set<string>;
   onPlayCard: (card: Card) => void;
   onHideTrump?: () => void;
 };
@@ -28,6 +29,7 @@ const BottomPlayer = (props: BottomPlayerProps) => {
     name,
     cardWidth = BIG_CARD,
     canHideTrump,
+    playableCards,
     onPlayCard,
     onHideTrump,
   } = props;
@@ -50,6 +52,7 @@ const BottomPlayer = (props: BottomPlayerProps) => {
         trumpCard={trumpCard}
         isPlaying={isPlaying}
         canHideTrump={canHideTrump}
+        playableCards={playableCards}
         onClick={onPlayCard}
         onHideTrump={onHideTrump}
         name={name}

@@ -20,6 +20,7 @@ import type { LobbyPlayerState, ServerToClientEvents } from '@/shared/SocketType
 import { Button } from '@mui/material';
 import { useSocket } from '@/client/tools/useSocket';
 import { useCardScale } from '@/client/tools/useCardScale';
+import getPlayableCards from '@/client/tools/getPlayableCards';
 import { BIG_CARD, SMALL_CARD } from '@/client/components/AnimatedCard';
 
 import ScorePad from '../ScorePad';
@@ -101,6 +102,13 @@ const FramerGame = (props: FramerGameProps) => {
     getPreviousPlayer(gameState.shufflePlayer)
   ), [gameState.shufflePlayer]);
 
+  // Cards the bottom player is allowed to play this turn, so only those glow.
+  const playableCards = useMemo(() => (
+    gameState.currentPlayer === bottomIdx
+      ? getPlayableCards(playerState.hand, gameState.table, gameState.currentPlayer)
+      : undefined
+  ), [gameState.currentPlayer, gameState.table, bottomIdx, playerState.hand]);
+
   return (
     <div className="relative w-screen h-[100dvh] overflow-hidden bg-red-950 p-2 touch-none select-none">
       <DenounceOverlay
@@ -146,6 +154,7 @@ const FramerGame = (props: FramerGameProps) => {
         onHideTrump={onHideTrump}
         canHideTrump={gameState.tricksCompleted >= 1}
         isPlaying={gameState.currentPlayer === bottomIdx}
+        playableCards={playableCards}
         cards={playerState.hand}
         trumpCard={(hasTrumpIdx === bottomIdx && gameState.trumpCard) || null}
         name={players[bottomIdx].name}
