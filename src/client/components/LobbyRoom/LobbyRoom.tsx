@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 
 import { SiteRoute } from '@/shared/Routes';
+import type { Score } from '@/shared/GameTypes';
 import type { LobbyPlayerState } from '@/shared/SocketTypes';
 
 import logo from '@/public/favicon.ico';
@@ -19,15 +20,23 @@ import logo from '@/public/favicon.ico';
 import ShareUrlButton from '../ShareUrlButton';
 import { useSocket } from '../../tools/useSocket';
 
+import Results from './Results';
 import LobbyRoomPlayer from './LobbyRoomPlayer';
 import LobbyRoomCounter from './LobbyRoomCounter';
 
 type LobbyRoomProps = {
   lobbyHash: string;
   players: LobbyPlayerState[];
+  gameResults?: Score[];
+  myIndex?: number | null;
 };
 
-const LobbyRoom = ({ lobbyHash, players }: LobbyRoomProps) => {
+const LobbyRoom = ({
+  lobbyHash,
+  players,
+  gameResults = [],
+  myIndex = null,
+}: LobbyRoomProps) => {
   const socket = useSocket();
 
   const [playerIndex, setPlayerIndex] = useState<number | null>(null);
@@ -58,10 +67,12 @@ const LobbyRoom = ({ lobbyHash, players }: LobbyRoomProps) => {
       alignItems="center"
       justifyContent="center"
     >
-      <Stack gap={1} width="100%" maxWidth={500}>
+      <Stack gap={1} width="100%" maxWidth={gameResults.length ? 600 : 500}>
         <Link href={SiteRoute.Home} style={{ alignSelf: 'center' }}>
           <Image alt="Logo" src={logo} priority width={200} height={200} />
         </Link>
+
+        <Results gameResults={gameResults} players={players} myIndex={myIndex} />
 
         <ShareUrlButton lobbyHash={lobbyHash} />
 

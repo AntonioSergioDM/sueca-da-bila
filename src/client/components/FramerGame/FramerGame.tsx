@@ -1,11 +1,7 @@
 import {
   useMemo,
   useState,
-  useEffect,
-  useCallback,
 } from 'react';
-
-import { useSnackbar } from 'notistack';
 
 import {
   type Score,
@@ -15,7 +11,7 @@ import {
   getPreviousPlayer,
 } from '@/shared/GameTypes';
 import { type Card } from '@/shared/Card';
-import type { LobbyPlayerState, ServerToClientEvents } from '@/shared/SocketTypes';
+import type { LobbyPlayerState } from '@/shared/SocketTypes';
 
 import { Button } from '@mui/material';
 import { useSocket } from '@/client/tools/useSocket';
@@ -37,6 +33,7 @@ type FramerGameProps = {
   gameState: GameState;
   players: LobbyPlayerState[];
   playerState: PlayerState;
+  gameResults: Score[];
   onPlayCard: (card: Card) => void;
   onHideTrump: () => void;
 };
@@ -48,43 +45,21 @@ const FramerGame = (props: FramerGameProps) => {
     onPlayCard,
     onHideTrump,
     playerState,
+    gameResults,
   } = props;
 
   const socket = useSocket();
-  const { enqueueSnackbar } = useSnackbar();
 
   const scale = useCardScale();
   const bigCard = useMemo(() => Math.round(BIG_CARD * scale), [scale]);
   const smallCard = useMemo(() => Math.round(SMALL_CARD * scale), [scale]);
 
-  const [gameResults, setGameResults] = useState<Score[] | []>([]);
   const [denounceOverlayState, setDenounceOverlayState] = useState(false);
 
   const denounce = (idx: number) => {
     console.info(`denounce ${idx}`);
     socket.emit('denounce', idx);
   };
-
-  const onGameResults = useCallback<ServerToClientEvents['gameResults']>((results) => {
-    if (!results.length) {
-      return;
-    }
-    setGameResults(results);
-    const myTeam = playerState.index % 2;
-    const result = results[results.length - 1] || [0, 0];
-    enqueueSnackbar({
-      variant: 'info',
-      message: `Game ended: You ${result[myTeam] > result[myTeam ? 0 : 1] ? 'won' : 'lost'}! Points: ${result[myTeam]}`,
-    });
-  }, [enqueueSnackbar, playerState.index]);
-
-  useEffect(() => {
-    socket.on('gameResults', onGameResults);
-
-    return () => {
-      socket.off('gameResults', onGameResults);
-    };
-  }, [onGameResults, socket]);
 
   const {
     topIdx,

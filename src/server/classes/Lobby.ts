@@ -284,10 +284,18 @@ export default class Lobby {
     }
 
     this.emitGameResults();
-    // TODO: Maybe we don't want to automaticly start another game? idk
+
+    // Show the final trick briefly, then send everyone back to the lobby to
+    // review the score/stats and ready up before the next game starts.
     setTimeout(() => {
-      this.startGame();
-    }, 5000);
+      this.players.forEach((p) => p.setReady(false));
+      this.room?.emit('gameReset');
+      this.emitLobbyUpdate();
+
+      if (IN_DEV) {
+        console.info(`🃏 Game over on Lobby ${this.hash}, waiting for players to ready up\n`);
+      }
+    }, 3000);
 
     return true;
   }
@@ -307,5 +315,7 @@ export default class Lobby {
 
     this.room?.emit('gameReset');
     this.emitLobbyUpdate();
+    // The score series belongs to the old game instance; clear it on clients too.
+    this.emitGameResults();
   }
 }
