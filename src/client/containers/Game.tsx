@@ -75,19 +75,10 @@ const Game = () => {
   }, []);
 
   const onGameResults = useCallback<ServerToClientEvents['gameResults']>((results) => {
+    // Deliberately no snackbar here: the win/lose reveal should happen only on
+    // the results screen, not the moment the last card is scored.
     setGameResults(results);
-
-    if (!results.length) {
-      return;
-    }
-
-    const myTeam = (myIndex ?? 0) % 2;
-    const result = results[results.length - 1] || [0, 0];
-    enqueueSnackbar({
-      variant: 'info',
-      message: `Game ended: You ${result[myTeam] > result[myTeam ? 0 : 1] ? 'won' : 'lost'}! Points: ${result[myTeam]}`,
-    });
-  }, [enqueueSnackbar, myIndex]);
+  }, []);
 
   const onHideTrump = useCallback(() => {
     socket.emit('hideTrump');
