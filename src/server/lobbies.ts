@@ -118,6 +118,21 @@ export const playCard = (socket: OurServerSocket): ClientToServerEvents['playCar
   }
 );
 
+export const hideTrump = (socket: OurServerSocket): ClientToServerEvents['hideTrump'] => (
+  () => {
+    if (!socket?.data?.lobbyHash || !socket.data.playerId) {
+      return;
+    }
+
+    const lobby = Lobby.lobbies.get(socket.data.lobbyHash);
+    if (!lobby) {
+      return;
+    }
+
+    lobby.hideTrump(socket.data.playerId);
+  }
+);
+
 export const leaveLobby = (socket: OurServerSocket): ClientToServerEvents['leaveLobby'] => (
   async () => {
     if (!socket?.data?.lobbyHash || !socket.data.playerId) {
@@ -147,3 +162,42 @@ export const denounce = (socket: OurServerSocket): ClientToServerEvents['denounc
     lobby.denounce(socket.data.playerId, idx);
   }
 );
+
+/**
+ * Fired when a socket drops (tab closed, connection lost, mobile backgrounded).
+ * The player is kept for a grace period rather than removed immediately, so a
+ * brief drop doesn't lose their seat. Without this, abandoned players would
+ * leak into `Lobby.lobbies` forever.
+ */
+export const handleDisconnect = (socket: OurServerSocket) => (
+  () => {
+    if (!socket?.data?.lobbyHash || !socket.data.playerId) {
+      return;
+    }
+
+    const lobby = Lobby.lobbies.get(socket.data.lobbyHash);
+    if (!lobby) {
+      return;
+    }
+
+    lobby.scheduleRemoval(socket.data.playerId);
+  }
+);
+
+/**
+ * Fired when a dropped socket is recovered by connectionStateRecovery. The
+ * restored `socket.data` lets us find the seat, cancel the pending removal, and
+ * rebind the live socket so the server can keep pushing game updates.
+ */
+export const handleReconnect = (socket: OurServerSocket) => {
+  if (!socket?.data?.lobbyHash || !socket.data.playerId) {
+    return;
+  }
+
+  const lobby = Lobby.lobbies.get(socket.data.lobbyHash);
+  if (!lobby) {
+    return;
+  }
+
+  lobby.reconnect(socket.data.playerId, socket);
+};

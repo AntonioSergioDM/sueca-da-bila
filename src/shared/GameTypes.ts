@@ -14,9 +14,12 @@ export type PlayerState = {
 export type GameState = {
   hands: Array<number>;
   table: Table;
+  lastTrick: Table;
   trumpCard: Card | null;
   shufflePlayer: number;
   currentPlayer: number;
+  /** number of completed tricks; the trump holder may pick up their card after the first one */
+  tricksCompleted: number;
 };
 
 export const getPreviousPlayer = (idx: number) => {

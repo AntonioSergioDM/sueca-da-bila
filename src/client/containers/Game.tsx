@@ -68,6 +68,10 @@ const Game = () => {
     setPlayerState(newPlayerState);
   }, []);
 
+  const onHideTrump = useCallback(() => {
+    socket.emit('hideTrump');
+  }, [socket]);
+
   const onPlayCard = useCallback((card: Card, allowRenounce = false) => {
     socket.emit('playCard', card, allowRenounce, (res) => {
       if (typeof res.error === 'string') {
@@ -125,6 +129,7 @@ const Game = () => {
           players={players}
           gameState={gameState}
           onPlayCard={onPlayCard}
+          onHideTrump={onHideTrump}
           playerState={playerState}
         />
       )}

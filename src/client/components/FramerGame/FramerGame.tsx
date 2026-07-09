@@ -19,6 +19,8 @@ import type { LobbyPlayerState, ServerToClientEvents } from '@/shared/SocketType
 
 import { Button } from '@mui/material';
 import { useSocket } from '@/client/tools/useSocket';
+import { useCardScale } from '@/client/tools/useCardScale';
+import { BIG_CARD, SMALL_CARD } from '@/client/components/AnimatedCard';
 
 import ScorePad from '../ScorePad';
 import TopPlayer from '../Players/TopPlayer';
@@ -27,6 +29,7 @@ import RightPlayer from '../Players/RightPlayer';
 import BottomPlayer from '../Players/BottomPlayer';
 
 import Table from './Table';
+import LastTrick from './LastTrick';
 import DenounceOverlay from '../DenounceOverlay';
 
 type FramerGameProps = {
@@ -34,6 +37,7 @@ type FramerGameProps = {
   players: LobbyPlayerState[];
   playerState: PlayerState;
   onPlayCard: (card: Card) => void;
+  onHideTrump: () => void;
 };
 
 const FramerGame = (props: FramerGameProps) => {
@@ -41,11 +45,16 @@ const FramerGame = (props: FramerGameProps) => {
     gameState,
     players,
     onPlayCard,
+    onHideTrump,
     playerState,
   } = props;
 
   const socket = useSocket();
   const { enqueueSnackbar } = useSnackbar();
+
+  const scale = useCardScale();
+  const bigCard = useMemo(() => Math.round(BIG_CARD * scale), [scale]);
+  const smallCard = useMemo(() => Math.round(SMALL_CARD * scale), [scale]);
 
   const [gameResults, setGameResults] = useState<Score[] | []>([]);
   const [denounceOverlayState, setDenounceOverlayState] = useState(false);
@@ -93,7 +102,7 @@ const FramerGame = (props: FramerGameProps) => {
   ), [gameState.shufflePlayer]);
 
   return (
-    <div className="relative w-screen h-screen bg-red-950 p-2">
+    <div className="relative w-screen h-[100dvh] overflow-hidden bg-red-950 p-2 touch-none select-none">
       <DenounceOverlay
         open={denounceOverlayState}
         onClose={() => setDenounceOverlayState(false)}
@@ -107,34 +116,43 @@ const FramerGame = (props: FramerGameProps) => {
         rightIdx={rightIdx}
         gameState={gameState}
         bottomIdx={bottomIdx}
+        cardWidth={smallCard}
       />
-      <Button className="w-fit z-10" onClick={() => { setDenounceOverlayState(true); }} color="primary">I spoted a cheater</Button>
+      <Button className="w-fit z-10" size="small" onClick={() => { setDenounceOverlayState(true); }} color="primary">I spoted a cheater</Button>
 
       <TopPlayer
         isPlaying={gameState.currentPlayer === topIdx}
         cardNum={gameState.hands[topIdx]}
         trumpCard={(hasTrumpIdx === topIdx && gameState.trumpCard) || null}
         name={players[topIdx].name}
+        cardWidth={smallCard}
       />
       <RightPlayer
         isPlaying={gameState.currentPlayer === rightIdx}
         cardNum={gameState.hands[rightIdx]}
         trumpCard={(hasTrumpIdx === rightIdx && gameState.trumpCard) || null}
         name={players[rightIdx].name}
+        cardWidth={smallCard}
       />
       <LeftPlayer
         isPlaying={gameState.currentPlayer === leftIdx}
         cardNum={gameState.hands[leftIdx]}
         trumpCard={(hasTrumpIdx === leftIdx && gameState.trumpCard) || null}
         name={players[leftIdx].name}
+        cardWidth={smallCard}
       />
       <BottomPlayer
         onPlayCard={onPlayCard}
+        onHideTrump={onHideTrump}
+        canHideTrump={gameState.tricksCompleted >= 1}
         isPlaying={gameState.currentPlayer === bottomIdx}
         cards={playerState.hand}
         trumpCard={(hasTrumpIdx === bottomIdx && gameState.trumpCard) || null}
         name={players[bottomIdx].name}
+        cardWidth={bigCard}
       />
+
+      <LastTrick lastTrick={gameState.lastTrick} players={players} />
 
       <ScorePad gameResults={gameResults} playerIdx={playerState.index} />
     </div>

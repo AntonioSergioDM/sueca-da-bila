@@ -21,9 +21,10 @@ export type TableCardVariants = {
 type TableCardProps = {
   variants: TableCardVariants;
   card: Card;
+  cardWidth?: number;
 };
 
-const TableCard = ({ card, variants }: TableCardProps) => (
+const TableCard = ({ card, variants, cardWidth = SMALL_CARD }: TableCardProps) => (
   <motion.div
     variants={variants}
     initial="fromHand"
@@ -31,7 +32,7 @@ const TableCard = ({ card, variants }: TableCardProps) => (
     exit={toGraveyard}
     className="absolute bottom-0 select-none"
   >
-    <AnimatedCard width={SMALL_CARD} card={card} />
+    <AnimatedCard width={cardWidth} card={card} />
   </motion.div>
 );
 
