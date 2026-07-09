@@ -13,6 +13,7 @@ type TableProps = {
   bottomIdx: number;
   leftIdx: number;
   gameState: GameState;
+  cardWidth?: number;
 };
 
 const Table = (props: TableProps) => {
@@ -22,6 +23,7 @@ const Table = (props: TableProps) => {
     bottomIdx,
     leftIdx,
     gameState,
+    cardWidth,
   } = props;
 
   const topCard = useMemo(() => (
@@ -134,6 +136,7 @@ const Table = (props: TableProps) => {
             key="top"
             card={topCard}
             variants={topVariant}
+            cardWidth={cardWidth}
           />
         )}
 
@@ -142,6 +145,7 @@ const Table = (props: TableProps) => {
             key="right"
             card={rightCard}
             variants={rightVariant}
+            cardWidth={cardWidth}
           />
         )}
 
@@ -150,6 +154,7 @@ const Table = (props: TableProps) => {
             key="bottom"
             card={bottomCard}
             variants={bottomVariant}
+            cardWidth={cardWidth}
           />
         )}
 
@@ -158,6 +163,7 @@ const Table = (props: TableProps) => {
             key="left"
             card={leftCard}
             variants={leftVariant}
+            cardWidth={cardWidth}
           />
         )}
       </AnimatePresence>

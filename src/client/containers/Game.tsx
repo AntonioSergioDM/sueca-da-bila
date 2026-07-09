@@ -8,7 +8,9 @@ import { useRouter } from 'next/router';
 import { useSnackbar } from 'notistack';
 
 import type { Card } from '@/shared/Card';
-import { PlayErrors, type GameState, type PlayerState } from '@/shared/GameTypes';
+import {
+  PlayErrors, type Score, type GameState, type PlayerState,
+} from '@/shared/GameTypes';
 import type { LobbyPlayerState, ServerToClientEvents } from '@/shared/SocketTypes';
 
 import { Box } from '@mui/material';
@@ -28,6 +30,9 @@ const Game = () => {
   const [players, setPlayers] = useState<LobbyPlayerState[]>([]);
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [playerState, setPlayerState] = useState<PlayerState | null>(null);
+  const [gameResults, setGameResults] = useState<Score[]>([]);
+  // Kept across games so the results screen can highlight the player's team.
+  const [myIndex, setMyIndex] = useState<number | null>(null);
   const [renounceOverlayState, setRenounceOverlayState] = useState<Card | null>(null);
 
   const lobbyHash = useMemo(() => {
@@ -66,7 +71,18 @@ const Game = () => {
 
   const onGameStart = useCallback<ServerToClientEvents['gameStart']>((newPlayerState) => {
     setPlayerState(newPlayerState);
+    setMyIndex(newPlayerState.index);
   }, []);
+
+  const onGameResults = useCallback<ServerToClientEvents['gameResults']>((results) => {
+    // Deliberately no snackbar here: the win/lose reveal should happen only on
+    // the results screen, not the moment the last card is scored.
+    setGameResults(results);
+  }, []);
+
+  const onHideTrump = useCallback(() => {
+    socket.emit('hideTrump');
+  }, [socket]);
 
   const onPlayCard = useCallback((card: Card, allowRenounce = false) => {
     socket.emit('playCard', card, allowRenounce, (res) => {
@@ -109,6 +125,17 @@ const Game = () => {
     };
   }, [onGameChange, onGameReset, onGameStart, socket, updatePlayers]);
 
+  // Kept separate from the lifecycle effect above: `onGameResults` changes
+  // identity whenever `myIndex` updates (e.g. on game start), and we must not
+  // let that re-run trigger the `leaveLobby` cleanup.
+  useEffect(() => {
+    socket.on('gameResults', onGameResults);
+
+    return () => {
+      socket.off('gameResults', onGameResults);
+    };
+  }, [onGameResults, socket]);
+
   return (
     <>
       <Box className="absolute top-0 left-0 z-10 w-full p-4 flex flex-row gap-1 items-center justify-end">
@@ -118,13 +145,22 @@ const Game = () => {
         {/* <ChatBtn/> */}
       </Box>
 
-      {!playerState && <LobbyRoom players={players} lobbyHash={lobbyHash} />}
+      {!playerState && (
+        <LobbyRoom
+          players={players}
+          lobbyHash={lobbyHash}
+          gameResults={gameResults}
+          myIndex={myIndex}
+        />
+      )}
 
       {(!!playerState && !!gameState && players.length >= 4) && (
         <FramerGame
           players={players}
           gameState={gameState}
+          gameResults={gameResults}
           onPlayCard={onPlayCard}
+          onHideTrump={onHideTrump}
           playerState={playerState}
         />
       )}

@@ -12,6 +12,7 @@ type TopPlayerProps = {
   isPlaying?: boolean;
   trumpCard: Card | null;
   name: string;
+  cardWidth?: number;
 };
 
 const TopPlayer = (props: TopPlayerProps) => {
@@ -21,6 +22,7 @@ const TopPlayer = (props: TopPlayerProps) => {
     isPlaying,
     trumpCard,
     name,
+    cardWidth = SMALL_CARD,
   } = props;
 
   const emptyCards = useMemo(() => {
@@ -33,7 +35,7 @@ const TopPlayer = (props: TopPlayerProps) => {
     <div className="fixed top-0 left-1/2 flex row justify-center rotate-180">
       <PlayerHand
         isRgb={isRgb}
-        cardWidth={SMALL_CARD}
+        cardWidth={cardWidth}
         cards={emptyCards}
         trumpCard={trumpCard}
         isPlaying={isPlaying}

@@ -14,6 +14,9 @@ export default class Player {
 
   ready: boolean = false;
 
+  /** Pending removal timer, set while the player is disconnected but still within the reconnect grace window */
+  disconnectTimer: ReturnType<typeof setTimeout> | null = null;
+
   constructor(socket: OurServerSocket, name?: string) {
     this.socket = socket;
     this.name = name || '';

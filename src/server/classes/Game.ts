@@ -40,11 +40,19 @@ export default class Game {
   /** each Card is related by id to the player */
   onTable: Table = [null, null, null, null];
 
+  /** the previous completed trick, indexed by player, kept so clients can show a history */
+  lastTrick: Table = [null, null, null, null];
+
   tableSuit: Suit | `${Suit}` | null = null;
+
+  /** completed tricks in the current game */
+  tricksCompleted = 0;
 
   start() {
     this.roundScore = [0, 0];
     this.bandeira = -1;
+    this.lastTrick = [null, null, null, null];
+    this.tricksCompleted = 0;
     this.renounce = [false, false, false, false];
     this.shuffleAndDistribute();
     this.chooseTrump();
@@ -110,10 +118,35 @@ export default class Game {
     return {
       trumpCard: this.trumpCard,
       table: this.onTable,
+      lastTrick: this.lastTrick,
       currentPlayer: this.currPlayer,
       shufflePlayer: this.shufflePlayer,
       hands: this.decks.map((hand) => hand.length),
+      tricksCompleted: this.tricksCompleted,
     };
+  }
+
+  /** The trump holder is the player right before whoever shuffled. */
+  getTrumpHolder() {
+    return this.getPreviousPlayer(this.shufflePlayer);
+  }
+
+  /**
+   * After the first trick, the trump holder may pick their face-up trump card
+   * into their hand so opponents can no longer see it. The card stays in their
+   * deck the whole time; this only stops it being broadcast/shown face-up.
+   */
+  hideTrump(player: number): boolean {
+    if (
+      this.trumpCard === null
+      || this.tricksCompleted < 1
+      || player !== this.getTrumpHolder()
+    ) {
+      return false;
+    }
+
+    this.trumpCard = null;
+    return true;
   }
 
   clearTable() {
@@ -143,6 +176,10 @@ export default class Game {
     }
 
     this.roundScore[winnerTeam] += points;
+
+    // Keep a snapshot of this trick so clients can show a history of the last one
+    this.lastTrick = [...this.onTable];
+    this.tricksCompleted++;
 
     // Reset the table
     this.resetTable();

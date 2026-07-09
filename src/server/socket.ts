@@ -23,6 +23,9 @@ import type {
 import {
   createLobby,
   denounce,
+  handleDisconnect,
+  handleReconnect,
+  hideTrump,
   joinLobby,
   leaveLobby,
   lobbyPlayers,
@@ -66,24 +69,30 @@ const SocketHandler = (_: NextApiRequest, res: SocketIOResponse) => {
   );
 
   io.on('connection', (socket) => {
+    // Handlers must be registered for EVERY connection, including recovered
+    // ones. Previously they were only attached to fresh sessions, so a socket
+    // restored by connectionStateRecovery had no listeners and the player was
+    // silently frozen (couldn't play, leave, or denounce).
+    socket.on('joinLobby', joinLobby(socket));
+    socket.on('createLobby', createLobby(socket));
+    socket.on('playerReady', playerReady(socket));
+    socket.on('leaveLobby', leaveLobby(socket));
+    socket.on('playCard', playCard(socket));
+    socket.on('hideTrump', hideTrump(socket));
+    socket.on('lobbyPlayers', lobbyPlayers(socket));
+    socket.on('denounce', denounce(socket));
+    socket.on('disconnect', handleDisconnect(socket));
+
     if (socket.recovered) {
       // recovery was successful: socket.id, socket.rooms and socket.data were restored
       if (IN_DEV) {
         console.info(`🥰 A client reconnected. ID: ${socket.id}\n`);
       }
-    } else {
+      // Rebind the live socket to the existing seat and cancel pending removal
+      handleReconnect(socket);
+    } else if (IN_DEV) {
       // new or unrecoverable session
-      if (IN_DEV) {
-        console.info(`😊 A client connected. ID: ${socket.id}\n`);
-      }
-
-      socket.on('joinLobby', joinLobby(socket));
-      socket.on('createLobby', createLobby(socket));
-      socket.on('playerReady', playerReady(socket));
-      socket.on('leaveLobby', leaveLobby(socket));
-      socket.on('playCard', playCard(socket));
-      socket.on('lobbyPlayers', lobbyPlayers(socket));
-      socket.on('denounce', denounce(socket));
+      console.info(`😊 A client connected. ID: ${socket.id}\n`);
     }
   });
 

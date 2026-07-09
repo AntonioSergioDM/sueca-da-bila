@@ -12,6 +12,7 @@ type LeftPlayerProps = {
   isPlaying?: boolean;
   trumpCard: Card | null;
   name: string;
+  cardWidth?: number;
 };
 
 const LeftPlayer = (props: LeftPlayerProps) => {
@@ -21,6 +22,7 @@ const LeftPlayer = (props: LeftPlayerProps) => {
     isPlaying,
     trumpCard,
     name,
+    cardWidth = SMALL_CARD,
   } = props;
 
   const emptyCards = useMemo(() => {
@@ -33,7 +35,7 @@ const LeftPlayer = (props: LeftPlayerProps) => {
     <div className="fixed top-1/2 left-0 flex row justify-center rotate-90">
       <PlayerHand
         isRgb={isRgb}
-        cardWidth={SMALL_CARD}
+        cardWidth={cardWidth}
         cards={emptyCards}
         trumpCard={trumpCard}
         isPlaying={isPlaying}

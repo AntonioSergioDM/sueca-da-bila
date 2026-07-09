@@ -24,6 +24,9 @@ export type LobbyRoom = BroadcastOperator<DecorateAcknowledgementsWithMultipleRe
 export default class Lobby {
   static lobbies: Map<string, Lobby> = new Map();
 
+  /** How long a disconnected player is kept before being dropped from the lobby (matches connectionStateRecovery) */
+  static reconnectGraceMs = 2 * 60 * 1000;
+
   hash: string;
 
   players: Array<Player> = [];
@@ -61,6 +64,11 @@ export default class Lobby {
 
     const player = this.players.splice(founIdx, 1)[0];
 
+    if (player.disconnectTimer) {
+      clearTimeout(player.disconnectTimer);
+      player.disconnectTimer = null;
+    }
+
     await player.leaveRoom(this.hash);
 
     if (IN_DEV) {
@@ -79,6 +87,50 @@ export default class Lobby {
 
     this.emitLobbyUpdate();
     this.resetGame();
+  }
+
+  /**
+   * A player's socket dropped. Keep them in the lobby for a grace period so a
+   * flaky connection (very common on mobile) can recover without losing the seat.
+   */
+  scheduleRemoval(playerId: string) {
+    const player = this.players.find((p) => p.id === playerId);
+    if (!player || player.disconnectTimer) {
+      return;
+    }
+
+    if (IN_DEV) {
+      console.info(`🔌 PlayerID: ${playerId} disconnected from ${this.hash}, ${Lobby.reconnectGraceMs / 1000}s to reconnect\n`);
+    }
+
+    player.disconnectTimer = setTimeout(() => {
+      player.disconnectTimer = null;
+      void this.removePlayer(playerId);
+    }, Lobby.reconnectGraceMs);
+  }
+
+  /**
+   * A recovered socket came back. Cancel the pending removal and rebind the
+   * player's socket so future server emits reach the new connection.
+   */
+  reconnect(playerId: string, socket: Player['socket']): boolean {
+    const player = this.players.find((p) => p.id === playerId);
+    if (!player) {
+      return false;
+    }
+
+    if (player.disconnectTimer) {
+      clearTimeout(player.disconnectTimer);
+      player.disconnectTimer = null;
+    }
+
+    player.socket = socket;
+
+    if (IN_DEV) {
+      console.info(`🔌 PlayerID: ${playerId} reconnected to ${this.hash}\n`);
+    }
+
+    return true;
   }
 
   async addPlayer(player: Player): Promise<boolean> {
@@ -162,6 +214,17 @@ export default class Lobby {
     this.checkEnd();
   }
 
+  hideTrump(playerId: string) {
+    const foundIdx = this.players.findIndex((p) => p.id === playerId);
+    if (foundIdx === -1) {
+      return;
+    }
+
+    if (this.game.hideTrump(foundIdx)) {
+      this.emitGameChange();
+    }
+  }
+
   denounce(playerId: string, denounceIdx: number) {
     const playerIdx = this.players.findIndex((p) => p.id === playerId);
 
@@ -221,10 +284,18 @@ export default class Lobby {
     }
 
     this.emitGameResults();
-    // TODO: Maybe we don't want to automaticly start another game? idk
+
+    // Show the final trick briefly, then send everyone back to the lobby to
+    // review the score/stats and ready up before the next game starts.
     setTimeout(() => {
-      this.startGame();
-    }, 5000);
+      this.players.forEach((p) => p.setReady(false));
+      this.room?.emit('gameReset');
+      this.emitLobbyUpdate();
+
+      if (IN_DEV) {
+        console.info(`🃏 Game over on Lobby ${this.hash}, waiting for players to ready up\n`);
+      }
+    }, 3000);
 
     return true;
   }
@@ -244,5 +315,7 @@ export default class Lobby {
 
     this.room?.emit('gameReset');
     this.emitLobbyUpdate();
+    // The score series belongs to the old game instance; clear it on clients too.
+    this.emitGameResults();
   }
 }

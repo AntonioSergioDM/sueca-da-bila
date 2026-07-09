@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+html,
+body {
+    /* Stop iOS/Android from rubber-band scrolling the whole game board */
+    overscroll-behavior: none;
+    /* Avoid the flash of grey on double-tap while playing cards */
+    -webkit-tap-highlight-color: transparent;
+}
+
 ::-webkit-scrollbar {
     @apply w-2 h-2;
 }

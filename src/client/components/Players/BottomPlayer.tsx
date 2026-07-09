@@ -13,7 +13,11 @@ type BottomPlayerProps = {
   isPlaying?: boolean;
   trumpCard: Card | null;
   name: string;
+  cardWidth?: number;
+  canHideTrump?: boolean;
+  playableCards?: Set<string>;
   onPlayCard: (card: Card) => void;
+  onHideTrump?: () => void;
 };
 
 const BottomPlayer = (props: BottomPlayerProps) => {
@@ -23,7 +27,11 @@ const BottomPlayer = (props: BottomPlayerProps) => {
     trumpCard,
     isPlaying,
     name,
+    cardWidth = BIG_CARD,
+    canHideTrump,
+    playableCards,
     onPlayCard,
+    onHideTrump,
   } = props;
 
   const cardsInHand = useMemo(() => {
@@ -40,10 +48,13 @@ const BottomPlayer = (props: BottomPlayerProps) => {
         isPlayer
         isRgb={isRgb}
         cards={cardsInHand}
-        cardWidth={BIG_CARD}
+        cardWidth={cardWidth}
         trumpCard={trumpCard}
         isPlaying={isPlaying}
+        canHideTrump={canHideTrump}
+        playableCards={playableCards}
         onClick={onPlayCard}
+        onHideTrump={onHideTrump}
         name={name}
       />
     </div>
