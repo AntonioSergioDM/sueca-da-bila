@@ -15,6 +15,7 @@ import type { LobbyPlayerState, ServerToClientEvents } from '@/shared/SocketType
 
 import { Box } from '@mui/material';
 import { SoundBtn } from '@/client/components/SoundBtn';
+import { ChatBtn } from '@/client/components/ChatBtn';
 import { useSocket } from '../tools/useSocket';
 import LobbyRoom from '../components/LobbyRoom';
 import FramerGame from '../components/FramerGame';
@@ -47,6 +48,10 @@ const Game = () => {
     setPlayers(newPlayers);
   }, []);
 
+  const onSeatUpdate = useCallback<ServerToClientEvents['seatUpdate']>((index) => {
+    setMyIndex(index >= 0 ? index : null);
+  }, []);
+
   const onGameChange = useCallback<ServerToClientEvents['gameChange']>((newGameState) => {
     setGameState(newGameState);
     // Play the beep sound
@@ -56,9 +61,10 @@ const Game = () => {
   useEffect(() => {
     if (lobbyHash) {
       // get current players in lobby
-      socket.emit('lobbyPlayers', lobbyHash, (validHash, newPlayers) => {
+      socket.emit('lobbyPlayers', lobbyHash, (validHash, newPlayers, seatIndex) => {
         if (validHash) {
           updatePlayers(newPlayers);
+          setMyIndex(seatIndex >= 0 ? seatIndex : null);
         }
       });
     }
@@ -104,6 +110,7 @@ const Game = () => {
   useEffect(() => {
     const cleanup = () => {
       socket.off('playersListUpdated', updatePlayers);
+      socket.off('seatUpdate', onSeatUpdate);
       socket.off('gameStart', onGameStart);
       socket.off('gameChange', onGameChange);
       socket.off('gameReset', onGameReset);
@@ -112,6 +119,7 @@ const Game = () => {
     };
 
     socket.on('playersListUpdated', updatePlayers);
+    socket.on('seatUpdate', onSeatUpdate);
     socket.on('gameStart', onGameStart);
     socket.on('gameChange', onGameChange);
     socket.on('gameReset', onGameReset);
@@ -123,7 +131,7 @@ const Game = () => {
       cleanup();
       window.removeEventListener('beforeunload', cleanup);
     };
-  }, [onGameChange, onGameReset, onGameStart, socket, updatePlayers]);
+  }, [onGameChange, onGameReset, onGameStart, onSeatUpdate, socket, updatePlayers]);
 
   // Kept separate from the lifecycle effect above: `onGameResults` changes
   // identity whenever `myIndex` updates (e.g. on game start), and we must not
@@ -142,7 +150,7 @@ const Game = () => {
         {/* <ThemeBtn/> */}
         <SoundBtn />
         {/* <HelpBtn/> */}
-        {/* <ChatBtn/> */}
+        <ChatBtn />
       </Box>
 
       {!playerState && (

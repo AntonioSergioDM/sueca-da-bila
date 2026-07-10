@@ -2,6 +2,7 @@
 import type { ClientToServerEvents, OurServerSocket } from '@/shared/SocketTypes';
 
 import type { Card } from '@/shared/Card';
+import { MessageType } from '@/shared/Message';
 import Lobby from './classes/Lobby';
 import Player from './classes/Player';
 
@@ -103,22 +104,66 @@ export const playerUnReady = (socket: OurServerSocket): ClientToServerEvents['pl
 export const lobbyPlayers = (socket: OurServerSocket): ClientToServerEvents['lobbyPlayers'] => (
   (lobbyHash, callback) => {
     if (!lobbyHash) {
-      return callback('', []);
+      return callback('', [], -1);
     }
 
     const lobby = Lobby.lobbies.get(lobbyHash);
     if (!lobby) {
-      return callback('', []);
+      return callback('', [], -1);
     }
 
     // checking if this player is part of this lobby
-    const player = lobby.players.find((p) => p.id === socket.data.playerId);
-    if (!player) {
-      return callback('', []);
+    const playerIdx = lobby.players.findIndex((p) => p.id === socket.data.playerId);
+    if (playerIdx === -1) {
+      return callback('', [], -1);
     }
 
     // returning lobby hash so the client knows it was successful at least
-    return callback(lobby.hash, lobby.players.map((p) => ({ name: p.name || '____', ready: p.ready })));
+    return callback(
+      lobby.hash,
+      lobby.players.map((p) => ({
+        id: p.id, name: p.name || '____', ready: p.ready, isHost: p.id === lobby.hostId,
+      })),
+      playerIdx,
+    );
+  }
+);
+
+export const swapSeat = (socket: OurServerSocket): ClientToServerEvents['swapSeat'] => (
+  (indexA, indexB, callback) => {
+    if (!socket?.data?.lobbyHash || !socket.data.playerId) {
+      return callback({ error: 'Invalid lobby' });
+    }
+
+    const lobby = Lobby.lobbies.get(socket.data.lobbyHash);
+    if (!lobby) {
+      return callback({ error: 'Invalid lobby' });
+    }
+
+    if (!lobby.swapSeats(socket.data.playerId, indexA, indexB)) {
+      return callback({ error: 'Only the host can change teams' });
+    }
+
+    return callback({ data: { ok: true } });
+  }
+);
+
+export const randomizeTeams = (socket: OurServerSocket): ClientToServerEvents['randomizeTeams'] => (
+  (callback) => {
+    if (!socket?.data?.lobbyHash || !socket.data.playerId) {
+      return callback({ error: 'Invalid lobby' });
+    }
+
+    const lobby = Lobby.lobbies.get(socket.data.lobbyHash);
+    if (!lobby) {
+      return callback({ error: 'Invalid lobby' });
+    }
+
+    if (!lobby.randomizeTeams(socket.data.playerId)) {
+      return callback({ error: 'Only the host can change teams' });
+    }
+
+    return callback({ data: { ok: true } });
   }
 );
 
@@ -171,6 +216,27 @@ export const leaveLobby = (socket: OurServerSocket): ClientToServerEvents['leave
     }
 
     await lobby.removePlayer(socket.data.playerId);
+  }
+);
+
+export const playerMessage = (socket: OurServerSocket): ClientToServerEvents['message'] => (
+  (message) => {
+    if (!socket?.data?.lobbyHash || !socket.data.playerId) {
+      return;
+    }
+
+    const lobby = Lobby.lobbies.get(socket.data.lobbyHash);
+    if (!lobby) {
+      return;
+    }
+
+    if (message.to) {
+      message.type = message.type === MessageType.reminder ? MessageType.reminder : MessageType.whisper;
+    } else {
+      message.type = MessageType.message;
+    }
+
+    lobby.emitMessage(message, socket.data.playerId);
   }
 );
 
