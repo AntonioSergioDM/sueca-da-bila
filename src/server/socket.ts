@@ -33,6 +33,8 @@ import {
   playerMessage,
   playerReady,
   playerUnReady,
+  randomizeTeams,
+  swapSeat,
 } from './lobbies';
 
 type SocketIOResponse = NextApiResponse & {
@@ -79,6 +81,8 @@ const SocketHandler = (_: NextApiRequest, res: SocketIOResponse) => {
     socket.on('createLobby', createLobby(socket));
     socket.on('playerReady', playerReady(socket));
     socket.on('playerUnready', playerUnReady(socket));
+    socket.on('swapSeat', swapSeat(socket));
+    socket.on('randomizeTeams', randomizeTeams(socket));
     socket.on('leaveLobby', leaveLobby(socket));
     socket.on('playCard', playCard(socket));
     socket.on('hideTrump', hideTrump(socket));

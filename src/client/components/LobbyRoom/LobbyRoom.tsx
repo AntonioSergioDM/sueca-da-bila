@@ -1,7 +1,11 @@
 /* eslint-disable react/no-array-index-key */
-import { useCallback, useMemo, useState } from 'react';
+import {
+  useCallback, useEffect, useMemo, useState,
+} from 'react';
 import { motion } from 'framer-motion';
+import { useSnackbar } from 'notistack';
 
+import Link from 'next/link';
 import Image from 'next/image';
 
 import {
@@ -10,12 +14,14 @@ import {
   Stack,
   Button,
   Container,
+  Typography,
 } from '@mui/material';
 
 import type { Score } from '@/shared/GameTypes';
 import type { LobbyPlayerState } from '@/shared/SocketTypes';
 
 import logo from '@/public/favicon.ico';
+import { SiteRoute } from '@/shared/Routes';
 
 import ShareUrlButton from '../ShareUrlButton';
 import { useSocket } from '../../tools/useSocket';
@@ -31,6 +37,9 @@ type LobbyRoomProps = {
   myIndex?: number | null;
 };
 
+// Teams are seat-parity based: seats 0 & 2 form one team, seats 1 & 3 the other.
+const TEAMS: number[][] = [[0, 2], [1, 3]];
+
 const LobbyRoom = ({
   lobbyHash,
   players,
@@ -38,34 +47,64 @@ const LobbyRoom = ({
   myIndex = null,
 }: LobbyRoomProps) => {
   const socket = useSocket();
+  const { enqueueSnackbar } = useSnackbar();
 
-  const [playerIndex, setPlayerIndex] = useState<number | null>(null);
+  // Only the host arranges the teams. First tap selects a seat, second tap on
+  // another seat swaps the two.
+  const isHost = useMemo(() => (
+    typeof myIndex === 'number' && (players[myIndex]?.isHost ?? false)
+  ), [myIndex, players]);
+
+  const [selectedSeat, setSelectedSeat] = useState<number | null>(null);
+
+  // Drop any pending selection if we stop being the host (e.g. when the host
+  // role is handed over) or the selected seat is no longer occupied.
+  useEffect(() => {
+    if (!isHost || (selectedSeat !== null && !players[selectedSeat])) {
+      setSelectedSeat(null);
+    }
+  }, [isHost, selectedSeat, players]);
 
   const onReady = useCallback(() => {
-    socket.emit('playerReady', (newPlayerIndex) => {
-      if (typeof newPlayerIndex === 'number') {
-        setPlayerIndex(newPlayerIndex);
-      }
-    });
+    socket.emit('playerReady', () => {});
   }, [socket]);
 
   const onUnReady = useCallback(() => {
-    socket.emit('playerUnready', (newPlayerIndex) => {
-      if (typeof newPlayerIndex === 'number') {
-        setPlayerIndex(newPlayerIndex);
-      }
-    });
+    socket.emit('playerUnready', () => {});
   }, [socket]);
 
-  const missingPlayers = useMemo(() => {
-    if (players.length >= 4) return [];
+  const onSeatClick = useCallback((seatIdx: number) => {
+    setSelectedSeat((current) => {
+      if (current === null) {
+        return seatIdx;
+      }
 
-    return Array(4 - players.length).fill(0);
-  }, [players.length]);
+      if (current === seatIdx) {
+        return null;
+      }
+
+      socket.emit('swapSeat', current, seatIdx, (res) => {
+        if (res.error) {
+          enqueueSnackbar({ variant: 'error', message: res.error });
+        }
+      });
+
+      return null;
+    });
+  }, [socket, enqueueSnackbar]);
+
+  const onRandomize = useCallback(() => {
+    setSelectedSeat(null);
+    socket.emit('randomizeTeams', (res) => {
+      if (res.error) {
+        enqueueSnackbar({ variant: 'error', message: res.error });
+      }
+    });
+  }, [socket, enqueueSnackbar]);
 
   const isReady = useMemo(() => (
-    typeof playerIndex === 'number' && (players[playerIndex]?.ready ?? false)
-  ), [playerIndex, players]);
+    typeof myIndex === 'number' && (players[myIndex]?.ready ?? false)
+  ), [myIndex, players]);
 
   return (
     <Box
@@ -100,24 +139,27 @@ const LobbyRoom = ({
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.5 }}
           >
-            <Box
-              className="flex items-center justify-center"
-              sx={{
-                filter: 'drop-shadow(0 8px 24px rgba(147, 51, 234, 0.4))',
-                transition: 'filter 0.3s ease',
-                '&:hover': {
-                  filter: 'drop-shadow(0 12px 32px rgba(147, 51, 234, 0.6))',
-                },
-                '& img': {
-                  height: 'auto !important',
-                  width: 'auto !important',
-                  maxWidth: '100%',
-                  maxHeight: { xs: 180, sm: 200, md: 240 },
-                },
-              }}
-            >
-              <Image alt="Logo" src={logo} priority width={280} height={280} />
-            </Box>
+            <Link href={SiteRoute.Home} className="flex items-center justify-center">
+              <Box
+                className="flex items-center justify-center"
+                sx={{
+                  cursor: 'pointer',
+                  filter: 'drop-shadow(0 8px 24px rgba(147, 51, 234, 0.4))',
+                  transition: 'filter 0.3s ease',
+                  '&:hover': {
+                    filter: 'drop-shadow(0 12px 32px rgba(147, 51, 234, 0.6))',
+                  },
+                  '& img': {
+                    height: 'auto !important',
+                    width: 'auto !important',
+                    maxWidth: '100%',
+                    maxHeight: { xs: 180, sm: 200, md: 240 },
+                  },
+                }}
+              >
+                <Image alt="Logo" src={logo} priority width={280} height={280} />
+              </Box>
+            </Link>
           </motion.div>
 
           <Results gameResults={gameResults} players={players} myIndex={myIndex} />
@@ -133,25 +175,84 @@ const LobbyRoom = ({
             <Card className="casino-box p-4 sm:p-6" sx={{ boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)' }}>
               <Stack gap={3} style={{ position: 'relative' }}>
                 <Stack
-                  direction="row"
+                  direction={{ xs: 'column', sm: 'row' }}
                   gap={3}
                   useFlexGap
-                  flexWrap="wrap"
                   justifyContent="center"
-                  alignItems="flex-start"
+                  alignItems="stretch"
                 >
-                  {players.map((player, idx) => (
-                    <LobbyRoomPlayer
-                      key={`${player.name}-${idx}`}
-                      name={player.name}
-                      ready={player.ready}
-                    />
-                  ))}
+                  {TEAMS.map((seats, teamIdx) => (
+                    <Stack
+                      key={teamIdx}
+                      gap={1}
+                      flex={1}
+                      alignItems="center"
+                      sx={{
+                        background: 'rgba(0, 0, 0, 0.25)',
+                        borderRadius: 2,
+                        p: 2,
+                      }}
+                    >
+                      <Typography
+                        variant="subtitle2"
+                        sx={{
+                          textTransform: 'uppercase',
+                          letterSpacing: '1px',
+                          fontWeight: 700,
+                          color: teamIdx === 0 ? '#60a5fa' : '#f472b6',
+                        }}
+                      >
+                        {`Team ${teamIdx + 1}`}
+                      </Typography>
 
-                  {missingPlayers.map((_, idx) => (
-                    <LobbyRoomPlayer key={idx} />
+                      <Stack direction="row" gap={2} justifyContent="center">
+                        {seats.map((seatIdx) => {
+                          const player = players[seatIdx];
+                          const isMe = seatIdx === myIndex;
+                          // Only the host arranges seats, and only occupied ones.
+                          const canSelect = isHost && !!player;
+
+                          return (
+                            <LobbyRoomPlayer
+                              key={seatIdx}
+                              name={player?.name}
+                              ready={player?.ready}
+                              isMe={isMe}
+                              isHost={player?.isHost}
+                              selected={selectedSeat === seatIdx}
+                              onClick={canSelect ? () => onSeatClick(seatIdx) : undefined}
+                            />
+                          );
+                        })}
+                      </Stack>
+                    </Stack>
                   ))}
                 </Stack>
+
+                {isHost && (
+                  <Stack alignItems="center" gap={1}>
+                    <Button
+                      onClick={onRandomize}
+                      variant="outlined"
+                      disabled={players.length < 2}
+                      sx={{
+                        color: 'white',
+                        borderColor: 'rgba(255,255,255,0.3)',
+                        textTransform: 'none',
+                        '&:hover': { borderColor: 'white', background: 'rgba(255,255,255,0.08)' },
+                      }}
+                    >
+                      🎲 Randomize Teams
+                    </Button>
+                    {players.length > 1 && (
+                      <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
+                        {selectedSeat === null
+                          ? 'You are the host — tap two players to swap their seats'
+                          : 'Now tap another player to swap'}
+                      </Typography>
+                    )}
+                  </Stack>
+                )}
 
                 <Stack
                   direction="row"

@@ -4,11 +4,13 @@ import type { GameState, PlayerState, Score } from '@/shared/GameTypes';
 import type { Message } from '@/shared/Message';
 import type { Card } from './Card';
 
-export type LobbyPlayerState = { name: string; ready: boolean };
+export type LobbyPlayerState = { name: string; ready: boolean; isHost: boolean };
 
 export interface ServerToClientEvents {
   error: () => void;
   playersListUpdated: (players: LobbyPlayerState[]) => void;
+  /** Pushed to each socket individually with that player's current seat index (teams are seat-parity based). */
+  seatUpdate: (index: number) => void;
   gameStart: (playerState: PlayerState) => void;
   gameChange: (gameState: GameState) => void;
   gameReset: () => void;
@@ -28,9 +30,13 @@ export interface ClientToServerEvents {
   joinLobby: (lobbyHash: string, playerName: string, callback: (res: GenericCallbackResponse<{ lobbyHash: string }>) => void) => void;
   createLobby: (playerName: string, callback: (res: GenericCallbackResponse<{ lobbyHash: string }>) => void) => void;
   leaveLobby: () => void;
-  lobbyPlayers: (lobbyHash: string, callback: (lobbyHash: string, players: LobbyPlayerState[]) => void) => void;
+  lobbyPlayers: (lobbyHash: string, callback: (lobbyHash: string, players: LobbyPlayerState[], myIndex: number) => void) => void;
   playerReady: (callback: (playerIndex: number | null) => void) => void;
   playerUnready: (callback: (playerIndex: number | null) => void) => void;
+  /** Host-only: swap two occupied seats, rearranging the 2v2 teams. */
+  swapSeat: (indexA: number, indexB: number, callback: (res: GenericCallbackResponse<{ ok: true }>) => void) => void;
+  /** Host-only: shuffle every seat to form random teams. */
+  randomizeTeams: (callback: (res: GenericCallbackResponse<{ ok: true }>) => void) => void;
   playCard: (card: Card, allowRenounce: boolean, callback: (res: GenericCallbackResponse<PlayerState | null>) => void) => void;
   hideTrump: () => void;
   denounce: (playerId: number) => void;

@@ -32,6 +32,9 @@ export default class Lobby {
 
   players: Array<Player> = [];
 
+  /** Stable id of the lobby host (the creator). Only the host may change team formations. */
+  hostId: string | null = null;
+
   game: Game = new Game();
 
   room: LobbyRoom | null = null;
@@ -86,7 +89,15 @@ export default class Lobby {
       return;
     }
 
+    // If the host left, hand the role to whoever now sits first.
+    if (this.hostId === playerId) {
+      this.hostId = this.players[0].id;
+    }
+
     this.emitLobbyUpdate();
+    // Removing a player shifts everyone after them down a seat, so refresh
+    // each remaining client's seat index.
+    this.emitSeats();
     this.resetGame();
   }
 
@@ -127,6 +138,10 @@ export default class Lobby {
 
     player.socket = socket;
 
+    // Make sure the recovered client knows its current seat (it may have been
+    // reshuffled while disconnected, and the lobby view relies on it).
+    player.socket.emit('seatUpdate', this.players.indexOf(player));
+
     // Re-push the authoritative state to the recovered socket. Without this the
     // client keeps whatever it had in memory before dropping, so a player who
     // disconnected across a trick-clear boundary keeps rendering the previous
@@ -156,10 +171,7 @@ export default class Lobby {
     // table are already cleared but `gameReset` hasn't fired yet.
     player.socket.emit('gameResults', this.game.gameScore);
 
-    const gameInProgress = this.game.decks.some((deck) => deck.length > 0)
-      || this.game.onTable.some((card) => card !== null);
-
-    if (!gameInProgress) {
+    if (!this.gameInProgress()) {
       return;
     }
 
@@ -176,6 +188,10 @@ export default class Lobby {
     }
 
     this.players.push(player);
+    // The first player to join is the host (the lobby creator).
+    if (!this.hostId) {
+      this.hostId = player.id;
+    }
     this.emitLobbyUpdate();
     this.room = await player.joinRoom(this.hash);
 
@@ -222,6 +238,68 @@ export default class Lobby {
     }
 
     this.emitLobbyUpdate();
+  }
+
+  /**
+   * Whether a game is currently being played. Used to block seat changes so the
+   * teams can't be rearranged mid-hand.
+   */
+  gameInProgress(): boolean {
+    return this.game.decks.some((deck) => deck.length > 0)
+      || this.game.onTable.some((card) => card !== null);
+  }
+
+  /**
+   * Host-only. Swap the two occupied seats `idxA` and `idxB`, letting the host
+   * arrange the 2v2 teams (even seats vs odd seats). Returns `true` on success,
+   * or `false` if the swap isn't allowed.
+   */
+  swapSeats(playerId: string, idxA: number, idxB: number): boolean {
+    // Only the host may rearrange the teams, and never mid-game.
+    if (playerId !== this.hostId || this.gameInProgress()) {
+      return false;
+    }
+
+    const inRange = (i: number) => Number.isInteger(i) && i >= 0 && i < this.players.length;
+    if (!inRange(idxA) || !inRange(idxB) || idxA === idxB) {
+      return false;
+    }
+
+    [this.players[idxA], this.players[idxB]] = [this.players[idxB], this.players[idxA]];
+    this.onTeamsChanged();
+
+    return true;
+  }
+
+  /**
+   * Host-only. Fisher-Yates shuffle of every seat to form random teams. Returns
+   * `true` on success, or `false` if it isn't allowed.
+   */
+  randomizeTeams(playerId: string): boolean {
+    // Only the host may rearrange the teams, and never mid-game.
+    if (playerId !== this.hostId || this.gameInProgress()) {
+      return false;
+    }
+
+    for (let i = this.players.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [this.players[i], this.players[j]] = [this.players[j], this.players[i]];
+    }
+
+    this.onTeamsChanged();
+
+    return true;
+  }
+
+  /**
+   * Shared bookkeeping after seats are rearranged: clearing every ready flag
+   * forces players to reconfirm their new team (and sidesteps any stale seat
+   * index a client may have been holding), then push the fresh seats.
+   */
+  private onTeamsChanged() {
+    this.players.forEach((p) => p.setReady(false));
+    this.emitLobbyUpdate();
+    this.emitSeats();
   }
 
   playCard(playerId: string, card: Card, allowRenounce = false): PlayerState | string {
@@ -303,7 +381,12 @@ export default class Lobby {
   }
 
   emitLobbyUpdate() {
-    this.room?.emit('playersListUpdated', this.players.map((p) => ({ name: p.name, ready: p.ready })));
+    this.room?.emit('playersListUpdated', this.players.map((p) => ({ name: p.name, ready: p.ready, isHost: p.id === this.hostId })));
+  }
+
+  /** Tell each socket individually which seat it now holds (drives team display). */
+  emitSeats() {
+    this.players.forEach((player, idx) => player.socket.emit('seatUpdate', idx));
   }
 
   emitGameChange() {
