@@ -35,6 +35,13 @@ export default class Lobby {
   /** Stable id of the lobby host (the creator). Only the host may change team formations. */
   hostId: string | null = null;
 
+  /**
+   * Set once the first game of the lobby has started. Teams are fixed for the
+   * lifetime of the lobby after this — they can only be arranged in the lobby
+   * before the very first game.
+   */
+  teamsLocked = false;
+
   game: Game = new Game();
 
   room: LobbyRoom | null = null;
@@ -255,8 +262,8 @@ export default class Lobby {
    * or `false` if the swap isn't allowed.
    */
   swapSeats(playerId: string, idxA: number, idxB: number): boolean {
-    // Only the host may rearrange the teams, and never mid-game.
-    if (playerId !== this.hostId || this.gameInProgress()) {
+    // Only the host may rearrange the teams, only before the first game starts.
+    if (playerId !== this.hostId || this.teamsLocked || this.gameInProgress()) {
       return false;
     }
 
@@ -276,8 +283,8 @@ export default class Lobby {
    * `true` on success, or `false` if it isn't allowed.
    */
   randomizeTeams(playerId: string): boolean {
-    // Only the host may rearrange the teams, and never mid-game.
-    if (playerId !== this.hostId || this.gameInProgress()) {
+    // Only the host may rearrange the teams, only before the first game starts.
+    if (playerId !== this.hostId || this.teamsLocked || this.gameInProgress()) {
       return false;
     }
 
@@ -418,6 +425,8 @@ export default class Lobby {
   }
 
   private startGame() {
+    // Once the first game starts the teams are locked in for good.
+    this.teamsLocked = true;
     this.game.start();
 
     if (IN_DEV) {
@@ -458,7 +467,7 @@ export default class Lobby {
       if (IN_DEV) {
         console.info(`🃏 Game over on Lobby ${this.hash}, waiting for players to ready up\n`);
       }
-    }, 3000);
+    }, 1500);
 
     return true;
   }

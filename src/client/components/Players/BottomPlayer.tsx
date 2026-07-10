@@ -37,9 +37,15 @@ const BottomPlayer = (props: BottomPlayerProps) => {
   const cardsInHand = useMemo(() => {
     if (!cards.length) return []; // or the only card available to this player is the trump card
 
-    if (!trumpCard) return cards;
+    const visible = trumpCard
+      ? cards.filter((card) => getCardId(card) !== getCardId(trumpCard))
+      : cards;
 
-    return cards.filter((card) => getCardId(card) !== getCardId(trumpCard));
+    // Group the hand by suit, and by rank within each suit (highest first), so
+    // the player always sees a tidy, predictable fan.
+    return [...visible].sort((a, b) => (
+      Number(a.suit) - Number(b.suit) || b.value - a.value
+    ));
   }, [cards, trumpCard]);
 
   return (

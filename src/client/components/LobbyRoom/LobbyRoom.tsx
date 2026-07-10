@@ -49,11 +49,15 @@ const LobbyRoom = ({
   const socket = useSocket();
   const { enqueueSnackbar } = useSnackbar();
 
-  // Only the host arranges the teams. First tap selects a seat, second tap on
-  // another seat swaps the two.
+  // Teams are locked once the first game has been played — they can only be
+  // arranged in the lobby before the very first game starts.
+  const teamsLocked = gameResults.length > 0;
+
+  // Only the host arranges the teams, and only before the first game. First tap
+  // selects a seat, second tap on another seat swaps the two.
   const isHost = useMemo(() => (
-    typeof myIndex === 'number' && (players[myIndex]?.isHost ?? false)
-  ), [myIndex, players]);
+    !teamsLocked && typeof myIndex === 'number' && (players[myIndex]?.isHost ?? false)
+  ), [teamsLocked, myIndex, players]);
 
   const [selectedSeat, setSelectedSeat] = useState<number | null>(null);
 
