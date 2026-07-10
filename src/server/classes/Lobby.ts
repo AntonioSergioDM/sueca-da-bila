@@ -253,6 +253,15 @@ export default class Lobby {
   }
 
   endTurn() {
+    // This runs on a timer scheduled when the last card of a trick was played.
+    // By the time it fires the trick may already have been resolved and the
+    // table reset by another path — a correct denúncia ends the game, or a
+    // player leaving rebuilds the game — leaving an incomplete table. Scoring
+    // that would trip `clearTable`'s no-nulls invariant and crash the server.
+    if (this.game.onTable.some((card) => card === null)) {
+      return;
+    }
+
     this.game.clearTable();
     this.emitGameChange();
     this.checkEnd();
