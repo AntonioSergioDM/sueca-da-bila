@@ -17,6 +17,7 @@ type PlayerHandProps = {
   isPlaying?: boolean;
   trumpCard: Card | null;
   name: string;
+  flipName?: boolean;
   canHideTrump?: boolean;
   playableCards?: Set<string>;
   onClick?: (card: Card) => void;
@@ -32,6 +33,7 @@ const PlayerHand = (props: PlayerHandProps) => {
     isPlaying,
     isPlayer,
     name,
+    flipName,
     canHideTrump,
     playableCards,
     onClick,
@@ -75,7 +77,7 @@ const PlayerHand = (props: PlayerHandProps) => {
         </motion.div>
       )}
 
-      <Typography className="relative z-20 px-1 rounded bg-black/40 [text-shadow:_0_1px_2px_rgb(0_0_0_/_80%)]">{name}</Typography>
+      <Typography className={`relative z-20 px-1 rounded bg-black/40 [text-shadow:_0_1px_2px_rgb(0_0_0_/_80%)]${flipName ? ' rotate-180' : ''}`}>{name}</Typography>
 
       {cards.map((card, idx) => (
         <motion.div
