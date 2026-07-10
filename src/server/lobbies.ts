@@ -74,6 +74,32 @@ export const playerReady = (socket: OurServerSocket): ClientToServerEvents['play
   }
 );
 
+export const playerUnReady = (socket: OurServerSocket): ClientToServerEvents['playerUnready'] => (
+  (callback) => {
+    if (!socket?.data?.lobbyHash || !socket.data.playerId) {
+      callback(null);
+      return;
+    }
+
+    const lobby = Lobby.lobbies.get(socket.data.lobbyHash);
+    if (!lobby) {
+      callback(null);
+      return;
+    }
+
+    lobby.setPlayerUnReady(socket.data.playerId);
+
+    const foundIdx = lobby.players.findIndex((player) => player.id === socket.data.playerId);
+
+    if (foundIdx === -1) {
+      callback(null);
+      return;
+    }
+
+    callback(foundIdx);
+  }
+);
+
 export const lobbyPlayers = (socket: OurServerSocket): ClientToServerEvents['lobbyPlayers'] => (
   (lobbyHash, callback) => {
     if (!lobbyHash) {

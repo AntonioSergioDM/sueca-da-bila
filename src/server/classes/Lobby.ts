@@ -173,6 +173,19 @@ export default class Lobby {
     }
   }
 
+  setPlayerUnReady(playerId: string) {
+    this.players.forEach((p) => {
+      if (p.id === playerId) {
+        p.setReady(false);
+        if (IN_DEV) {
+          console.info(`🙃 Player ${p.name} (ID: ${p.id}) is no longer ready\n`);
+        }
+      }
+    });
+
+    this.emitLobbyUpdate();
+  }
+
   playCard(playerId: string, card: Card, allowRenounce = false): PlayerState | string {
     const foundIdx = this.players.findIndex((p) => p.id === playerId);
     if (foundIdx === -1) {

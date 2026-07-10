@@ -28,6 +28,7 @@ export interface ClientToServerEvents {
   leaveLobby: () => void;
   lobbyPlayers: (lobbyHash: string, callback: (lobbyHash: string, players: LobbyPlayerState[]) => void) => void;
   playerReady: (callback: (playerIndex: number | null) => void) => void;
+  playerUnready: (callback: (playerIndex: number | null) => void) => void;
   playCard: (card: Card, allowRenounce: boolean, callback: (res: GenericCallbackResponse<PlayerState | null>) => void) => void;
   hideTrump: () => void;
   denounce: (playerId: number) => void;
