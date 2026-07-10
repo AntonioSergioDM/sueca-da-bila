@@ -126,11 +126,42 @@ export default class Lobby {
 
     player.socket = socket;
 
+    // Re-push the authoritative state to the recovered socket. Without this the
+    // client keeps whatever it had in memory before dropping, so a player who
+    // disconnected across a trick-clear boundary keeps rendering the previous
+    // (already scored) trick until the next card is played.
+    this.emitGameStateTo(player);
+
     if (IN_DEV) {
       console.info(`🔌 PlayerID: ${playerId} reconnected to ${this.hash}\n`);
     }
 
     return true;
+  }
+
+  /**
+   * Send the current game snapshot to a single player's socket. Used to bring a
+   * (re)connected client back in sync. No-op when no game is in progress — the
+   * lobby view is driven by `playersListUpdated` instead.
+   */
+  emitGameStateTo(player: Player) {
+    const idx = this.players.indexOf(player);
+    if (idx === -1) {
+      return;
+    }
+
+    const gameInProgress = this.game.decks.some((deck) => deck.length > 0)
+      || this.game.onTable.some((card) => card !== null);
+
+    if (!gameInProgress) {
+      return;
+    }
+
+    player.socket.emit('gameStart', {
+      index: idx,
+      hand: this.game.decks[idx],
+    });
+    player.socket.emit('gameChange', this.game.getState());
   }
 
   async addPlayer(player: Player): Promise<boolean> {
