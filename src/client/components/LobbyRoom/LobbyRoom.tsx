@@ -1,7 +1,7 @@
 /* eslint-disable react/no-array-index-key */
 import { useCallback, useMemo, useState } from 'react';
+import { motion } from 'framer-motion';
 
-import Link from 'next/link';
 import Image from 'next/image';
 
 import {
@@ -9,9 +9,9 @@ import {
   Card,
   Stack,
   Button,
+  Container,
 } from '@mui/material';
 
-import { SiteRoute } from '@/shared/Routes';
 import type { Score } from '@/shared/GameTypes';
 import type { LobbyPlayerState } from '@/shared/SocketTypes';
 
@@ -69,52 +69,144 @@ const LobbyRoom = ({
 
   return (
     <Box
-      margin={5}
-      height="90vh"
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
+      className="casino-lights"
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        py: 4,
+        position: 'relative',
+        overflow: 'auto',
+      }}
     >
-      <Stack gap={1} width="100%" maxWidth={gameResults.length ? 600 : 500}>
-        <Link href={SiteRoute.Home} style={{ alignSelf: 'center' }}>
-          <Image alt="Logo" src={logo} priority width={200} height={200} />
-        </Link>
+      {/* Background decoration */}
+      <Box
+        sx={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'radial-gradient(circle at 50% 50%, rgba(147, 51, 234, 0.1) 0%, transparent 50%)',
+          pointerEvents: 'none',
+        }}
+      />
 
-        <Results gameResults={gameResults} players={players} myIndex={myIndex} />
-
-        <ShareUrlButton lobbyHash={lobbyHash} />
-
-        <Card
-          sx={{
-            p: 2,
-            gap: 3,
-            display: 'flex',
-            flexDirection: 'column',
-          }}
-        >
-          <Stack direction="row" gap={2}>
-            {players.map((player, idx) => (
-              <LobbyRoomPlayer key={`${player.name}-${idx}`} name={player.name} ready={player.ready} />
-            ))}
-
-            {missingPlayers.map((_, idx) => (
-              <LobbyRoomPlayer key={idx} />
-            ))}
-          </Stack>
-
-          <Stack px={1} direction="row" gap={5} justifyContent="space-between" alignItems="center">
-            <Button
-              onClick={isReady ? onUnReady : onReady}
-              color={isReady ? 'error' : 'primary'}
-              sx={{ maxWidth: 100 }}
+      <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
+        <Stack gap={3} width="100%" maxWidth={gameResults.length ? 700 : 560} mx="auto">
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Box
+              className="flex items-center justify-center"
+              sx={{
+                filter: 'drop-shadow(0 8px 24px rgba(147, 51, 234, 0.4))',
+                transition: 'filter 0.3s ease',
+                '&:hover': {
+                  filter: 'drop-shadow(0 12px 32px rgba(147, 51, 234, 0.6))',
+                },
+                '& img': {
+                  height: 'auto !important',
+                  width: 'auto !important',
+                  maxWidth: '100%',
+                  maxHeight: { xs: 110, sm: 160, md: 200 },
+                },
+              }}
             >
-              {isReady ? 'Unready' : 'Ready'}
-            </Button>
+              <Image alt="Logo" src={logo} priority width={200} height={200} />
+            </Box>
+          </motion.div>
 
-            <LobbyRoomCounter value={players.filter((p) => p.ready).length} outOf={4} />
-          </Stack>
-        </Card>
-      </Stack>
+          <Results gameResults={gameResults} players={players} myIndex={myIndex} />
+
+          <ShareUrlButton lobbyHash={lobbyHash} />
+
+          {/* Players Card */}
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+          >
+            <Card className="casino-box p-4 sm:p-6" sx={{ boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)' }}>
+              <Stack gap={3} style={{ position: 'relative' }}>
+                <div className="absolute top-0 right-0">
+                  <LobbyRoomCounter
+                    value={players.filter((p) => p.ready).length}
+                    outOf={4}
+                  />
+                </div>
+
+                <Stack
+                  direction="row"
+                  gap={3}
+                  useFlexGap
+                  flexWrap="wrap"
+                  justifyContent="center"
+                  alignItems="flex-start"
+                >
+                  {players.map((player, idx) => (
+                    <LobbyRoomPlayer
+                      key={`${player.name}-${idx}`}
+                      name={player.name}
+                      ready={player.ready}
+                    />
+                  ))}
+
+                  {missingPlayers.map((_, idx) => (
+                    <LobbyRoomPlayer key={idx} />
+                  ))}
+                </Stack>
+
+                <Stack
+                  direction="row"
+                  gap={3}
+                  justifyContent="center"
+                  alignItems="center"
+                  sx={{
+                    background: 'rgba(0, 0, 0, 0.3)',
+                    borderRadius: 2,
+                    p: 2,
+                  }}
+                >
+                  <Button
+                    onClick={isReady ? onUnReady : onReady}
+                    variant="contained"
+                    size="large"
+                    sx={{
+                      minWidth: 150,
+                      maxWidth: 220,
+                      background: isReady
+                        ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)'
+                        : 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)',
+                      color: 'white',
+                      fontWeight: 700,
+                      fontSize: '1.1rem',
+                      textTransform: 'uppercase',
+                      letterSpacing: '1px',
+                      borderRadius: 2,
+                      boxShadow: isReady
+                        ? '0 4px 12px rgba(34, 197, 94, 0.4), inset 0 1px 0 rgba(255,255,255,0.2)'
+                        : '0 4px 12px rgba(147, 51, 234, 0.4), inset 0 1px 0 rgba(255,255,255,0.2)',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        transform: 'translateY(-2px)',
+                        boxShadow: isReady
+                          ? '0 6px 16px rgba(34, 197, 94, 0.6)'
+                          : '0 6px 16px rgba(147, 51, 234, 0.6)',
+                      },
+                    }}
+                  >
+                    {isReady ? 'Ready ✓' : 'Ready Up'}
+                  </Button>
+                </Stack>
+              </Stack>
+            </Card>
+          </motion.div>
+        </Stack>
+      </Container>
     </Box>
   );
 };

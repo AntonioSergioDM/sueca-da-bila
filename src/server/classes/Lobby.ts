@@ -11,6 +11,7 @@ import {
 } from 'unique-names-generator';
 
 import type { ServerToClientEvents, SocketData } from '@/shared/SocketTypes';
+import type { Message } from '@/shared/Message';
 
 import { IN_DEV } from '@/globals';
 import { DenounceErrors, type PlayerState } from '@/shared/GameTypes';
@@ -311,6 +312,24 @@ export default class Lobby {
 
   emitGameResults() {
     this.room?.emit('gameResults', this.game.gameScore);
+  }
+
+  emitMessage(message: Message, from: string = '') {
+    if (IN_DEV) {
+      console.info(`Player ${from} sent a message`, message);
+    }
+
+    // eslint-disable-next-line no-param-reassign
+    message.from = this.players.find((p) => p.id === from)?.name || from;
+    // eslint-disable-next-line no-param-reassign
+    message.timestamp = Date.now();
+
+    this.players.forEach((player) => {
+      if (player.id === from) return;
+      if (message.to && message.to !== player.id) return;
+
+      player.socket.emit('message', message);
+    });
   }
 
   private startGame() {

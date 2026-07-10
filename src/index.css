@@ -10,6 +10,31 @@ body {
     -webkit-tap-highlight-color: transparent;
 }
 
+@layer utilities {
+    .casino-lights {
+        background: radial-gradient(ellipse at top, rgba(255, 215, 0, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at bottom, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
+        #1a1a1a;
+    }
+
+    .casino-box {
+        background: linear-gradient(135deg, rgba(93, 15, 128, 0.3) 0%, rgba(44, 4, 62, 0.3) 100%);
+        @apply backdrop-blur-md rounded-2xl;
+        @apply border-2 border-solid border-sueca-highlight border-opacity-20;
+    }
+
+    .card-shadow {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3),
+        0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .neon-glow {
+        text-shadow: 0 0 10px rgba(147, 51, 234, 0.8),
+        0 0 20px rgba(147, 51, 234, 0.6),
+        0 0 30px rgba(147, 51, 234, 0.4);
+    }
+}
+
 ::-webkit-scrollbar {
     @apply w-2 h-2;
 }
@@ -20,21 +45,42 @@ body {
 
 /* Track */
 ::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: #1a1a1a;
     @apply rounded-b-md;
 }
 
 ::-webkit-scrollbar-track:hover {
-    background: #bebdbd;
+    background: #2a2a2a;
 }
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
-    background: #888;
+    background: #4a4a4a;
     @apply rounded-md;
 }
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-    background: #555;
+    background: #5a5a5a;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+@keyframes pulse-glow {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(147, 51, 234, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(147, 51, 234, 0.8);
+    }
+}
+
+.animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
 }

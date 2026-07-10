@@ -15,6 +15,7 @@ import type { LobbyPlayerState, ServerToClientEvents } from '@/shared/SocketType
 
 import { Box } from '@mui/material';
 import { SoundBtn } from '@/client/components/SoundBtn';
+import { ChatBtn } from '@/client/components/ChatBtn';
 import { useSocket } from '../tools/useSocket';
 import LobbyRoom from '../components/LobbyRoom';
 import FramerGame from '../components/FramerGame';
@@ -142,7 +143,7 @@ const Game = () => {
         {/* <ThemeBtn/> */}
         <SoundBtn />
         {/* <HelpBtn/> */}
-        {/* <ChatBtn/> */}
+        <ChatBtn />
       </Box>
 
       {!playerState && (

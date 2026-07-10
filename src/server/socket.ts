@@ -30,6 +30,7 @@ import {
   leaveLobby,
   lobbyPlayers,
   playCard,
+  playerMessage,
   playerReady,
   playerUnReady,
 } from './lobbies';
@@ -83,6 +84,7 @@ const SocketHandler = (_: NextApiRequest, res: SocketIOResponse) => {
     socket.on('hideTrump', hideTrump(socket));
     socket.on('lobbyPlayers', lobbyPlayers(socket));
     socket.on('denounce', denounce(socket));
+    socket.on('message', playerMessage(socket));
     socket.on('disconnect', handleDisconnect(socket));
 
     if (socket.recovered) {

@@ -2,6 +2,7 @@
 import type { ClientToServerEvents, OurServerSocket } from '@/shared/SocketTypes';
 
 import type { Card } from '@/shared/Card';
+import { MessageType } from '@/shared/Message';
 import Lobby from './classes/Lobby';
 import Player from './classes/Player';
 
@@ -171,6 +172,27 @@ export const leaveLobby = (socket: OurServerSocket): ClientToServerEvents['leave
     }
 
     await lobby.removePlayer(socket.data.playerId);
+  }
+);
+
+export const playerMessage = (socket: OurServerSocket): ClientToServerEvents['message'] => (
+  (message) => {
+    if (!socket?.data?.lobbyHash || !socket.data.playerId) {
+      return;
+    }
+
+    const lobby = Lobby.lobbies.get(socket.data.lobbyHash);
+    if (!lobby) {
+      return;
+    }
+
+    if (message.to) {
+      message.type = message.type === MessageType.reminder ? MessageType.reminder : MessageType.whisper;
+    } else {
+      message.type = MessageType.message;
+    }
+
+    lobby.emitMessage(message, socket.data.playerId);
   }
 );
 
