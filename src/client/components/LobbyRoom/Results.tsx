@@ -175,7 +175,7 @@ const Results = ({ gameResults, players, myIndex }: ResultsProps) => {
           ))}
         </Stack>
 
-        {gameResults.length > 1 && (
+        {gameResults.length >= 1 && (
           <Box>
             <Typography variant="caption" color="text.secondary">
               {`Match history (${stats.gamesPlayed} games)`}
