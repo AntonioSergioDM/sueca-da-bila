@@ -64,7 +64,7 @@ const LobbyRoom = ({
   }, [players.length]);
 
   const isReady = useMemo(() => (
-    typeof playerIndex === 'number' && players[playerIndex].ready
+    typeof playerIndex === 'number' && (players[playerIndex]?.ready ?? false)
   ), [playerIndex, players]);
 
   return (

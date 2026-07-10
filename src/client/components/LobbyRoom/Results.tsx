@@ -175,33 +175,31 @@ const Results = ({ gameResults, players, myIndex }: ResultsProps) => {
           ))}
         </Stack>
 
-        {gameResults.length >= 1 && (
-          <Box>
-            <Typography variant="caption" color="text.secondary">
-              {`Match history (${stats.gamesPlayed} games)`}
-            </Typography>
-            <Box
-              sx={{
-                mt: 0.5,
-                p: 1,
-                borderRadius: 1,
-                bgcolor: 'rgba(0,0,0,0.35)',
-                overflowX: 'auto',
-              }}
-            >
-              {[pad.top, pad.middleTop, pad.middle, pad.middleBottom, pad.bottom].map((line, idx) => (
-                <Typography
-                  // eslint-disable-next-line react/no-array-index-key
-                  key={idx}
-                  className="font-mono"
-                  sx={{ whiteSpace: 'pre', fontSize: 10, lineHeight: 1.15 }}
-                >
-                  {line}
-                </Typography>
-              ))}
-            </Box>
+        <Box>
+          <Typography variant="caption" color="text.secondary">
+            {`Match history (${stats.gamesPlayed} games)`}
+          </Typography>
+          <Box
+            sx={{
+              mt: 0.5,
+              p: 1,
+              borderRadius: 1,
+              bgcolor: 'rgba(0,0,0,0.35)',
+              overflowX: 'auto',
+            }}
+          >
+            {[pad.top, pad.middleTop, pad.middle, pad.middleBottom, pad.bottom].map((line, idx) => (
+              <Typography
+                // eslint-disable-next-line react/no-array-index-key
+                key={idx}
+                className="font-mono"
+                sx={{ whiteSpace: 'pre', fontSize: 10, lineHeight: 1.15 }}
+              >
+                {line}
+              </Typography>
+            ))}
           </Box>
-        )}
+        </Box>
       </Card>
     </motion.div>
   );

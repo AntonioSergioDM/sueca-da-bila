@@ -150,6 +150,11 @@ export default class Lobby {
       return;
     }
 
+    // Always re-send the score series so the recovered client's results/history
+    // is current — including during the end-of-game window where the decks and
+    // table are already cleared but `gameReset` hasn't fired yet.
+    player.socket.emit('gameResults', this.game.gameScore);
+
     const gameInProgress = this.game.decks.some((deck) => deck.length > 0)
       || this.game.onTable.some((card) => card !== null);
 
@@ -205,14 +210,15 @@ export default class Lobby {
   }
 
   setPlayerUnReady(playerId: string) {
-    this.players.forEach((p) => {
-      if (p.id === playerId) {
-        p.setReady(false);
-        if (IN_DEV) {
-          console.info(`🙃 Player ${p.name} (ID: ${p.id}) is no longer ready\n`);
-        }
-      }
-    });
+    const player = this.players.find((p) => p.id === playerId);
+    if (!player) {
+      return;
+    }
+
+    player.setReady(false);
+    if (IN_DEV) {
+      console.info(`🙃 Player ${player.name} (ID: ${player.id}) is no longer ready\n`);
+    }
 
     this.emitLobbyUpdate();
   }
