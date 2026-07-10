@@ -228,18 +228,18 @@ export default class Game {
   // --------------- Private Methods --------------- //
 
   private shuffleAndDistribute() {
-    Game.getFullDeck().forEach((c) => this.addCardRandom(c));
-  }
+    const deck = Game.getFullDeck();
 
-  private addCardRandom(card: Card): void {
-    const playerNum = getRandom(Game.numPlayers);
-
-    if (this.decks[playerNum].length >= Game.cardsPerPlayer) {
-      this.addCardRandom(card);
-      return;
+    // Fisher-Yates: unbiased in-place shuffle of the whole deck
+    for (let i = deck.length - 1; i > 0; i--) {
+      const j = getRandom(i + 1);
+      [deck[i], deck[j]] = [deck[j], deck[i]];
     }
 
-    this.decks[playerNum].push(card);
+    // Deal the shuffled deck out in equal, contiguous chunks
+    deck.forEach((card, idx) => {
+      this.decks[Math.floor(idx / Game.cardsPerPlayer)].push(card);
+    });
   }
 
   private getNextPlayer(player = this.currPlayer) {
