@@ -49,6 +49,14 @@ const LobbyRoom = ({
     });
   }, [socket]);
 
+  const onUnReady = useCallback(() => {
+    socket.emit('playerUnready', (newPlayerIndex) => {
+      if (typeof newPlayerIndex === 'number') {
+        setPlayerIndex(newPlayerIndex);
+      }
+    });
+  }, [socket]);
+
   const missingPlayers = useMemo(() => {
     if (players.length >= 4) return [];
 
@@ -56,7 +64,7 @@ const LobbyRoom = ({
   }, [players.length]);
 
   const isReady = useMemo(() => (
-    typeof playerIndex === 'number' && players[playerIndex].ready
+    typeof playerIndex === 'number' && (players[playerIndex]?.ready ?? false)
   ), [playerIndex, players]);
 
   return (
@@ -96,11 +104,11 @@ const LobbyRoom = ({
 
           <Stack px={1} direction="row" gap={5} justifyContent="space-between" alignItems="center">
             <Button
-              onClick={onReady}
-              disabled={isReady}
+              onClick={isReady ? onUnReady : onReady}
+              color={isReady ? 'error' : 'primary'}
               sx={{ maxWidth: 100 }}
             >
-              Ready
+              {isReady ? 'Unready' : 'Ready'}
             </Button>
 
             <LobbyRoomCounter value={players.filter((p) => p.ready).length} outOf={4} />

@@ -126,11 +126,47 @@ export default class Lobby {
 
     player.socket = socket;
 
+    // Re-push the authoritative state to the recovered socket. Without this the
+    // client keeps whatever it had in memory before dropping, so a player who
+    // disconnected across a trick-clear boundary keeps rendering the previous
+    // (already scored) trick until the next card is played.
+    this.emitGameStateTo(player);
+
     if (IN_DEV) {
       console.info(`🔌 PlayerID: ${playerId} reconnected to ${this.hash}\n`);
     }
 
     return true;
+  }
+
+  /**
+   * Send the current game snapshot to a single player's socket. Used to bring a
+   * (re)connected client back in sync. No-op when no game is in progress — the
+   * lobby view is driven by `playersListUpdated` instead.
+   */
+  emitGameStateTo(player: Player) {
+    const idx = this.players.indexOf(player);
+    if (idx === -1) {
+      return;
+    }
+
+    // Always re-send the score series so the recovered client's results/history
+    // is current — including during the end-of-game window where the decks and
+    // table are already cleared but `gameReset` hasn't fired yet.
+    player.socket.emit('gameResults', this.game.gameScore);
+
+    const gameInProgress = this.game.decks.some((deck) => deck.length > 0)
+      || this.game.onTable.some((card) => card !== null);
+
+    if (!gameInProgress) {
+      return;
+    }
+
+    player.socket.emit('gameStart', {
+      index: idx,
+      hand: this.game.decks[idx],
+    });
+    player.socket.emit('gameChange', this.game.getState());
   }
 
   async addPlayer(player: Player): Promise<boolean> {
@@ -173,6 +209,20 @@ export default class Lobby {
     }
   }
 
+  setPlayerUnReady(playerId: string) {
+    const player = this.players.find((p) => p.id === playerId);
+    if (!player) {
+      return;
+    }
+
+    player.setReady(false);
+    if (IN_DEV) {
+      console.info(`🙃 Player ${player.name} (ID: ${player.id}) is no longer ready\n`);
+    }
+
+    this.emitLobbyUpdate();
+  }
+
   playCard(playerId: string, card: Card, allowRenounce = false): PlayerState | string {
     const foundIdx = this.players.findIndex((p) => p.id === playerId);
     if (foundIdx === -1) {
@@ -209,6 +259,15 @@ export default class Lobby {
   }
 
   endTurn() {
+    // This runs on a timer scheduled when the last card of a trick was played.
+    // By the time it fires the trick may already have been resolved and the
+    // table reset by another path — a correct denúncia ends the game, or a
+    // player leaving rebuilds the game — leaving an incomplete table. Scoring
+    // that would trip `clearTable`'s no-nulls invariant and crash the server.
+    if (this.game.onTable.some((card) => card === null)) {
+      return;
+    }
+
     this.game.clearTable();
     this.emitGameChange();
     this.checkEnd();

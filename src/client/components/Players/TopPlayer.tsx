@@ -40,6 +40,7 @@ const TopPlayer = (props: TopPlayerProps) => {
         trumpCard={trumpCard}
         isPlaying={isPlaying}
         name={name}
+        flipName
       />
     </div>
   );

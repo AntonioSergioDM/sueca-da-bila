@@ -17,6 +17,7 @@ type PlayerHandProps = {
   isPlaying?: boolean;
   trumpCard: Card | null;
   name: string;
+  flipName?: boolean;
   canHideTrump?: boolean;
   playableCards?: Set<string>;
   onClick?: (card: Card) => void;
@@ -32,6 +33,7 @@ const PlayerHand = (props: PlayerHandProps) => {
     isPlaying,
     isPlayer,
     name,
+    flipName,
     canHideTrump,
     playableCards,
     onClick,
@@ -61,6 +63,7 @@ const PlayerHand = (props: PlayerHandProps) => {
     <AnimatePresence>
       {!!trumpCard && (
         <motion.div
+          key="trump"
           animate={{ x: `-${cards.length <= 2 ? 125 : (25 * cards.length)}%`, y: '65%' }}
           className="absolute bottom-0 select-none"
           onClick={handleTrumpClick(trumpCard)}
@@ -75,12 +78,15 @@ const PlayerHand = (props: PlayerHandProps) => {
         </motion.div>
       )}
 
-      <Typography className="relative z-20 px-1 rounded bg-black/40 [text-shadow:_0_1px_2px_rgb(0_0_0_/_80%)]">{name}</Typography>
+      <Typography key="name" className={`relative z-20 px-1 rounded bg-black/40 [text-shadow:_0_1px_2px_rgb(0_0_0_/_80%)]${flipName ? ' rotate-180' : ''}`}>{name}</Typography>
 
       {cards.map((card, idx) => (
         <motion.div
+          // Key by card identity so exiting/entering cards never collide (the
+          // "ghost card" bug). Opponent hands are cover placeholders (0) with no
+          // identity, so fall back to a stable per-slot key for those.
           // eslint-disable-next-line react/no-array-index-key
-          key={idx}
+          key={card ? getCardId(card) : `cover-${idx}`}
           initial="fromDeck"
           animate="inHand"
           variants={getCardFanVariants(idx, cards.length, cardWidth, shouldPulse(card))}
