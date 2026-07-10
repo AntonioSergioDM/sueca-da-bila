@@ -24,7 +24,7 @@ type LobbyRoomPlayerProps = {
 };
 
 const SIZE = 75;
-const MAX_WIDTH = 100;
+export const MAX_WIDTH = 120;
 
 const LobbyRoomPlayer = ({
   name,
@@ -57,15 +57,24 @@ const LobbyRoomPlayer = ({
           </Avatar>
         </Badge>
 
+        {/* Let long names wrap onto more lines (and break unbroken words)
+            instead of overflowing the card sideways. */}
         <Typography
-          variant="body1"
+          variant="body2"
           textAlign="center"
-          overflow="hidden"
-          maxWidth={MAX_WIDTH}
           fontWeight={isMe ? 700 : 400}
+          title={name}
+          sx={{
+            width: '100%',
+            maxWidth: MAX_WIDTH,
+            lineHeight: 1.25,
+            overflowWrap: 'anywhere',
+            wordBreak: 'break-word',
+          }}
         >
           {isHost && '👑 '}
-          {isMe ? `${name} (You)` : name}
+          {name}
+          {isMe && ' (You)'}
         </Typography>
       </>
     );
@@ -79,10 +88,11 @@ const LobbyRoomPlayer = ({
 
   return (
     <Stack
-      gap={2}
-      width={MAX_WIDTH}
-      height={150}
-      flexGrow={1}
+      gap={1.5}
+      width="100%"
+      maxWidth={MAX_WIDTH}
+      minWidth={0}
+      minHeight={165}
       direction="column"
       alignItems="center"
       justifyContent="flex-start"

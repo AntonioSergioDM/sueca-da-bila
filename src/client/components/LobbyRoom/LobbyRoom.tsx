@@ -2,7 +2,7 @@
 import {
   useCallback, useEffect, useMemo, useState,
 } from 'react';
-import { motion } from 'framer-motion';
+import { motion, LayoutGroup } from 'framer-motion';
 import { useSnackbar } from 'notistack';
 
 import Link from 'next/link';
@@ -27,7 +27,7 @@ import ShareUrlButton from '../ShareUrlButton';
 import { useSocket } from '../../tools/useSocket';
 
 import Results from './Results';
-import LobbyRoomPlayer from './LobbyRoomPlayer';
+import LobbyRoomPlayer, { MAX_WIDTH } from './LobbyRoomPlayer';
 import LobbyRoomCounter from './LobbyRoomCounter';
 
 type LobbyRoomProps = {
@@ -174,60 +174,88 @@ const LobbyRoom = ({
           >
             <Card className="casino-box p-4 sm:p-6" sx={{ boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)' }}>
               <Stack gap={3} style={{ position: 'relative' }}>
-                <Stack
-                  direction={{ xs: 'column', sm: 'row' }}
-                  gap={3}
-                  useFlexGap
-                  justifyContent="center"
-                  alignItems="stretch"
-                >
-                  {TEAMS.map((seats, teamIdx) => (
-                    <Stack
-                      key={teamIdx}
-                      gap={1}
-                      flex={1}
-                      alignItems="center"
-                      sx={{
-                        background: 'rgba(0, 0, 0, 0.25)',
-                        borderRadius: 2,
-                        p: 2,
-                      }}
-                    >
-                      <Typography
-                        variant="subtitle2"
+                <LayoutGroup>
+                  <Stack
+                    direction={{ xs: 'column', sm: 'row' }}
+                    gap={3}
+                    useFlexGap
+                    justifyContent="center"
+                    alignItems="stretch"
+                  >
+                    {TEAMS.map((seats, teamIdx) => (
+                      <Stack
+                        key={teamIdx}
+                        gap={1}
+                        flex={1}
+                        alignItems="center"
                         sx={{
-                          textTransform: 'uppercase',
-                          letterSpacing: '1px',
-                          fontWeight: 700,
-                          color: teamIdx === 0 ? '#60a5fa' : '#f472b6',
+                          background: 'rgba(0, 0, 0, 0.25)',
+                          borderRadius: 2,
+                          p: 2,
                         }}
                       >
-                        {`Team ${teamIdx + 1}`}
-                      </Typography>
+                        <Typography
+                          variant="subtitle2"
+                          sx={{
+                            textTransform: 'uppercase',
+                            letterSpacing: '1px',
+                            fontWeight: 700,
+                            color: teamIdx === 0 ? '#60a5fa' : '#f472b6',
+                          }}
+                        >
+                          {`Team ${teamIdx + 1}`}
+                        </Typography>
 
-                      <Stack direction="row" gap={2} justifyContent="center">
-                        {seats.map((seatIdx) => {
-                          const player = players[seatIdx];
-                          const isMe = seatIdx === myIndex;
-                          // Only the host arranges seats, and only occupied ones.
-                          const canSelect = isHost && !!player;
+                        <Stack direction="row" gap={2} justifyContent="center" width="100%">
+                          {seats.map((seatIdx) => {
+                            const player = players[seatIdx];
+                            const isMe = seatIdx === myIndex;
 
-                          return (
-                            <LobbyRoomPlayer
-                              key={seatIdx}
-                              name={player?.name}
-                              ready={player?.ready}
-                              isMe={isMe}
-                              isHost={player?.isHost}
-                              selected={selectedSeat === seatIdx}
-                              onClick={canSelect ? () => onSeatClick(seatIdx) : undefined}
-                            />
-                          );
-                        })}
+                            // Equal, shrinkable cells so two cards always fit the
+                            // team box (capped at the card's max width).
+                            const cellStyle = {
+                              flex: '1 1 0',
+                              minWidth: 0,
+                              maxWidth: MAX_WIDTH,
+                              display: 'flex',
+                              justifyContent: 'center',
+                            } as const;
+
+                            // Empty seat: static placeholder, no swap animation.
+                            if (!player) {
+                              return (
+                                <div key={`empty-${seatIdx}`} style={cellStyle}>
+                                  <LobbyRoomPlayer />
+                                </div>
+                              );
+                            }
+
+                            // `layoutId` keyed by the stable player id lets Framer
+                            // slide a card to its new seat when the host swaps.
+                            return (
+                              <motion.div
+                                key={seatIdx}
+                                layout
+                                layoutId={player.id}
+                                transition={{ type: 'spring', stiffness: 500, damping: 34 }}
+                                style={cellStyle}
+                              >
+                                <LobbyRoomPlayer
+                                  name={player.name}
+                                  ready={player.ready}
+                                  isMe={isMe}
+                                  isHost={player.isHost}
+                                  selected={selectedSeat === seatIdx}
+                                  onClick={isHost ? () => onSeatClick(seatIdx) : undefined}
+                                />
+                              </motion.div>
+                            );
+                          })}
+                        </Stack>
                       </Stack>
-                    </Stack>
-                  ))}
-                </Stack>
+                    ))}
+                  </Stack>
+                </LayoutGroup>
 
                 {isHost && (
                   <Stack alignItems="center" gap={1}>

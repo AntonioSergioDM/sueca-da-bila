@@ -4,7 +4,7 @@ import type { GameState, PlayerState, Score } from '@/shared/GameTypes';
 import type { Message } from '@/shared/Message';
 import type { Card } from './Card';
 
-export type LobbyPlayerState = { name: string; ready: boolean; isHost: boolean };
+export type LobbyPlayerState = { id: string; name: string; ready: boolean; isHost: boolean };
 
 export interface ServerToClientEvents {
   error: () => void;

@@ -381,7 +381,9 @@ export default class Lobby {
   }
 
   emitLobbyUpdate() {
-    this.room?.emit('playersListUpdated', this.players.map((p) => ({ name: p.name, ready: p.ready, isHost: p.id === this.hostId })));
+    this.room?.emit('playersListUpdated', this.players.map((p) => ({
+      id: p.id, name: p.name, ready: p.ready, isHost: p.id === this.hostId,
+    })));
   }
 
   /** Tell each socket individually which seat it now holds (drives team display). */

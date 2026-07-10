@@ -121,7 +121,9 @@ export const lobbyPlayers = (socket: OurServerSocket): ClientToServerEvents['lob
     // returning lobby hash so the client knows it was successful at least
     return callback(
       lobby.hash,
-      lobby.players.map((p) => ({ name: p.name || '____', ready: p.ready, isHost: p.id === lobby.hostId })),
+      lobby.players.map((p) => ({
+        id: p.id, name: p.name || '____', ready: p.ready, isHost: p.id === lobby.hostId,
+      })),
       playerIdx,
     );
   }
