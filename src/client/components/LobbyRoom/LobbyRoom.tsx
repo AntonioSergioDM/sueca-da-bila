@@ -112,11 +112,11 @@ const LobbyRoom = ({
                   height: 'auto !important',
                   width: 'auto !important',
                   maxWidth: '100%',
-                  maxHeight: { xs: 110, sm: 160, md: 200 },
+                  maxHeight: { xs: 180, sm: 200, md: 240 },
                 },
               }}
             >
-              <Image alt="Logo" src={logo} priority width={200} height={200} />
+              <Image alt="Logo" src={logo} priority width={280} height={280} />
             </Box>
           </motion.div>
 
@@ -132,13 +132,6 @@ const LobbyRoom = ({
           >
             <Card className="casino-box p-4 sm:p-6" sx={{ boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)' }}>
               <Stack gap={3} style={{ position: 'relative' }}>
-                <div className="absolute top-0 right-0">
-                  <LobbyRoomCounter
-                    value={players.filter((p) => p.ready).length}
-                    outOf={4}
-                  />
-                </div>
-
                 <Stack
                   direction="row"
                   gap={3}
@@ -163,7 +156,7 @@ const LobbyRoom = ({
                 <Stack
                   direction="row"
                   gap={3}
-                  justifyContent="center"
+                  justifyContent="space-between"
                   alignItems="center"
                   sx={{
                     background: 'rgba(0, 0, 0, 0.3)',
@@ -201,6 +194,11 @@ const LobbyRoom = ({
                   >
                     {isReady ? 'Ready ✓' : 'Ready Up'}
                   </Button>
+
+                  <LobbyRoomCounter
+                    value={players.filter((p) => p.ready).length}
+                    outOf={4}
+                  />
                 </Stack>
               </Stack>
             </Card>

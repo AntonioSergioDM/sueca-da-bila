@@ -45,11 +45,11 @@ const Layout = ({ children }: LayoutProps) => (
               height: 'auto !important',
               width: 'auto !important',
               maxWidth: '100%',
-              maxHeight: { xs: 120, sm: 160, md: 200 },
+              maxHeight: { xs: 200, sm: 220, md: 260 },
             },
           }}
         >
-          <Image alt="Logo" src={logo} priority width={200} height={200} />
+          <Image alt="Logo" src={logo} priority width={280} height={280} />
         </Box>
       </Link>
     </motion.div>
