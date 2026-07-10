@@ -21,12 +21,14 @@ import type {
 } from '@/shared/SocketTypes';
 
 import {
+  addBot,
   createLobby,
   denounce,
   handleDisconnect,
   handleReconnect,
   hideTrump,
   joinLobby,
+  kickPlayer,
   leaveLobby,
   lobbyPlayers,
   playCard,
@@ -83,6 +85,8 @@ const SocketHandler = (_: NextApiRequest, res: SocketIOResponse) => {
     socket.on('playerUnready', playerUnReady(socket));
     socket.on('swapSeat', swapSeat(socket));
     socket.on('randomizeTeams', randomizeTeams(socket));
+    socket.on('addBot', addBot(socket));
+    socket.on('kickPlayer', kickPlayer(socket));
     socket.on('leaveLobby', leaveLobby(socket));
     socket.on('playCard', playCard(socket));
     socket.on('hideTrump', hideTrump(socket));

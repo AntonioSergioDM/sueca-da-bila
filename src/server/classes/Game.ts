@@ -29,6 +29,9 @@ export default class Game {
   /** each 'deck' corresponds to a player hand */
   decks: [Array<Card>, Array<Card>, Array<Card>, Array<Card>] = [[], [], [], []];
 
+  /** every card played so far this game, in play order (used by bots to reason about what's left) */
+  playedCards: Array<Card> = [];
+
   trump: Suit | `${Suit}` | null = null;
 
   trumpCard: Card | null = null;
@@ -53,6 +56,7 @@ export default class Game {
     this.bandeira = -1;
     this.lastTrick = [null, null, null, null];
     this.tricksCompleted = 0;
+    this.playedCards = [];
     this.renounce = [false, false, false, false];
     this.shuffleAndDistribute();
     this.chooseTrump();
@@ -102,7 +106,9 @@ export default class Game {
     }
 
     // From the hand to the table
-    this.onTable[player] = this.decks[player].splice(foundIdx, 1)[0];
+    const played = this.decks[player].splice(foundIdx, 1)[0];
+    this.onTable[player] = played;
+    this.playedCards.push(played);
 
     if (this.onTable.findIndex((val) => val === null) !== -1) {
       // missing some cards on the table

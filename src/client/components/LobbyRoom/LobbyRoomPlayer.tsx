@@ -6,7 +6,9 @@ import {
   Skeleton,
   Typography,
   Badge,
+  IconButton,
 } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 
 import getInitials from '../../tools/getInitials';
 
@@ -17,10 +19,14 @@ type LobbyRoomPlayerProps = {
   isMe?: boolean;
   /** Marks this seat as the lobby host. */
   isHost?: boolean;
+  /** Marks this seat as an engine-driven bot. */
+  isBot?: boolean;
   /** Highlights this seat as picked (first tap of a host swap). */
   selected?: boolean;
   /** When provided, the seat becomes clickable (used to swap seats). */
   onClick?: () => void;
+  /** When provided (host viewing another seat), shows a control to kick that player. */
+  onKick?: () => void;
 };
 
 const SIZE = 75;
@@ -31,8 +37,10 @@ const LobbyRoomPlayer = ({
   ready,
   isMe = false,
   isHost = false,
+  isBot = false,
   selected = false,
   onClick,
+  onKick,
 }: LobbyRoomPlayerProps) => {
   const content = useMemo(() => {
     if (!name) {
@@ -50,6 +58,9 @@ const LobbyRoomPlayer = ({
         <Badge
           badgeContent=" "
           overlap="circular"
+          // Bottom-right so the ready dot never sits under the kick button in
+          // the card's top-right corner.
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
           color={ready ? 'success' : 'error'}
         >
           <Avatar sx={{ width: SIZE, height: SIZE }}>
@@ -73,12 +84,13 @@ const LobbyRoomPlayer = ({
           }}
         >
           {isHost && '👑 '}
+          {isBot && '🤖 '}
           {name}
           {isMe && ' (You)'}
         </Typography>
       </>
     );
-  }, [name, ready, isMe, isHost]);
+  }, [name, ready, isMe, isHost, isBot]);
 
   const clickable = typeof onClick === 'function';
 
@@ -100,6 +112,7 @@ const LobbyRoomPlayer = ({
       sx={{
         p: 1,
         borderRadius: 2,
+        position: 'relative',
         cursor: clickable ? 'pointer' : 'default',
         border: `2px solid ${borderColor}`,
         background: selected ? 'rgba(250, 204, 21, 0.12)' : 'transparent',
@@ -110,6 +123,40 @@ const LobbyRoomPlayer = ({
         } : undefined,
       }}
     >
+      {onKick && (
+        <IconButton
+          aria-label="Remove player"
+          title="Remove player"
+          // Stop both events: the seat is itself clickable (to swap teams), and
+          // without this the tap bubbles up and selects the seat instead.
+          onMouseDown={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            onKick();
+          }}
+          sx={{
+            position: 'absolute',
+            top: 4,
+            right: 4,
+            zIndex: 2,
+            width: 28,
+            height: 28,
+            padding: 0,
+            color: '#fff',
+            backgroundColor: 'rgba(220, 38, 38, 0.92)',
+            boxShadow: '0 2px 6px rgba(0, 0, 0, 0.35)',
+            transition: 'transform 0.15s ease, background-color 0.15s ease',
+            '&:hover': {
+              backgroundColor: '#dc2626',
+              transform: 'scale(1.12)',
+            },
+            '& svg': { fontSize: 17 },
+          }}
+        >
+          <CloseIcon fontSize="inherit" />
+        </IconButton>
+      )}
       {content}
     </Stack>
   );

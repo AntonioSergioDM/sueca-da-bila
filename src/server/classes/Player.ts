@@ -5,6 +5,19 @@ import type { OurServerSocket } from '@/shared/SocketTypes';
 
 import { io } from '../socket';
 
+/**
+ * A stand-in socket for bots, which have no real connection. Every method is a
+ * no-op so the shared `Player`/`Lobby` code that emits to sockets or manages
+ * rooms can treat a bot exactly like a connected human without special-casing.
+ */
+const createBotSocket = (): OurServerSocket => ({
+  emit: () => true,
+  join: async () => {},
+  leave: async () => {},
+  on: () => {},
+  data: { lobbyHash: null, playerId: null },
+} as unknown as OurServerSocket);
+
 export default class Player {
   id: string;
 
@@ -14,6 +27,9 @@ export default class Player {
 
   ready: boolean = false;
 
+  /** Bots are engine-driven players with no socket; they are always ready. */
+  isBot: boolean = false;
+
   /** Pending removal timer, set while the player is disconnected but still within the reconnect grace window */
   disconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -21,6 +37,14 @@ export default class Player {
     this.socket = socket;
     this.name = name || '';
     this.id = uuid();
+  }
+
+  /** Build an engine-driven bot player, ready to play from the start. */
+  static createBot(name: string): Player {
+    const bot = new Player(createBotSocket(), name);
+    bot.isBot = true;
+    bot.ready = true;
+    return bot;
   }
 
   async joinRoom(room: Room) {

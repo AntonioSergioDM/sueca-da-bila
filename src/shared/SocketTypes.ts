@@ -4,7 +4,7 @@ import type { GameState, PlayerState, Score } from '@/shared/GameTypes';
 import type { Message } from '@/shared/Message';
 import type { Card } from './Card';
 
-export type LobbyPlayerState = { id: string; name: string; ready: boolean; isHost: boolean };
+export type LobbyPlayerState = { id: string; name: string; ready: boolean; isHost: boolean; isBot: boolean };
 
 export interface ServerToClientEvents {
   error: () => void;
@@ -16,6 +16,8 @@ export interface ServerToClientEvents {
   gameReset: () => void;
   gameResults: (gameScore: Score[]) => void;
   message: (message: Message) => void;
+  /** Sent to a player the host has removed from the lobby. */
+  kicked: () => void;
 }
 
 type GenericCallbackResponse<T = any> = {
@@ -37,6 +39,10 @@ export interface ClientToServerEvents {
   swapSeat: (indexA: number, indexB: number, callback: (res: GenericCallbackResponse<{ ok: true }>) => void) => void;
   /** Host-only: shuffle every seat to form random teams. */
   randomizeTeams: (callback: (res: GenericCallbackResponse<{ ok: true }>) => void) => void;
+  /** Host-only: add an engine-driven bot to an open seat. */
+  addBot: (callback: (res: GenericCallbackResponse<{ ok: true }>) => void) => void;
+  /** Host-only: remove any player or bot from the lobby (not mid-game). */
+  kickPlayer: (targetId: string, callback: (res: GenericCallbackResponse<{ ok: true }>) => void) => void;
   playCard: (card: Card, allowRenounce: boolean, callback: (res: GenericCallbackResponse<PlayerState | null>) => void) => void;
   hideTrump: () => void;
   denounce: (playerId: number) => void;
