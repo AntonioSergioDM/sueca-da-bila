@@ -34,6 +34,7 @@ type LobbyRoomProps = {
   lobbyHash: string;
   players: LobbyPlayerState[];
   gameResults?: Score[];
+  teamsLocked?: boolean;
   myIndex?: number | null;
 };
 
@@ -44,14 +45,14 @@ const LobbyRoom = ({
   lobbyHash,
   players,
   gameResults = [],
+  teamsLocked = false,
   myIndex = null,
 }: LobbyRoomProps) => {
   const socket = useSocket();
   const { enqueueSnackbar } = useSnackbar();
 
-  // Teams are locked once the first game has been played — they can only be
-  // arranged in the lobby before the very first game starts.
-  const teamsLocked = gameResults.length > 0;
+  // `teamsLocked` is server-authoritative (fixed once the first game completes),
+  // so the host controls below stay in sync with what the server will accept.
 
   // Only the host arranges the teams, and only before the first game. First tap
   // selects a seat, second tap on another seat swaps the two.
