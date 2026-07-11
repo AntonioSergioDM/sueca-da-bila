@@ -12,6 +12,7 @@ import {
   PlayErrors, type Score, type GameState, type PlayerState,
 } from '@/shared/GameTypes';
 import type { LobbyPlayerState, ServerToClientEvents } from '@/shared/SocketTypes';
+import { SiteRoute } from '@/shared/Routes';
 
 import { Box } from '@mui/material';
 import { SoundBtn } from '@/client/components/SoundBtn';
@@ -26,7 +27,7 @@ const Game = () => {
   const { enqueueSnackbar } = useSnackbar();
 
   const socket = useSocket();
-  const { query } = useRouter();
+  const { query, push } = useRouter();
 
   const [players, setPlayers] = useState<LobbyPlayerState[]>([]);
   const [gameState, setGameState] = useState<GameState | null>(null);
@@ -146,6 +147,20 @@ const Game = () => {
       socket.off('gameResults', onGameResults);
     };
   }, [onGameResults, socket]);
+
+  // The host removed us from the lobby: notify and return to the home page.
+  useEffect(() => {
+    const onKicked = () => {
+      enqueueSnackbar({ variant: 'warning', message: 'You were removed from the lobby' });
+      void push(SiteRoute.Home);
+    };
+
+    socket.on('kicked', onKicked);
+
+    return () => {
+      socket.off('kicked', onKicked);
+    };
+  }, [socket, enqueueSnackbar, push]);
 
   return (
     <>

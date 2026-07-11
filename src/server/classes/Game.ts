@@ -29,6 +29,9 @@ export default class Game {
   /** each 'deck' corresponds to a player hand */
   decks: [Array<Card>, Array<Card>, Array<Card>, Array<Card>] = [[], [], [], []];
 
+  /** every card played so far this game, in play order (used by bots to reason about what's left) */
+  playedCards: Array<Card> = [];
+
   trump: Suit | `${Suit}` | null = null;
 
   trumpCard: Card | null = null;
@@ -53,6 +56,7 @@ export default class Game {
     this.bandeira = -1;
     this.lastTrick = [null, null, null, null];
     this.tricksCompleted = 0;
+    this.playedCards = [];
     this.renounce = [false, false, false, false];
     this.shuffleAndDistribute();
     this.chooseTrump();
@@ -102,7 +106,9 @@ export default class Game {
     }
 
     // From the hand to the table
-    this.onTable[player] = this.decks[player].splice(foundIdx, 1)[0];
+    const played = this.decks[player].splice(foundIdx, 1)[0];
+    this.onTable[player] = played;
+    this.playedCards.push(played);
 
     if (this.onTable.findIndex((val) => val === null) !== -1) {
       // missing some cards on the table
@@ -263,20 +269,23 @@ export default class Game {
     this.trump = this.trumpCard.suit;
   }
 
-  private isBiggerThan(card1: Card, card2: Card): boolean {
-    if (card1.suit === card2.suit) {
-      return card1.value > card2.value;
-    }
+  /**
+   * Trick-comparison rule shared by the engine and the bot: does `challenger`
+   * beat `best`, given the trump suit and the suit that was led? Suits are
+   * coerced to numbers so it works with either card-suit representation.
+   */
+  static beats(challenger: Card, best: Card, trump: number, tableSuit: number): boolean {
+    const cs = Number(challenger.suit);
+    const bs = Number(best.suit);
 
-    if (card1.suit === this.trump) {
-      return true;
-    }
-
-    if (card1.suit === this.tableSuit && card2.suit !== this.trump) {
-      return true;
-    }
-
+    if (cs === bs) return challenger.value > best.value;
+    if (cs === trump) return true;
+    if (cs === tableSuit && bs !== trump) return true;
     return false;
+  }
+
+  private isBiggerThan(card1: Card, card2: Card): boolean {
+    return Game.beats(card1, card2, Number(this.trump), Number(this.tableSuit));
   }
 
   private end() {

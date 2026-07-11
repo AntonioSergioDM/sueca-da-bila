@@ -107,6 +107,23 @@ const LobbyRoom = ({
     });
   }, [socket, enqueueSnackbar]);
 
+  const onAddBot = useCallback(() => {
+    socket.emit('addBot', (res) => {
+      if (res.error) {
+        enqueueSnackbar({ variant: 'error', message: res.error });
+      }
+    });
+  }, [socket, enqueueSnackbar]);
+
+  const onKick = useCallback((playerId: string) => {
+    setSelectedSeat(null);
+    socket.emit('kickPlayer', playerId, (res) => {
+      if (res.error) {
+        enqueueSnackbar({ variant: 'error', message: res.error });
+      }
+    });
+  }, [socket, enqueueSnackbar]);
+
   const isReady = useMemo(() => (
     typeof myIndex === 'number' && (players[myIndex]?.ready ?? false)
   ), [myIndex, players]);
@@ -250,8 +267,10 @@ const LobbyRoom = ({
                                   ready={player.ready}
                                   isMe={isMe}
                                   isHost={player.isHost}
+                                  isBot={player.isBot}
                                   selected={selectedSeat === seatIdx}
                                   onClick={isHost ? () => onSeatClick(seatIdx) : undefined}
+                                  onKick={isHost && !isMe ? () => onKick(player.id) : undefined}
                                 />
                               </motion.div>
                             );
@@ -264,19 +283,34 @@ const LobbyRoom = ({
 
                 {isHost && (
                   <Stack alignItems="center" gap={1}>
-                    <Button
-                      onClick={onRandomize}
-                      variant="outlined"
-                      disabled={players.length < 2}
-                      sx={{
-                        color: 'white',
-                        borderColor: 'rgba(255,255,255,0.3)',
-                        textTransform: 'none',
-                        '&:hover': { borderColor: 'white', background: 'rgba(255,255,255,0.08)' },
-                      }}
-                    >
-                      🎲 Randomize Teams
-                    </Button>
+                    <Stack direction="row" gap={1.5} flexWrap="wrap" justifyContent="center">
+                      <Button
+                        onClick={onRandomize}
+                        variant="outlined"
+                        disabled={players.length < 2}
+                        sx={{
+                          color: 'white',
+                          borderColor: 'rgba(255,255,255,0.3)',
+                          textTransform: 'none',
+                          '&:hover': { borderColor: 'white', background: 'rgba(255,255,255,0.08)' },
+                        }}
+                      >
+                        🎲 Randomize Teams
+                      </Button>
+                      <Button
+                        onClick={onAddBot}
+                        variant="outlined"
+                        disabled={players.length >= 4}
+                        sx={{
+                          color: 'white',
+                          borderColor: 'rgba(255,255,255,0.3)',
+                          textTransform: 'none',
+                          '&:hover': { borderColor: 'white', background: 'rgba(255,255,255,0.08)' },
+                        }}
+                      >
+                        🤖 Add Bot
+                      </Button>
+                    </Stack>
                     {players.length > 1 && (
                       <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
                         {selectedSeat === null

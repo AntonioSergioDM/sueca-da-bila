@@ -122,7 +122,7 @@ export const lobbyPlayers = (socket: OurServerSocket): ClientToServerEvents['lob
     return callback(
       lobby.hash,
       lobby.players.map((p) => ({
-        id: p.id, name: p.name || '____', ready: p.ready, isHost: p.id === lobby.hostId,
+        id: p.id, name: p.name || '____', ready: p.ready, isHost: p.id === lobby.hostId, isBot: p.isBot,
       })),
       playerIdx,
       lobby.teamsLocked,
@@ -162,6 +162,46 @@ export const randomizeTeams = (socket: OurServerSocket): ClientToServerEvents['r
 
     if (!lobby.randomizeTeams(socket.data.playerId)) {
       return callback({ error: 'Only the host can change teams' });
+    }
+
+    return callback({ data: { ok: true } });
+  }
+);
+
+export const addBot = (socket: OurServerSocket): ClientToServerEvents['addBot'] => (
+  (callback) => {
+    if (!socket?.data?.lobbyHash || !socket.data.playerId) {
+      return callback({ error: 'Invalid lobby' });
+    }
+
+    const lobby = Lobby.lobbies.get(socket.data.lobbyHash);
+    if (!lobby) {
+      return callback({ error: 'Invalid lobby' });
+    }
+
+    const res = lobby.addBot(socket.data.playerId);
+    if (res !== true) {
+      return callback({ error: res });
+    }
+
+    return callback({ data: { ok: true } });
+  }
+);
+
+export const kickPlayer = (socket: OurServerSocket): ClientToServerEvents['kickPlayer'] => (
+  async (targetId, callback) => {
+    if (!socket?.data?.lobbyHash || !socket.data.playerId) {
+      return callback({ error: 'Invalid lobby' });
+    }
+
+    const lobby = Lobby.lobbies.get(socket.data.lobbyHash);
+    if (!lobby) {
+      return callback({ error: 'Invalid lobby' });
+    }
+
+    const res = await lobby.kickPlayer(socket.data.playerId, targetId);
+    if (res !== true) {
+      return callback({ error: res });
     }
 
     return callback({ data: { ok: true } });
