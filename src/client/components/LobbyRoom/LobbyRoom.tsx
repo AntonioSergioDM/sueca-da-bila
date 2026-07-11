@@ -34,6 +34,7 @@ type LobbyRoomProps = {
   lobbyHash: string;
   players: LobbyPlayerState[];
   gameResults?: Score[];
+  teamsLocked?: boolean;
   myIndex?: number | null;
 };
 
@@ -44,16 +45,20 @@ const LobbyRoom = ({
   lobbyHash,
   players,
   gameResults = [],
+  teamsLocked = false,
   myIndex = null,
 }: LobbyRoomProps) => {
   const socket = useSocket();
   const { enqueueSnackbar } = useSnackbar();
 
-  // Only the host arranges the teams. First tap selects a seat, second tap on
-  // another seat swaps the two.
+  // `teamsLocked` is server-authoritative (fixed once the first game completes),
+  // so the host controls below stay in sync with what the server will accept.
+
+  // Only the host arranges the teams, and only before the first game. First tap
+  // selects a seat, second tap on another seat swaps the two.
   const isHost = useMemo(() => (
-    typeof myIndex === 'number' && (players[myIndex]?.isHost ?? false)
-  ), [myIndex, players]);
+    !teamsLocked && typeof myIndex === 'number' && (players[myIndex]?.isHost ?? false)
+  ), [teamsLocked, myIndex, players]);
 
   const [selectedSeat, setSelectedSeat] = useState<number | null>(null);
 

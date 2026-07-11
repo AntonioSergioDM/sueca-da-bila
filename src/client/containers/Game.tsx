@@ -33,6 +33,8 @@ const Game = () => {
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [playerState, setPlayerState] = useState<PlayerState | null>(null);
   const [gameResults, setGameResults] = useState<Score[]>([]);
+  // Server-authoritative: teams are fixed once the first game completes.
+  const [teamsLocked, setTeamsLocked] = useState(false);
   // Kept across games so the results screen can highlight the player's team.
   const [myIndex, setMyIndex] = useState<number | null>(null);
   const [renounceOverlayState, setRenounceOverlayState] = useState<Card | null>(null);
@@ -45,8 +47,9 @@ const Game = () => {
     return '';
   }, [query.lobby]);
 
-  const updatePlayers = useCallback<ServerToClientEvents['playersListUpdated']>((newPlayers) => {
+  const updatePlayers = useCallback<ServerToClientEvents['playersListUpdated']>((newPlayers, locked) => {
     setPlayers(newPlayers);
+    setTeamsLocked(locked);
   }, []);
 
   const onSeatUpdate = useCallback<ServerToClientEvents['seatUpdate']>((index) => {
@@ -62,9 +65,9 @@ const Game = () => {
   useEffect(() => {
     if (lobbyHash) {
       // get current players in lobby
-      socket.emit('lobbyPlayers', lobbyHash, (validHash, newPlayers, seatIndex) => {
+      socket.emit('lobbyPlayers', lobbyHash, (validHash, newPlayers, seatIndex, locked) => {
         if (validHash) {
-          updatePlayers(newPlayers);
+          updatePlayers(newPlayers, locked);
           setMyIndex(seatIndex >= 0 ? seatIndex : null);
         }
       });
@@ -173,6 +176,7 @@ const Game = () => {
           players={players}
           lobbyHash={lobbyHash}
           gameResults={gameResults}
+          teamsLocked={teamsLocked}
           myIndex={myIndex}
         />
       )}

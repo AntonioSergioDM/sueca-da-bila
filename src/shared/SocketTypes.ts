@@ -8,7 +8,8 @@ export type LobbyPlayerState = { id: string; name: string; ready: boolean; isHos
 
 export interface ServerToClientEvents {
   error: () => void;
-  playersListUpdated: (players: LobbyPlayerState[]) => void;
+  /** Full lobby roster plus whether teams are locked (fixed after the first game completes). */
+  playersListUpdated: (players: LobbyPlayerState[], teamsLocked: boolean) => void;
   /** Pushed to each socket individually with that player's current seat index (teams are seat-parity based). */
   seatUpdate: (index: number) => void;
   gameStart: (playerState: PlayerState) => void;
@@ -32,7 +33,7 @@ export interface ClientToServerEvents {
   joinLobby: (lobbyHash: string, playerName: string, callback: (res: GenericCallbackResponse<{ lobbyHash: string }>) => void) => void;
   createLobby: (playerName: string, callback: (res: GenericCallbackResponse<{ lobbyHash: string }>) => void) => void;
   leaveLobby: () => void;
-  lobbyPlayers: (lobbyHash: string, callback: (lobbyHash: string, players: LobbyPlayerState[], myIndex: number) => void) => void;
+  lobbyPlayers: (lobbyHash: string, callback: (lobbyHash: string, players: LobbyPlayerState[], myIndex: number, teamsLocked: boolean) => void) => void;
   playerReady: (callback: (playerIndex: number | null) => void) => void;
   playerUnready: (callback: (playerIndex: number | null) => void) => void;
   /** Host-only: swap two occupied seats, rearranging the 2v2 teams. */

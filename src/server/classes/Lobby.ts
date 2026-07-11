@@ -49,6 +49,14 @@ export default class Lobby {
   /** Stable id of the lobby host (the creator). Only the host may change team formations. */
   hostId: string | null = null;
 
+  /**
+   * Set once the first game of the lobby has been played through to the end.
+   * Teams are fixed for the lifetime of the lobby after this — they can only be
+   * arranged in the lobby before the first game completes. A game that is
+   * aborted mid-play (e.g. a player leaves) does not lock the teams.
+   */
+  teamsLocked = false;
+
   game: Game = new Game();
 
   room: LobbyRoom | null = null;
@@ -348,8 +356,8 @@ export default class Lobby {
    * or `false` if the swap isn't allowed.
    */
   swapSeats(playerId: string, idxA: number, idxB: number): boolean {
-    // Only the host may rearrange the teams, and never mid-game.
-    if (playerId !== this.hostId || this.gameInProgress()) {
+    // Only the host may rearrange the teams, only before the first game starts.
+    if (playerId !== this.hostId || this.teamsLocked || this.gameInProgress()) {
       return false;
     }
 
@@ -369,8 +377,8 @@ export default class Lobby {
    * `true` on success, or `false` if it isn't allowed.
    */
   randomizeTeams(playerId: string): boolean {
-    // Only the host may rearrange the teams, and never mid-game.
-    if (playerId !== this.hostId || this.gameInProgress()) {
+    // Only the host may rearrange the teams, only before the first game starts.
+    if (playerId !== this.hostId || this.teamsLocked || this.gameInProgress()) {
       return false;
     }
 
@@ -550,7 +558,7 @@ export default class Lobby {
   emitLobbyUpdate() {
     this.room?.emit('playersListUpdated', this.players.map((p) => ({
       id: p.id, name: p.name, ready: p.ready, isHost: p.id === this.hostId, isBot: p.isBot,
-    })));
+    })), this.teamsLocked);
   }
 
   /** Tell each socket individually which seat it now holds (drives team display). */
@@ -607,6 +615,9 @@ export default class Lobby {
     if (!this.game.isEnded()) {
       return false;
     }
+
+    // The first game played to completion locks the teams for good.
+    this.teamsLocked = true;
 
     if (IN_DEV) {
       console.info(this.game.gameScore.reduce(

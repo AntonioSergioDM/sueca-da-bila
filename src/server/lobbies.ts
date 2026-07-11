@@ -104,18 +104,18 @@ export const playerUnReady = (socket: OurServerSocket): ClientToServerEvents['pl
 export const lobbyPlayers = (socket: OurServerSocket): ClientToServerEvents['lobbyPlayers'] => (
   (lobbyHash, callback) => {
     if (!lobbyHash) {
-      return callback('', [], -1);
+      return callback('', [], -1, false);
     }
 
     const lobby = Lobby.lobbies.get(lobbyHash);
     if (!lobby) {
-      return callback('', [], -1);
+      return callback('', [], -1, false);
     }
 
     // checking if this player is part of this lobby
     const playerIdx = lobby.players.findIndex((p) => p.id === socket.data.playerId);
     if (playerIdx === -1) {
-      return callback('', [], -1);
+      return callback('', [], -1, false);
     }
 
     // returning lobby hash so the client knows it was successful at least
@@ -125,6 +125,7 @@ export const lobbyPlayers = (socket: OurServerSocket): ClientToServerEvents['lob
         id: p.id, name: p.name || '____', ready: p.ready, isHost: p.id === lobby.hostId, isBot: p.isBot,
       })),
       playerIdx,
+      lobby.teamsLocked,
     );
   }
 );
