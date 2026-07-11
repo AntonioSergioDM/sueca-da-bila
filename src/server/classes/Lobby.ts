@@ -47,6 +47,12 @@ export default class Lobby {
 
   room: LobbyRoom | null = null;
 
+  /** Pending bot-move timer while a bot is "thinking"; cancelled on reset/teardown. */
+  botTurnTimer: ReturnType<typeof setTimeout> | null = null;
+
+  /** Pending end-of-game reset timer; cancelled if the lobby resets first. */
+  endGameTimer: ReturnType<typeof setTimeout> | null = null;
+
   constructor() {
     this.hash = Lobby.generateNewHash();
   }
@@ -87,7 +93,13 @@ export default class Lobby {
       console.info(`😘 PlayerID: ${playerId} left the lobby ${this.hash}\n`);
     }
 
-    if (!this.players.length) {
+    // Tear the lobby down once no human players remain. Bots never leave on
+    // their own, so a bot-only lobby would otherwise linger forever with its
+    // timers still pending. `every` is vacuously true for an empty array, so
+    // this also covers the plain "last player left" case.
+    if (this.players.every((p) => p.isBot)) {
+      this.clearTimers();
+      this.players = [];
       Lobby.lobbies.delete(this.hash);
 
       if (IN_DEV) {
@@ -97,9 +109,10 @@ export default class Lobby {
       return;
     }
 
-    // If the host left, hand the role to whoever now sits first.
+    // If the host left, hand the role to the first remaining human — a bot must
+    // never hold the host role since it can't act on it.
     if (this.hostId === playerId) {
-      this.hostId = this.players[0].id;
+      this.hostId = (this.players.find((p) => !p.isBot) ?? this.players[0]).id;
     }
 
     this.emitLobbyUpdate();
@@ -420,6 +433,22 @@ export default class Lobby {
    * play a chosen card after a short, human-feeling delay. Each bot move chains
    * back through `playCard`, so consecutive bots resolve automatically.
    */
+  private clearBotTimer() {
+    if (this.botTurnTimer) {
+      clearTimeout(this.botTurnTimer);
+      this.botTurnTimer = null;
+    }
+  }
+
+  /** Cancel every pending timer (bot move + end-of-game reset). */
+  private clearTimers() {
+    this.clearBotTimer();
+    if (this.endGameTimer) {
+      clearTimeout(this.endGameTimer);
+      this.endGameTimer = null;
+    }
+  }
+
   private scheduleBotTurn() {
     const idx = this.game.currPlayer;
     if (idx < 0) {
@@ -432,7 +461,12 @@ export default class Lobby {
     }
 
     const botId = player.id;
-    setTimeout(() => {
+    // At most one bot move is ever pending; drop any stale one first so it can't
+    // fire after this lobby resets or tears down.
+    this.clearBotTimer();
+    this.botTurnTimer = setTimeout(() => {
+      this.botTurnTimer = null;
+
       // The world may have moved on during the delay (a human left and rebuilt
       // the game, the game ended, the trick resolved). Only act if it is still
       // this exact bot's turn.
@@ -449,8 +483,14 @@ export default class Lobby {
       }
 
       const res = this.playCard(botId, card);
-      if (typeof res === 'string' && IN_DEV) {
-        console.warn(`🤖 Bot ${player.name} made an illegal move: ${res}\n`);
+      if (typeof res === 'string') {
+        if (IN_DEV) {
+          console.warn(`🤖 Bot ${player.name} made an illegal move: ${res}; playing a fallback card\n`);
+        }
+        // Safety net: never let a bad pick freeze the game. The engine still
+        // enforces legality, so play the first card it accepts — a legal move
+        // always exists on the bot's turn.
+        this.game.decks[idx].some((c) => typeof this.playCard(botId, c) !== 'string');
       }
     }, Lobby.botTurnDelayMs);
   }
@@ -573,7 +613,8 @@ export default class Lobby {
 
     // Show the final trick briefly, then send everyone back to the lobby to
     // review the score/stats and ready up before the next game starts.
-    setTimeout(() => {
+    this.endGameTimer = setTimeout(() => {
+      this.endGameTimer = null;
       // Bots ready up automatically for the next game; humans must ready again.
       this.players.forEach((p) => p.setReady(false));
       this.room?.emit('gameReset');
@@ -588,6 +629,8 @@ export default class Lobby {
   }
 
   private resetGame() {
+    // A fresh game invalidates any pending bot move or end-of-game reset.
+    this.clearTimers();
     this.game = new Game();
     this.players.forEach((p) => {
       // setReady is a no-op for bots, so they stay ready across resets.
