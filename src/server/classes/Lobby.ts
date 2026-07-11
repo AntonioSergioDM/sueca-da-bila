@@ -33,6 +33,12 @@ export default class Lobby {
   /** How long a bot "thinks" before playing its card, so its moves feel human. */
   static botTurnDelayMs = 1000;
 
+  /** How long a completed trick stays on the table before it's scored and cleared. */
+  static endTurnDelayMs = 2000;
+
+  /** How long the final trick is shown before everyone is sent back to the lobby. */
+  static endGameResetDelayMs = 3000;
+
   /** Names handed to bots, in order; falls back to a numbered name when exhausted. */
   static botNames = ['Claudio', 'Bilinha', 'Zé Bot', 'Mafalda', 'Xico', 'Robó'];
 
@@ -415,7 +421,7 @@ export default class Lobby {
     if (this.game.currPlayer < 0) {
       setTimeout(
         () => this.endTurn(),
-        2000,
+        Lobby.endTurnDelayMs,
       );
     } else {
       // The turn advanced to the next player — let a bot take it if it's theirs.
@@ -623,7 +629,7 @@ export default class Lobby {
       if (IN_DEV) {
         console.info(`🃏 Game over on Lobby ${this.hash}, waiting for players to ready up\n`);
       }
-    }, 3000);
+    }, Lobby.endGameResetDelayMs);
 
     return true;
   }

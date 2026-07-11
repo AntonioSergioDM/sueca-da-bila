@@ -9,7 +9,10 @@
     "errors:types": "tsc --noEmit && echo \"Type errors done\"",
     "errors:lint": "eslint src --ext .mts --ext .mjs --ext .ts --ext .js --ext .tsx --fix && echo \"Lint errors done\"",
     "errors": "npm run errors:types && npm run errors:lint",
-    "bot:sim": "tsx src/server/bot/sim.ts"
+    "bot:sim": "tsx src/server/bot/sim.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "vitest run test/e2e"
   },
   "dependencies": {
     "@emotion/cache": "^11.11.0",
@@ -51,6 +54,7 @@
     "postcss": "^8.4.39",
     "tailwindcss": "^3.4.6",
     "tsx": "^4.23.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.7"
   }
 }
