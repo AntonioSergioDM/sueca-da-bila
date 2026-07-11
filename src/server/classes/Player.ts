@@ -58,6 +58,11 @@ export default class Player {
   }
 
   setReady(state: boolean = true) {
+    // Bots are always ready; ignore any attempt to un-ready them so a game can
+    // never stall waiting on a bot that will never ready itself.
+    if (this.isBot) {
+      return;
+    }
     this.ready = state;
   }
 }

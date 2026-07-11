@@ -371,8 +371,8 @@ export default class Lobby {
    * index a client may have been holding), then push the fresh seats.
    */
   private onTeamsChanged() {
-    // Bots are always ready; only humans must reconfirm their new team.
-    this.players.forEach((p) => { if (!p.isBot) p.setReady(false); });
+    // setReady is a no-op for bots, so only humans reconfirm their new team.
+    this.players.forEach((p) => p.setReady(false));
     this.emitLobbyUpdate();
     this.emitSeats();
   }
@@ -575,7 +575,7 @@ export default class Lobby {
     // review the score/stats and ready up before the next game starts.
     setTimeout(() => {
       // Bots ready up automatically for the next game; humans must ready again.
-      this.players.forEach((p) => { if (!p.isBot) p.setReady(false); });
+      this.players.forEach((p) => p.setReady(false));
       this.room?.emit('gameReset');
       this.emitLobbyUpdate();
 
@@ -590,12 +590,9 @@ export default class Lobby {
   private resetGame() {
     this.game = new Game();
     this.players.forEach((p) => {
-      // Bots stay ready across resets so a game can restart without them.
-      if (p.isBot) {
-        return;
-      }
+      // setReady is a no-op for bots, so they stay ready across resets.
       p.setReady(false);
-      if (IN_DEV) {
+      if (IN_DEV && !p.isBot) {
         console.info(`🙃 Player ${p.name} (ID: ${p.id}) is no longer ready\n`);
       }
     });

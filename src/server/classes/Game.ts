@@ -269,20 +269,23 @@ export default class Game {
     this.trump = this.trumpCard.suit;
   }
 
-  private isBiggerThan(card1: Card, card2: Card): boolean {
-    if (card1.suit === card2.suit) {
-      return card1.value > card2.value;
-    }
+  /**
+   * Trick-comparison rule shared by the engine and the bot: does `challenger`
+   * beat `best`, given the trump suit and the suit that was led? Suits are
+   * coerced to numbers so it works with either card-suit representation.
+   */
+  static beats(challenger: Card, best: Card, trump: number, tableSuit: number): boolean {
+    const cs = Number(challenger.suit);
+    const bs = Number(best.suit);
 
-    if (card1.suit === this.trump) {
-      return true;
-    }
-
-    if (card1.suit === this.tableSuit && card2.suit !== this.trump) {
-      return true;
-    }
-
+    if (cs === bs) return challenger.value > best.value;
+    if (cs === trump) return true;
+    if (cs === tableSuit && bs !== trump) return true;
     return false;
+  }
+
+  private isBiggerThan(card1: Card, card2: Card): boolean {
+    return Game.beats(card1, card2, Number(this.trump), Number(this.tableSuit));
   }
 
   private end() {

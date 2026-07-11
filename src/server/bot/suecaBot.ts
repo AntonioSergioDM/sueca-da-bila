@@ -1,6 +1,6 @@
 import { pointsOf, type Card } from '@/shared/Card';
 
-import type Game from '../classes/Game';
+import Game from '../classes/Game';
 
 /**
  * A rule-based Sueca bot. It only ever reads information a fair human player
@@ -13,53 +13,45 @@ import type Game from '../classes/Game';
  * conserving trumps and high cards otherwise.
  */
 
-const NUM_PLAYERS = 4;
 const CARDS_PER_SUIT = 10;
 
 const suitOf = (card: Card) => Number(card.suit);
 
-/**
- * Mirrors `Game.isBiggerThan`: does `challenger` beat `best`, given the trump
- * suit and the suit that was led? Kept in sync with the engine so the bot's
- * idea of who is winning matches how tricks are actually scored.
- */
-const beats = (challenger: Card, best: Card, trump: number, lead: number): boolean => {
-  const cs = suitOf(challenger);
-  const bs = suitOf(best);
-
-  if (cs === bs) return challenger.value > best.value;
-  if (cs === trump) return true;
-  if (cs === lead && bs !== trump) return true;
-  return false;
-};
-
 type Play = { card: Card; idx: number };
 
-/** The play currently winning the trick (highest under `beats`). */
-const currentWinner = (plays: Play[], trump: number, lead: number): Play => plays.reduce((best, p) => (beats(p.card, best.card, trump, lead) ? p : best));
+/** The play currently winning the trick (highest under `Game.beats`). */
+const currentWinner = (plays: Play[], trump: number, lead: number): Play => (
+  plays.reduce((best, p) => (Game.beats(p.card, best.card, trump, lead) ? p : best))
+);
 
-/** Cards we are allowed to play: must follow the led suit if we can. */
-const legalMoves = (hand: Card[], lead: number | null): Card[] => {
-  if (lead === null) return hand;
-  const followers = hand.filter((c) => suitOf(c) === lead);
-  return followers.length ? followers : hand;
-};
+/** Single-pass min/max — cheaper and clearer than sorting to read one element. */
+const minBy = (cards: Card[], score: (c: Card) => number): Card => (
+  cards.reduce((best, c) => (score(c) < score(best) ? c : best))
+);
+const maxBy = (cards: Card[], score: (c: Card) => number): Card => (
+  cards.reduce((best, c) => (score(c) > score(best) ? c : best))
+);
 
-const byValueAsc = (a: Card, b: Card) => a.value - b.value;
-const lowestValue = (cards: Card[]) => [...cards].sort(byValueAsc)[0];
+/**
+ * How much we value a card: points first, then rank. High = most valuable to
+ * feed a winning partner; low = cheapest to throw away.
+ */
+const cardScore = (c: Card) => pointsOf(c) * 100 + c.value;
 
-/** Card we least mind losing: fewest points first, then lowest rank. */
-const discardScore = (c: Card) => pointsOf(c) * 100 + c.value;
-const cheapestDiscard = (cards: Card[]) => [...cards].sort((a, b) => discardScore(a) - discardScore(b))[0];
+const lowestValue = (cards: Card[]) => minBy(cards, (c) => c.value);
+const cheapestDiscard = (cards: Card[]) => minBy(cards, cardScore);
+const richest = (cards: Card[]) => maxBy(cards, cardScore);
 
-/** Card that hands off the most value (used to feed a winning partner). */
-const feedScore = (c: Card) => pointsOf(c) * 100 + c.value;
-const richest = (cards: Card[]) => [...cards].sort((a, b) => feedScore(b) - feedScore(a))[0];
+/** Feed points to a winning partner when safe, otherwise conserve them. */
+const feedOrDump = (pool: Card[], safe: boolean) => (safe ? richest(pool) : cheapestDiscard(pool));
 
 /**
  * How many still-unseen cards of `card`'s suit outrank it. Zero means the card
  * is the highest of its suit that can still appear — a "boss" — though a boss
  * of a side suit can still be ruffed by a void opponent's trump.
+ *
+ * On-table cards are already in `playedCards` (pushed when played), so the
+ * table does not need a separate scan.
  */
 const higherOutstanding = (game: Game, myIdx: number, card: Card): number => {
   const suit = suitOf(card);
@@ -69,7 +61,6 @@ const higherOutstanding = (game: Game, myIdx: number, card: Card): number => {
   };
 
   game.playedCards.forEach(note);
-  game.onTable.forEach(note);
   game.decks[myIdx].forEach(note);
 
   let count = 0;
@@ -154,15 +145,13 @@ const chooseFollow = (
       || (higherOutstanding(game, myIdx, winningCard) === 0
         && (winSuitIsTrump || trumpsOutstanding(game, myIdx, trump) === 0));
 
-    // Never overtake our own partner; among the rest, feed points if safe,
-    // otherwise play low and keep our points for later.
-    const nonOvertaking = legal.filter((c) => !beats(c, winningCard, trump, lead));
-    const pool = nonOvertaking.length ? nonOvertaking : legal;
-    return safe ? richest(pool) : cheapestDiscard(pool);
+    // Never overtake our own partner; feed from the rest.
+    const nonOvertaking = legal.filter((c) => !Game.beats(c, winningCard, trump, lead));
+    return feedOrDump(nonOvertaking.length ? nonOvertaking : legal, safe);
   }
 
   // An opponent is winning.
-  const winningOptions = legal.filter((c) => beats(c, winningCard, trump, lead));
+  const winningOptions = legal.filter((c) => Game.beats(c, winningCard, trump, lead));
 
   if (winningOptions.length) {
     if (iAmLast) {
@@ -199,21 +188,19 @@ const chooseVoid = (
   if (partnerWinning) {
     // Feed points to the partner with a side card, keeping trumps back.
     const safe = iAmLast || higherOutstanding(game, myIdx, winningCard) === 0;
-    const pool = nonTrumps.length ? nonTrumps : legal;
-    return safe ? richest(pool) : cheapestDiscard(pool);
+    return feedOrDump(nonTrumps.length ? nonTrumps : legal, safe);
   }
 
   // Opponent winning: ruff a worthwhile trick with the cheapest trump that beats
   // the current winner.
-  const cuttingTrumps = trumps.filter((c) => beats(c, winningCard, trump, -1));
+  const cuttingTrumps = trumps.filter((c) => Game.beats(c, winningCard, trump, -1));
   if (cuttingTrumps.length && (iAmLast || trickPoints >= 10)) {
     return lowestValue(cuttingTrumps);
   }
 
   // Not worth trumping (or we can't beat it): discard the cheapest side card and
   // preserve our trumps.
-  const pool = nonTrumps.length ? nonTrumps : legal;
-  return cheapestDiscard(pool);
+  return cheapestDiscard(nonTrumps.length ? nonTrumps : legal);
 };
 
 /**
@@ -225,10 +212,14 @@ export const chooseCard = (game: Game, myIdx: number): Card | null => {
   if (!hand.length) return null;
 
   const trump = Number(game.trump);
-  const lead = game.tableSuit === null ? null : Number(game.tableSuit);
-  const partner = (myIdx + 2) % NUM_PLAYERS;
+  // -1 means "no suit led yet" (we are leading); no real card matches it.
+  const lead = game.tableSuit === null ? -1 : Number(game.tableSuit);
+  const partner = (myIdx + 2) % Game.numPlayers;
 
-  const legal = legalMoves(hand, lead);
+  // Legal moves: must follow the led suit when we hold it.
+  const followers = hand.filter((c) => suitOf(c) === lead);
+  const canFollow = followers.length > 0;
+  const legal = canFollow ? followers : hand;
   if (legal.length === 1) return legal[0];
 
   const plays: Play[] = [];
@@ -237,15 +228,14 @@ export const chooseCard = (game: Game, myIdx: number): Card | null => {
   });
 
   // Leading the trick.
-  if (lead === null || plays.length === 0) {
+  if (plays.length === 0) {
     return chooseLead(game, myIdx, hand, trump);
   }
 
   const winner = currentWinner(plays, trump, lead);
   const partnerWinning = winner.idx === partner;
-  const iAmLast = plays.length === NUM_PLAYERS - 1;
+  const iAmLast = plays.length === Game.numPlayers - 1;
   const trickPoints = plays.reduce((sum, p) => sum + pointsOf(p.card), 0);
-  const canFollow = hand.some((c) => suitOf(c) === lead);
 
   return canFollow
     ? chooseFollow(game, myIdx, legal, winner.card, partnerWinning, iAmLast, trickPoints, trump, lead)
